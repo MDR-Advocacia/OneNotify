@@ -5,10 +5,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import database
 import re
+import time
 
-# --- FUNÇÃO RESTAURADA E MELHORADA ---
-# Esta função foi trazida da sua versão antiga, pois contém a lógica
-# essencial para abrir o modal e extrair o texto completo da publicação.
 def extrair_andamentos_na_janela(page: Page, datas_alvo: set[str]) -> list[dict]:
     """
     Na seção 'Andamentos', varre a tabela, captura qualquer andamento
@@ -16,7 +14,11 @@ def extrair_andamentos_na_janela(page: Page, datas_alvo: set[str]) -> list[dict]
     """
     andamentos_encontrados = []
     try:
-        page.locator("li:has-text('Andamentos')").click()
+        print("    - Clicando na seção 'Andamentos'...")
+        botao_andamentos = page.locator("li:has-text('Andamentos')")
+        botao_andamentos.wait_for(state="visible", timeout=15000)
+        botao_andamentos.click()
+        
         page.wait_for_load_state("networkidle", timeout=20000)
         print("    - Seção 'Andamentos' carregada.")
 
@@ -35,7 +37,6 @@ def extrair_andamentos_na_janela(page: Page, datas_alvo: set[str]) -> list[dict]
 
                 andamento_info = {"data": data_encontrada, "tipo": tipo_andamento, "texto": None}
 
-                # Lógica crucial para extrair texto de publicações
                 if "PUBLICACAO DJ/DO" in tipo_andamento.upper():
                     botao_detalhar = linha.locator('a[bb-tooltip="Detalhar publicação"]')
                     if botao_detalhar.count() > 0:
@@ -46,12 +47,11 @@ def extrair_andamentos_na_janela(page: Page, datas_alvo: set[str]) -> list[dict]
                         modal.wait_for(state="visible", timeout=10000)
                         
                         try:
-                            # Tenta expandir o texto clicando em "Leia mais"
                             leia_mais_botao = modal.locator("texto-grande-detalhar").get_by_role("button", name="Leia mais")
-                            leia_mais_botao.wait_for(state="visible", timeout=3000)
-                            leia_mais_botao.click()
-                            modal.get_by_role("button", name="Leia menos").wait_for(state="visible", timeout=5000)
-                            print("      - Texto expandido.")
+                            if leia_mais_botao.count() > 0:
+                                leia_mais_botao.click(timeout=5000)
+                                modal.get_by_role("button", name="Leia menos").wait_for(state="visible", timeout=5000)
+                                print("      - Texto expandido.")
                         except TimeoutError:
                             print("      - Texto já completo ou botão 'Leia mais' não encontrado.")
 
@@ -72,15 +72,20 @@ def extrair_andamentos_na_janela(page: Page, datas_alvo: set[str]) -> list[dict]
     
     return andamentos_encontrados
 
-def baixar_documentos_na_janela(page: Page, npj: str, datas_alvo: set[str]) -> list[dict]:
+def baixar_documentos_na_janela(page: Page, npj: str, datas_alvo: set[str]) -> tuple[list[dict], bool]:
     """
-    Na seção 'Dados do Processo', expande a aba 'Documentos', encontra e baixa
-    os arquivos que estão dentro da janela de datas alvo.
+    Na seção 'Dados do Processo', baixa arquivos e retorna uma tupla com a
+    lista de documentos baixados e um booleano indicando sucesso.
+    Retorna (lista_docs, False) se um erro irrecuperável (GED) ocorrer.
     """
     documentos_baixados = []
+    sucesso_geral = True
     try:
         print("    - Navegando para 'Dados do Processo' para buscar documentos...")
-        page.get_by_text("Dados do Processo", exact=True).click()
+        botao_dados_processo = page.get_by_text("Dados do Processo", exact=True)
+        botao_dados_processo.wait_for(state="visible", timeout=15000)
+        botao_dados_processo.click()
+
         page.wait_for_load_state("networkidle", timeout=20000)
 
         acordeao_documentos = page.locator('div.accordion__item[bb-item-title="Documentos"]')
@@ -89,7 +94,7 @@ def baixar_documentos_na_janela(page: Page, npj: str, datas_alvo: set[str]) -> l
             page.wait_for_load_state("networkidle", timeout=20000)
         
         pasta_base = Path("downloads")
-        pasta_npj_sanitizada = re.sub(r'[\\/*?:"<>|]', "_", npj) # Remove caracteres inválidos
+        pasta_npj_sanitizada = re.sub(r'[\\/*?:"<>|]', "_", npj)
         caminho_completo_npj = pasta_base / pasta_npj_sanitizada
         caminho_completo_npj.mkdir(parents=True, exist_ok=True)
         
@@ -125,13 +130,23 @@ def baixar_documentos_na_janela(page: Page, npj: str, datas_alvo: set[str]) -> l
                             "caminho_relativo": str(caminho_salvar.relative_to(pasta_base)).replace("\\", "/")
                         })
                         print(f"      - ✅ Download concluído: {caminho_salvar}")
+
+                    except TimeoutError:
+                        print(f"      - ⌛️ Timeout ao esperar pelo download de '{nome_arquivo}'. Verificando se é erro do portal...")
+                        page_content = page.content()
+                        if "GED indisponível" in page_content:
+                            print(f"      - ❌ ERRO DO PORTAL: 'GED indisponível'. Abortando downloads para este NPJ.")
+                            sucesso_geral = False
+                            break # Sai do loop de documentos, pois é um erro do NPJ
+                        else:
+                            print("      - O portal não indicou erro de GED. Pode ser um arquivo pesado ou falha de rede.")
                     except Exception as e_download:
-                        print(f"      - ❌ ERRO ao baixar o arquivo '{nome_arquivo}': {e_download}")
+                        print(f"      - ❌ ERRO GERAL ao baixar o arquivo '{nome_arquivo}': {e_download}")
 
     except Exception as e:
         print(f"    - ⚠️ Aviso durante o processo de download de documentos: {e}")
         
-    return documentos_baixados
+    return documentos_baixados, sucesso_geral
 
 def extrair_numero_processo(page: Page) -> str:
     """Extrai o número do processo da tela de detalhes."""
@@ -148,77 +163,90 @@ def extrair_numero_processo(page: Page) -> str:
 
 def processar_detalhes_pendentes(page: Page):
     """
-    Processa notificações pendentes, extraindo detalhes, andamentos e documentos.
-    A lógica de modo de teste foi removida para simplificar; agora processa
-    qualquer notificação com status 'Pendente'.
+    Processa notificações pendentes por NPJ, lidando com possíveis erros de
+    carregamento do portal e falhas de download antes de prosseguir.
     """
     print("\n" + "="*50)
     print("INICIANDO MÓDULO DE PROCESSAMENTO DETALHADO")
     print("="*50)
 
     stats = {"sucesso": 0, "falha": 0, "andamentos": 0, "documentos": 0}
-    notificacoes_para_processar = database.obter_notificacoes_pendentes()
+    npjs_sucesso = []
+    
+    notificacoes_para_processar = database.obter_npjs_pendentes_agrupados()
 
     if not notificacoes_para_processar:
-        print("✅ Nenhuma notificação pendente para processar.")
-        return stats
+        print("✅ Nenhum NPJ pendente para processar.")
+        return stats, npjs_sucesso
 
     url_base = "https://juridico.bb.com.br/paj/app/paj-cadastro/spas/processo/consulta/processo-consulta.app.html#/editar/"
     
     total_a_processar = len(notificacoes_para_processar)
-    print(f"Total de {total_a_processar} notificação(ões) a serem processadas.")
+    print(f"Total de {total_a_processar} NPJ(s) únicos a serem processados.")
 
-    for i, notificacao in enumerate(notificacoes_para_processar):
-        notificacao_id = notificacao['id']
-        npj = notificacao['NPJ']
-        data_notificacao_str = notificacao['data_notificacao']
+    for i, item_processo in enumerate(notificacoes_para_processar):
+        npj = item_processo['NPJ']
+        data_notificacao_str = item_processo['data_recente_notificacao']
         
-        print(f"\n[{i+1}/{total_a_processar}] Processando Notificação ID: {notificacao_id} (NPJ: {npj})")
+        print(f"\n[{i+1}/{total_a_processar}] Processando NPJ: {npj} (baseado na notificação mais recente de: {data_notificacao_str})")
         
         try:
-            # Cria a janela de datas (D, D-1, D-2) para a busca
             data_base = datetime.strptime(data_notificacao_str, '%d/%m/%Y')
             datas_alvo = { (data_base - timedelta(days=d)).strftime('%d/%m/%Y') for d in range(3) }
             print(f"    - Janela de datas para busca: {sorted(list(datas_alvo), reverse=True)}")
 
-            # Constrói a URL do NPJ
             ano, resto = npj.split('/')
             numero, variacao_str = resto.split('-')
             url_final = f"{url_base}{ano + numero}/{int(variacao_str)}/1"
             
             page.goto(url_final)
-            page.locator("i.ci.ci--barcode").first.wait_for(state="visible", timeout=20000)
-            print("    - Página de detalhes do NPJ carregada.")
+            page.wait_for_load_state("networkidle", timeout=30000)
 
-            # 1. Extrai o número do processo
+            seletor_erro_portal = "div.alert--warn:has-text('Erro ao carregar o processo')"
+            time.sleep(2)
+            
+            if page.locator(seletor_erro_portal).count() > 0:
+                print(f"    - ❌ ERRO DO PORTAL: A página para o NPJ {npj} falhou ao carregar ('Erro ao carregar o processo').")
+                stats["falha"] += 1
+                database.marcar_npj_como_erro(npj)
+                continue
+
+            page.locator("i.ci.ci--barcode").first.wait_for(state="visible", timeout=30000)
+            page.locator("div.loader.is-loading").wait_for(state="hidden", timeout=45000)
+            print("    - Página de detalhes do NPJ carregada e estável.")
+
             numero_processo = extrair_numero_processo(page)
-
-            # 2. Extrai andamentos com a lógica detalhada
             andamentos_coletados = extrair_andamentos_na_janela(page, datas_alvo)
             stats["andamentos"] += len(andamentos_coletados)
 
-            # 3. Extrai documentos
-            documentos_coletados = baixar_documentos_na_janela(page, npj, datas_alvo)
+            documentos_coletados, download_sucesso = baixar_documentos_na_janela(page, npj, datas_alvo)
             stats["documentos"] += len(documentos_coletados)
+            
+            # Se o download falhou por causa do GED, marca como erro e pula
+            if not download_sucesso:
+                print(f"    - ❌ Falha crítica de download (GED) detectada para o NPJ {npj}. Marcando como erro.")
+                stats["falha"] += 1
+                database.marcar_npj_como_erro(npj)
+                continue
 
-            # 4. Atualiza o banco de dados com sucesso
-            database.atualizar_registro_processado(
-                notificacao_id, 
+            database.atualizar_notificacoes_de_npj_processado(
+                npj, 
                 numero_processo, 
                 andamentos_coletados, 
                 documentos_coletados
             )
             stats["sucesso"] += 1
+            npjs_sucesso.append(npj)
 
         except Exception as e:
-            print(f"    - ❌ ERRO GERAL no processamento da notificação {notificacao_id} (NPJ {npj}): {e}")
+            print(f"    - ❌ ERRO GERAL no processamento do NPJ {npj}: {e}")
             traceback.print_exc()
             stats["falha"] += 1
-            database.marcar_como_erro(notificacao_id)
+            database.marcar_npj_como_erro(npj)
             continue
             
     print("\n" + "="*50)
     print("PROCESSAMENTO DETALHADO CONCLUÍDO")
     print("="*50)
-    return stats
+    return stats, npjs_sucesso
 

@@ -2,14 +2,18 @@
 from playwright.sync_api import Page, TimeoutError
 from datetime import datetime, timedelta
 import database 
+import re
+import time
 
 def extrair_dados_com_paginacao(page: Page, id_tabela: str, colunas_desejadas: list[str], limite_registros: int) -> list[dict]:
-    # (O código desta função permanece o mesmo)
-    # ...
+    """
+    Extrai dados de uma tabela com paginação, usando seletores robustos e esperas explícitas
+    para garantir a estabilidade.
+    """
     dados_extraidos = []
     
     try:
-        tabela = page.locator(f'[id="{id_tabela}"]')
+        tabela = page.locator(f'table[id="{id_tabela}"]')
         corpo_da_tabela = tabela.locator(f'tbody[id$=":tb"]')
         corpo_da_tabela.locator("tr").first.wait_for(state="visible", timeout=20000)
         print("    - Tabela de notificações encontrada.")
@@ -28,8 +32,11 @@ def extrair_dados_com_paginacao(page: Page, id_tabela: str, colunas_desejadas: l
     pagina_atual = 1
     
     while True:
-        print(f"\n--- Extraindo dados da página {pagina_atual} ---")
-        
+        if len(dados_extraidos) >= limite_registros:
+            print(f"    - Limite de {limite_registros} registros atingido. Encerrando extração desta tarefa.")
+            break
+            
+        print(f"\n    --- Extraindo dados da página {pagina_atual} ---")
         corpo_da_tabela.wait_for(state="visible")
         
         for linha in corpo_da_tabela.locator("tr").all():
@@ -45,24 +52,27 @@ def extrair_dados_com_paginacao(page: Page, id_tabela: str, colunas_desejadas: l
             dados_extraidos.append(item)
         
         print(f"    - {len(dados_extraidos)} de {limite_registros} registros extraídos até agora.")
-        
-        if len(dados_extraidos) >= limite_registros:
-            print(f"    - Limite de {limite_registros} registros atingido. Encerrando extração desta tarefa.")
+
+        paginador_locator = f'table[id="{id_tabela}"] > tfoot'
+        try:
+            page.locator(paginador_locator).wait_for(state="visible", timeout=5000)
+        except TimeoutError:
+            print("    - Paginador (tfoot) não encontrado. Assumindo página única.")
             break
 
-        paginador = tabela.locator("tfoot")
-        if paginador.count() == 0:
-            print("    - Paginador não encontrado. Assumindo página única.")
+        controles_paginacao = page.locator(f'{paginador_locator} table.rich-dtascroller-table')
+        if controles_paginacao.count() == 0:
+            print("    - Controles de paginação (rich-dtascroller-table) não encontrados. Fim da extração.")
             break
-            
-        botao_proxima = paginador.locator('td.rich-datascr-button[onclick*="fastforward"]')
+
+        botao_proxima = controles_paginacao.locator('td.rich-datascr-button').nth(-2)
         if botao_proxima.count() == 0:
-            print("    - Botão 'Próxima Página' (fastforward) não encontrado.")
+            print("    - Botão 'Próxima Página' não pôde ser localizado por posição. Fim da paginação.")
             break
 
         classe_do_botao = botao_proxima.get_attribute("class") or ""
         if "dsbld" in classe_do_botao:
-            print("    - Não há mais páginas para extrair.")
+            print("    - Não há mais páginas para extrair (botão desabilitado).")
             break
             
         print("\n    - Clicando em 'Próxima Página'...")
@@ -72,22 +82,18 @@ def extrair_dados_com_paginacao(page: Page, id_tabela: str, colunas_desejadas: l
 
     return dados_extraidos
 
-
 def extrair_novas_notificacoes(page: Page, url_lista_tarefas: str) -> int:
     """
     Navega pela central, extrai os dados básicos, salva no DB e retorna a contagem de itens encontrados.
     """
-    print("\n" + "="*20)
+    print("\n" + "="*50)
     print("INICIANDO MÓDULO DE EXTRAÇÃO DE NOTIFICAÇÕES")
-    print("="*20)
+    print("="*50)
     
-    # CORREÇÃO: "Adverso Principal" agora é uma coluna opcional para todas as tarefas.
-    # A lógica de extração tratará os casos onde ela não existe.
     TAREFAS_CONFIG = [
-        #{ "nome": "Pedido Pendente de Finalização", "colunas": ["NPJ", "Adverso Principal", "Gerado em"] },
-        { "nome": "Andamento de publicação em processo de condução terceirizada", "colunas": ["NPJ", "Adverso Principal", "Gerada em"] },
-        { "nome": "Doc. anexado por empresa externa em processo terceirizado", "colunas": ["NPJ", "Adverso Principal", "Gerada em"] },
-        { "nome": "Inclusão de Documentos no NPJ", "colunas": ["NPJ", "Adverso Principal", "Qtd Dias Gerada"] },
+        { "nome": "Andamento de publicação em processo de condução terceirizada", "colunas": ["NPJ", "Adverso Principal", "Gerada em", "Qtd Dias Gerada"] },
+        { "nome": "Doc. anexado por empresa externa em processo terceirizado", "colunas": ["NPJ", "Adverso Principal", "Gerada em", "Qtd Dias Gerada"] },
+        { "nome": "Inclusão de Documentos no NPJ", "colunas": ["NPJ", "Adverso Principal", "Gerada em", "Qtd Dias Gerada"] },
     ]
     
     notificacoes_coletadas = []
@@ -97,18 +103,32 @@ def extrair_novas_notificacoes(page: Page, url_lista_tarefas: str) -> int:
             print(f"\n--- Processando tarefa: {tarefa['nome']} ---")
             page.goto(url_lista_tarefas)
             page.wait_for_load_state("networkidle")
-
-            linha_alvo = page.locator(f"tr:has-text(\"{tarefa['nome']}\")")
-            if linha_alvo.count() == 0:
-                print(f"    - Tarefa '{tarefa['nome']}' não encontrada na página. Pulando.")
+            
+            tabela_subtipos = page.locator("#tabelaTipoSubtipoGeral")
+            tabela_subtipos.wait_for(state="visible", timeout=15000)
+            
+            celula_tarefa = tabela_subtipos.locator("td", has_text=re.compile(f"^{re.escape(tarefa['nome'])}$"))
+            
+            if celula_tarefa.count() == 0:
+                print(f"    - Tarefa '{tarefa['nome']}' não encontrada com exatidão na tabela de subtipos. Pulando.")
                 continue
+            
+            linha_alvo = celula_tarefa.locator("xpath=..")
 
             contagem_texto = linha_alvo.locator("td").nth(2).inner_text().strip()
             contagem_numero = int(contagem_texto) if contagem_texto.isdigit() else 0
             print(f"    - {contagem_numero} itens encontrados.")
 
             if contagem_numero > 0:
-                linha_alvo.get_by_title("Detalhar notificações e pendências do subtipo").click()
+                botao_detalhar = linha_alvo.locator('input[title="Detalhar notificações e pendências do subtipo"]')
+                botao_detalhar.click(force=True)
+                
+                # --- AJUSTE FINAL E CRUCIAL ---
+                # Adiciona uma pausa explícita para garantir que a tabela e a paginação carreguem completamente
+                # antes de prosseguir, especialmente para tarefas com muitos itens.
+                print("    - Aguardando carregamento completo da lista detalhada...")
+                time.sleep(5) 
+                
                 page.wait_for_load_state("networkidle", timeout=30000)
                 
                 id_tabela = "notificacoesNaoLidasForm:notificacoesNaoLidasDetalhamentoForm:dataTabletableNotificacoesNaoLidas"
@@ -127,7 +147,6 @@ def extrair_novas_notificacoes(page: Page, url_lista_tarefas: str) -> int:
                         notificacoes_coletadas.append({
                             "NPJ": item.get("NPJ"),
                             "tipo_notificacao": tarefa["nome"],
-                            # A chave 'Adverso Principal' será pega se existir; senão, será vazia.
                             "adverso_principal": item.get("Adverso Principal", ""), 
                             "data_notificacao": data_notif
                         })
@@ -137,9 +156,9 @@ def extrair_novas_notificacoes(page: Page, url_lista_tarefas: str) -> int:
             continue
 
     if notificacoes_coletadas:
-        database.salvar_notificacoes(notificacoes_coletadas)
+        total_salvo = database.salvar_notificacoes(notificacoes_coletadas)
+        return total_salvo
     else:
         print("\nNenhuma nova notificação encontrada para ser salva.")
-    
-    return len(notificacoes_coletadas)
+        return 0
 

@@ -8,6 +8,7 @@ from autologin import realizar_login_automatico
 import database
 import extracao_notificacoes
 import processamento_detalhado
+import ciencia_notificacoes # Importa o novo módulo
 
 def formatar_duracao(segundos):
     """Formata segundos em uma string legível (minutos e segundos)."""
@@ -23,15 +24,14 @@ def main():
     
     stats_extracao = {"notificacoes": 0}
     stats_processamento = {"sucesso": 0, "falha": 0, "andamentos": 0, "documentos": 0}
+    stats_ciencia = {"registradas": 0}
 
     browser = None
     browser_process = None
-    # O bloco 'with' já garante que o playwright será fechado.
-    # O 'try/except/finally' interno trata erros durante a execução da automação.
     with sync_playwright() as playwright:
         try:
             browser, context, browser_process = realizar_login_automatico(playwright)
-            time.sleep(60)
+            time.sleep(60) # Pequena pausa após login
             page = context.new_page()
             
             page.goto("https://juridico.bb.com.br/paj/juridico")
@@ -50,36 +50,39 @@ def main():
             print(f"✅ URL da lista de tarefas capturada: {url_lista_tarefas}")
 
             stats_extracao["notificacoes"] = extracao_notificacoes.extrair_novas_notificacoes(page, url_lista_tarefas)
-            stats_processamento = processamento_detalhado.processar_detalhes_pendentes(page)
+            
+            # Captura as estatísticas e a lista de NPJs com sucesso
+            stats_processamento, npjs_de_sucesso = processamento_detalhado.processar_detalhes_pendentes(page)
+
+            # Se houve sucesso, executa o módulo de dar ciência
+            if npjs_de_sucesso:
+                stats_ciencia["registradas"] = ciencia_notificacoes.dar_ciencia_em_lote(page, url_central_notificacoes, npjs_de_sucesso)
 
         except Exception as e:
             print(f"\n❌ Ocorreu uma falha crítica na automação: {e}")
             stats_processamento["falha"] = "Crítico"
-            # Re-lança a exceção para que ela seja capturada pelo bloco principal e encerre o script com erro.
             raise
         finally:
             end_time = time.time()
             duracao_total = end_time - start_time
             
-            # --- Monta o dicionário de log ---
             total_npjs_processados = stats_processamento.get("sucesso", 0) + (1 if stats_processamento.get("falha") == "Crítico" else stats_processamento.get("falha", 0))
             tempo_medio = duracao_total / total_npjs_processados if total_npjs_processados > 0 else 0
 
             log_data = {
                 "timestamp": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
-                "duracao_total": duracao_total, # Salva o valor numérico para o dashboard
+                "duracao_total": duracao_total,
                 "tempo_medio_npj": tempo_medio,
                 "notificacoes_salvas": stats_extracao.get("notificacoes", 0),
                 "andamentos_capturados": stats_processamento.get("andamentos", 0),
                 "documentos_baixados": stats_processamento.get("documentos", 0),
                 "npjs_sucesso": stats_processamento.get("sucesso", 0),
-                "npjs_falha": stats_processamento.get("falha", 0)
+                "npjs_falha": stats_processamento.get("falha", 0),
+                "ciencias_registradas": stats_ciencia.get("registradas", 0) # Adiciona a nova métrica
             }
             
-            # Salva o log no banco de dados
             database.salvar_log_execucao(log_data)
 
-            # --- Imprime o resumo no terminal ---
             resumo = f"""
 ============================================================
 📊 RESUMO DA EXECUÇÃO DA RPA ({log_data['timestamp']})
@@ -93,12 +96,11 @@ def main():
 
 - Processos com Sucesso: {log_data['npjs_sucesso']}
 - Processos com Falha: {log_data['npjs_falha']}
+- Notificações com Ciência: {log_data['ciencias_registradas']}
 ============================================================
 """
             print(resumo)
 
-            # --- LÓGICA DE ENCERRAMENTO CONDICIONAL ---
-            # Verifica se o script está rodando em modo manual (ou seja, sem o argumento '--automated')
             is_manual_run = '--automated' not in sys.argv
 
             if 'browser' in locals() and browser and browser.is_connected():
@@ -108,15 +110,10 @@ def main():
             elif browser_process:
                 browser_process.kill()
 
-# Bloco de execução principal
 if __name__ == "__main__":
     try:
         main()
-        # Se main() terminar sem erros, o script sairá com código 0 (sucesso) por padrão.
     except Exception as e:
-        # Se uma exceção não tratada escapar de main(), ela será capturada aqui.
         print("\n!!! OCORREU UM ERRO CRITICO FINAL NA EXECUCAO DA RPA !!!")
-        # O traceback já foi impresso dentro da função 'main' se o erro foi lá.
-        # Aqui, apenas garantimos que o script termine com um código de erro.
         sys.exit(1)
 

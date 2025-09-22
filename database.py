@@ -114,7 +114,6 @@ def adicionar_usuario(nome):
 def remover_usuario(usuario_id):
     conn = sqlite3.connect(DB_NOME)
     cursor = conn.cursor()
-    # Desvincula as notificações antes de remover o usuário
     cursor.execute(f"UPDATE {TABELA_NOTIFICACOES} SET usuario_id = NULL WHERE usuario_id = ?", (usuario_id,))
     cursor.execute(f"DELETE FROM {TABELA_USUARIOS} WHERE id = ?", (usuario_id,))
     conn.commit()
@@ -208,8 +207,11 @@ def salvar_notificacoes(lista_notificacoes: list[dict]):
             conn.close()
     return registros_inseridos
 
-def obter_notificacoes_pendentes() -> list[dict]:
-    """Busca notificações individuais com status 'Pendente'."""
+def obter_npjs_pendentes_agrupados() -> list[dict]:
+    """
+    Busca NPJs únicos que tenham pelo menos uma notificação 'Pendente',
+    retornando também a data da notificação mais recente para guiar a busca.
+    """
     conn = None
     try:
         conn = sqlite3.connect(DB_NOME)
@@ -217,23 +219,29 @@ def obter_notificacoes_pendentes() -> list[dict]:
         cursor = conn.cursor()
         
         query = f"""
-        SELECT id, NPJ, data_notificacao
+        SELECT 
+            NPJ,
+            MAX(data_notificacao) as data_recente_notificacao
         FROM {TABELA_NOTIFICACOES}
         WHERE status = 'Pendente'
+        GROUP BY NPJ
         """
         cursor.execute(query)
         pendentes = [dict(row) for row in cursor.fetchall()]
-        print(f"🔎 Encontradas {len(pendentes)} notificações individuais pendentes.")
+        print(f"🔎 Encontrados {len(pendentes)} NPJs únicos para processamento.")
         return pendentes
     except sqlite3.Error as e:
-        print(f"❌ ERRO ao obter notificações pendentes: {e}")
+        print(f"❌ ERRO ao obter NPJs pendentes agrupados: {e}")
         return []
     finally:
         if conn:
             conn.close()
 
-def atualizar_registro_processado(notificacao_id: int, numero_processo: str, andamentos: list[dict], documentos: list[dict], is_test: bool = False):
-    """Atualiza uma notificação específica com os dados processados."""
+def atualizar_notificacoes_de_npj_processado(npj: str, numero_processo: str, andamentos: list[dict], documentos: list[dict]):
+    """
+    Atualiza TODAS as notificações 'Pendente' de um NPJ específico para 'Processado',
+    preenchendo os detalhes em todas elas.
+    """
     conn = None
     try:
         conn = sqlite3.connect(DB_NOME)
@@ -241,7 +249,6 @@ def atualizar_registro_processado(notificacao_id: int, numero_processo: str, and
 
         andamentos_json = json.dumps(andamentos, ensure_ascii=False)
         documentos_json = json.dumps(documentos, ensure_ascii=False)
-        novo_status = "Processado em Teste" if is_test else "Processado"
         
         query = f"""
         UPDATE {TABELA_NOTIFICACOES} 
@@ -249,34 +256,33 @@ def atualizar_registro_processado(notificacao_id: int, numero_processo: str, and
             numero_processo = ?,
             andamentos = ?, 
             documentos = ?, 
-            status = ? 
-        WHERE id = ?
+            status = 'Processado'
+        WHERE NPJ = ? AND status = 'Pendente'
         """
-        params = (numero_processo, andamentos_json, documentos_json, novo_status, notificacao_id)
+        params = (numero_processo, andamentos_json, documentos_json, npj)
         
         cursor.execute(query, params)
         conn.commit()
-        print(f"    - ✅ Notificação ID {notificacao_id} atualizada para '{novo_status}'.")
+        print(f"    - ✅ {cursor.rowcount} notificação(ões) do NPJ {npj} atualizadas para 'Processado'.")
 
     except sqlite3.Error as e:
-        print(f"❌ ERRO ao atualizar notificação ID {notificacao_id}: {e}")
+        print(f"❌ ERRO ao atualizar em lote o NPJ {npj}: {e}")
     finally:
         if conn:
             conn.close()
 
-
-def marcar_como_erro(notificacao_id: int):
-    """Marca uma notificação específica como 'Erro'."""
+def marcar_npj_como_erro(npj: str):
+    """Marca TODAS as notificações 'Pendente' de um NPJ específico como 'Erro'."""
     conn = None
     try:
         conn = sqlite3.connect(DB_NOME)
         cursor = conn.cursor()
-        query = f"UPDATE {TABELA_NOTIFICACOES} SET status = 'Erro' WHERE id = ?"
-        cursor.execute(query, (notificacao_id,))
+        query = f"UPDATE {TABELA_NOTIFICACOES} SET status = 'Erro' WHERE NPJ = ? AND status = 'Pendente'"
+        cursor.execute(query, (npj,))
         conn.commit()
-        print(f"    - ⚠️ Notificação ID {notificacao_id} marcada como 'Erro'.")
+        print(f"    - ⚠️ {cursor.rowcount} notificação(ões) do NPJ {npj} marcadas como 'Erro'.")
     except sqlite3.Error as e:
-        print(f"❌ ERRO ao marcar notificação ID {notificacao_id} como erro: {e}")
+        print(f"❌ ERRO ao marcar NPJ {npj} como erro: {e}")
     finally:
         if conn:
             conn.close()
@@ -355,4 +361,3 @@ def arquivar_notificacoes_em_lote_por_npj(lista_npjs: list[str]):
     finally:
         if conn:
             conn.close()
-
