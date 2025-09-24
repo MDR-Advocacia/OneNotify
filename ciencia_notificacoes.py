@@ -2,10 +2,28 @@
 from playwright.sync_api import Page, TimeoutError
 import time
 
-# Importa a configuração de tarefas para garantir consistência
-from extracao_notificacoes import TAREFAS_CONFIG
+# ALTERAÇÃO: Importa a configuração do novo arquivo central para quebrar a dependência.
+from config import TAREFAS_CONFIG
 
-def dar_ciencia_em_lote(page: Page, url_central_notificacoes: str, npjs_sucesso: list[str]):
+def aguardar_carregamento_ajax(page: Page):
+    """Espera o overlay de carregamento 'AJAX' do portal desaparecer."""
+    try:
+        # Seletor para a máscara de loading que cobre a tela
+        loading_overlay_selector = "div.rich-mpnl-mask-div-opaque"
+        
+        # Espera o overlay aparecer primeiro, mas com um timeout curto.
+        # Se não aparecer, ótimo, a ação foi instantânea.
+        page.locator(loading_overlay_selector).wait_for(state="visible", timeout=2000)
+        
+        # Agora, espera o overlay DESAPARECER, com um timeout longo.
+        page.locator(loading_overlay_selector).wait_for(state="hidden", timeout=45000)
+    except TimeoutError:
+        # Se o overlay não apareceu em 2s, é provável que a ação foi rápida.
+        # Se ele apareceu mas não desapareceu, a exceção de timeout será lançada.
+        # Em ambos os casos, um 'pass' é seguro, pois o robô prosseguirá ou falhará na próxima ação.
+        pass
+
+def dar_ciencia_em_lote(page: Page, npjs_sucesso: list[str]):
     """
     Navega pela central de notificações e marca a 'ciência' para uma lista de NPJs
     que foram processados com sucesso, seguindo o fluxo de navegação completo.
@@ -15,9 +33,10 @@ def dar_ciencia_em_lote(page: Page, url_central_notificacoes: str, npjs_sucesso:
     print("="*50)
 
     if not npjs_sucesso:
-        print("✅ Nenhum NPJ processado com sucesso. Nenhuma ciência a ser registrada.")
+        print("[OK] Nenhum NPJ processado com sucesso. Nenhuma ciência a ser registrada.")
         return 0
 
+    URL_CENTRAL_NOTIFICACOES = "https://juridico.bb.com.br/paj/app/paj-central-notificacoes/spas/central-notificacoes/central-notificacoes.app.html"
     npjs_set = set(npjs_sucesso)
     total_ciencias_registradas = 0
 
@@ -26,7 +45,7 @@ def dar_ciencia_em_lote(page: Page, url_central_notificacoes: str, npjs_sucesso:
             print(f"\n--- Verificando tarefa para dar ciência: {tarefa['nome']} ---")
             
             print("    - Navegando para a central de notificações...")
-            page.goto(url_central_notificacoes)
+            page.goto(URL_CENTRAL_NOTIFICACOES)
             page.wait_for_load_state("networkidle", timeout=60000)
             
             print("    - Localizando o card 'Processos - Visao Advogado'...")
@@ -56,7 +75,7 @@ def dar_ciencia_em_lote(page: Page, url_central_notificacoes: str, npjs_sucesso:
 
             print(f"    - {contagem_numero} itens encontrados. Abrindo detalhes para verificação...")
             linha_alvo.get_by_title("Detalhar notificações e pendências do subtipo").click()
-            page.wait_for_load_state("networkidle", timeout=30000)
+            aguardar_carregamento_ajax(page)
 
             pagina_atual = 1
             houve_marcacao_nesta_tarefa = False
@@ -81,14 +100,13 @@ def dar_ciencia_em_lote(page: Page, url_central_notificacoes: str, npjs_sucesso:
                             checkbox.check()
                             total_ciencias_registradas += 1
                             houve_marcacao_nesta_tarefa = True
-                            page.wait_for_load_state("networkidle", timeout=10000)
+                            aguardar_carregamento_ajax(page)
                         else:
                             print(f"      - Checkbox para {npj_encontrado} não encontrado ou já marcado.")
 
                 paginador = tabela.locator("tfoot")
                 if paginador.count() == 0: break
                 
-                # --- LÓGICA DE PAGINAÇÃO CORRIGIDA E ROBUSTA ---
                 controles_paginacao = paginador.locator('table.rich-dtascroller-table')
                 if controles_paginacao.count() == 0:
                     break
@@ -104,7 +122,7 @@ def dar_ciencia_em_lote(page: Page, url_central_notificacoes: str, npjs_sucesso:
                 
                 print("    - Navegando para a próxima página...")
                 botao_proxima.click()
-                page.wait_for_load_state("networkidle", timeout=30000)
+                aguardar_carregamento_ajax(page)
                 pagina_atual += 1
 
             if houve_marcacao_nesta_tarefa:
@@ -112,13 +130,13 @@ def dar_ciencia_em_lote(page: Page, url_central_notificacoes: str, npjs_sucesso:
                 confirmar_btn = page.locator('input[type="image"][name*=":j_id193"]')
                 if confirmar_btn.count() > 0:
                     confirmar_btn.click()
-                    page.wait_for_load_state("networkidle", timeout=45000)
-                    print("    - ✅ Ação de ciência confirmada.")
+                    aguardar_carregamento_ajax(page)
+                    print("    - [OK] Ação de ciência confirmada.")
                 else:
-                    print("    - ⚠️ ATENÇÃO: Botão de confirmar não encontrado após marcar os checkboxes.")
+                    print("    - [AVISO] Botão de confirmar não encontrado após marcar os checkboxes.")
 
         except Exception as e:
-            print(f"    - ❌ ERRO ao processar ciência para a tarefa '{tarefa['nome']}': {e}")
+            print(f"    - [ERRO] Falha ao processar ciência para a tarefa '{tarefa['nome']}': {e}")
             continue
     
     print("\n" + "="*50)

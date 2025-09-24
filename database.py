@@ -45,7 +45,7 @@ def inicializar_banco():
             ON {TABELA_NOTIFICACOES} (NPJ, tipo_notificacao, data_notificacao)
             """)
         except sqlite3.OperationalError as e:
-            print(f"AVISO: Não foi possível criar o índice de unicidade. Isso pode ocorrer se dados duplicados já existem. Erro: {e}")
+            print(f"[AVISO] Não foi possível criar o índice de unicidade. Isso pode ocorrer se dados duplicados já existem. Erro: {e}")
 
         # --- Migração de Schema para Notificações ---
         cursor.execute(f"PRAGMA table_info({TABELA_NOTIFICACOES})")
@@ -61,7 +61,7 @@ def inicializar_banco():
 
         for coluna, tipo in colunas_desejadas.items():
             if coluna not in colunas_existentes:
-                print(f"INFO: Migrando schema. Adicionando coluna '{coluna}'...")
+                print(f"[INFO] Migrando schema (Notificações). Adicionando coluna '{coluna}'...")
                 cursor.execute(f"ALTER TABLE {TABELA_NOTIFICACOES} ADD COLUMN {coluna} {tipo}")
         
         # --- Tabela de Logs ---
@@ -75,14 +75,47 @@ def inicializar_banco():
             andamentos_capturados INTEGER,
             documentos_baixados INTEGER,
             npjs_sucesso INTEGER,
-            npjs_falha TEXT
+            npjs_falha INTEGER
         )
         """)
         
+        # --- Migração de Schema para Logs ---
+        cursor.execute(f"PRAGMA table_info({TABELA_LOGS})")
+        colunas_logs_existentes = [row[1] for row in cursor.fetchall()]
+        if "ciencias_registradas" not in colunas_logs_existentes:
+            print("[INFO] Migrando schema (Logs). Adicionando coluna 'ciencias_registradas'...")
+            cursor.execute(f"ALTER TABLE {TABELA_LOGS} ADD COLUMN ciencias_registradas INTEGER")
+
         conn.commit()
-        print(f"✅ Banco de dados '{DB_NOME}' e tabelas verificados/migrados com sucesso.")
+        print(f"[OK] Banco de dados '{DB_NOME}' e tabelas verificados/migrados com sucesso.")
     except sqlite3.Error as e:
-        print(f"❌ ERRO ao inicializar o banco de dados: {e}")
+        print(f"[ERRO] ERRO ao inicializar o banco de dados: {e}")
+    finally:
+        if conn:
+            conn.close()
+
+def resetar_notificacoes_em_erro():
+    """
+    Busca todas as notificações marcadas como 'Erro' (mas não 'Erro_GED') 
+    e redefine seu status para 'Pendente' para que sejam reprocessadas.
+    """
+    conn = None
+    try:
+        conn = sqlite3.connect(DB_NOME)
+        cursor = conn.cursor()
+        
+        # AÇÃO 1: A query agora reseta APENAS o status 'Erro', ignorando 'Erro_GED'.
+        query = f"UPDATE {TABELA_NOTIFICACOES} SET status = 'Pendente' WHERE status = 'Erro'"
+        
+        cursor.execute(query)
+        registros_afetados = cursor.rowcount
+        conn.commit()
+        
+        if registros_afetados > 0:
+            print(f"[INFO] {registros_afetados} notificações com erro foram resetadas para 'Pendente' e serão reprocessadas.")
+
+    except sqlite3.Error as e:
+        print(f"[ERRO] ERRO ao resetar notificações com erro: {e}")
     finally:
         if conn:
             conn.close()
@@ -145,7 +178,7 @@ def criar_notificacoes_de_teste(npjs: list[str]):
     conn.commit()
     conn.close()
     
-    print(f"✅ {registros_criados} novas notificações de teste criadas. {len(npjs) - registros_criados} ignoradas (já existentes).")
+    print(f"[OK] {registros_criados} novas notificações de teste criadas. {len(npjs) - registros_criados} ignoradas (já existentes).")
     return registros_criados
 
 def atribuir_notificacoes_em_lote(npjs, usuario_id):
@@ -196,20 +229,20 @@ def salvar_notificacoes(lista_notificacoes: list[dict]):
         ignorados = total_tentado - registros_inseridos
         
         if ignorados > 0:
-            print(f"✅ {registros_inseridos} novas notificações salvas. {ignorados} duplicatas foram ignoradas.")
+            print(f"[OK] {registros_inseridos} novas notificações salvas. {ignorados} duplicatas foram ignoradas.")
         else:
-            print(f"✅ {registros_inseridos} novas notificações salvas para processamento.")
+            print(f"[OK] {registros_inseridos} novas notificações salvas para processamento.")
 
     except sqlite3.Error as e:
-        print(f"❌ ERRO ao salvar notificações: {e}")
+        print(f"[ERRO] ERRO ao salvar notificações: {e}")
     finally:
         if conn:
             conn.close()
     return registros_inseridos
 
-def obter_npjs_pendentes_agrupados() -> list[dict]:
+def obter_npjs_pendentes_por_lote(tamanho_lote: int) -> list[dict]:
     """
-    Busca NPJs únicos que tenham pelo menos uma notificação 'Pendente',
+    Busca um lote de NPJs únicos que tenham pelo menos uma notificação 'Pendente',
     retornando também a data da notificação mais recente para guiar a busca.
     """
     conn = None
@@ -225,14 +258,32 @@ def obter_npjs_pendentes_agrupados() -> list[dict]:
         FROM {TABELA_NOTIFICACOES}
         WHERE status = 'Pendente'
         GROUP BY NPJ
+        LIMIT ? 
         """
-        cursor.execute(query)
+        cursor.execute(query, (tamanho_lote,))
         pendentes = [dict(row) for row in cursor.fetchall()]
-        print(f"🔎 Encontrados {len(pendentes)} NPJs únicos para processamento.")
+        print(f"[INFO] Encontrados {len(pendentes)} NPJs para processar neste lote (limite de {tamanho_lote}).")
         return pendentes
     except sqlite3.Error as e:
-        print(f"❌ ERRO ao obter NPJs pendentes agrupados: {e}")
+        print(f"[ERRO] ERRO ao obter lote de NPJs pendentes: {e}")
         return []
+    finally:
+        if conn:
+            conn.close()
+
+def contar_pendentes() -> int:
+    """Conta o total de NPJs únicos com status 'Pendente'."""
+    conn = None
+    try:
+        conn = sqlite3.connect(DB_NOME)
+        cursor = conn.cursor()
+        query = f"SELECT COUNT(DISTINCT NPJ) FROM {TABELA_NOTIFICACOES} WHERE status = 'Pendente'"
+        cursor.execute(query)
+        total = cursor.fetchone()[0]
+        return total
+    except sqlite3.Error as e:
+        print(f"[ERRO] ERRO ao contar notificações pendentes: {e}")
+        return 0
     finally:
         if conn:
             conn.close()
@@ -263,26 +314,28 @@ def atualizar_notificacoes_de_npj_processado(npj: str, numero_processo: str, and
         
         cursor.execute(query, params)
         conn.commit()
-        print(f"    - ✅ {cursor.rowcount} notificação(ões) do NPJ {npj} atualizadas para 'Processado'.")
+        print(f"    - [OK] {cursor.rowcount} notificação(ões) do NPJ {npj} atualizadas para 'Processado'.")
 
     except sqlite3.Error as e:
-        print(f"❌ ERRO ao atualizar em lote o NPJ {npj}: {e}")
+        print(f"[ERRO] ERRO ao atualizar em lote o NPJ {npj}: {e}")
     finally:
         if conn:
             conn.close()
 
-def marcar_npj_como_erro(npj: str):
-    """Marca TODAS as notificações 'Pendente' de um NPJ específico como 'Erro'."""
+# AÇÃO 1: Modificar a função para aceitar um status de erro customizado
+def marcar_npj_como_erro(npj: str, status_erro: str = 'Erro'):
+    """Marca TODAS as notificações 'Pendente' de um NPJ específico com um status de erro."""
     conn = None
     try:
         conn = sqlite3.connect(DB_NOME)
         cursor = conn.cursor()
-        query = f"UPDATE {TABELA_NOTIFICACOES} SET status = 'Erro' WHERE NPJ = ? AND status = 'Pendente'"
-        cursor.execute(query, (npj,))
+        # A query agora usa o parâmetro 'status_erro'
+        query = f"UPDATE {TABELA_NOTIFICACOES} SET status = ? WHERE NPJ = ? AND status = 'Pendente'"
+        cursor.execute(query, (status_erro, npj))
         conn.commit()
-        print(f"    - ⚠️ {cursor.rowcount} notificação(ões) do NPJ {npj} marcadas como 'Erro'.")
+        print(f"    - [AVISO] {cursor.rowcount} notificação(ões) do NPJ {npj} marcadas como '{status_erro}'.")
     except sqlite3.Error as e:
-        print(f"❌ ERRO ao marcar NPJ {npj} como erro: {e}")
+        print(f"[ERRO] ERRO ao marcar NPJ {npj} como erro: {e}")
     finally:
         if conn:
             conn.close()
@@ -298,9 +351,9 @@ def salvar_log_execucao(log_data: dict):
         query = f"INSERT INTO {TABELA_LOGS} ({colunas}) VALUES ({placeholders})"
         cursor.execute(query, list(log_data.values()))
         conn.commit()
-        print("✅ Resumo da execução salvo no log.")
+        print("[OK] Resumo da execução salvo no log.")
     except sqlite3.Error as e:
-        print(f"❌ ERRO ao salvar log de execução: {e}")
+        print(f"[ERRO] ERRO ao salvar log de execução: {e}")
     finally:
         if conn:
             conn.close()
@@ -315,7 +368,7 @@ def arquivar_notificacao_por_npj(npj: str):
         cursor.execute(query, (npj,))
         conn.commit()
     except sqlite3.Error as e:
-        print(f"❌ ERRO ao arquivar notificações para o NPJ {npj}: {e}")
+        print(f"[ERRO] ERRO ao arquivar notificações para o NPJ {npj}: {e}")
     finally:
         if conn:
             conn.close()
@@ -330,7 +383,7 @@ def desarquivar_notificacao_por_npj(npj: str):
         cursor.execute(query, (npj,))
         conn.commit()
     except sqlite3.Error as e:
-        print(f"❌ ERRO ao desarquivar notificações para o NPJ {npj}: {e}")
+        print(f"[ERRO] ERRO ao desarquivar notificações para o NPJ {npj}: {e}")
     finally:
         if conn:
             conn.close()
@@ -353,11 +406,12 @@ def arquivar_notificacoes_em_lote_por_npj(lista_npjs: list[str]):
         cursor.execute(query, lista_npjs)
         conn.commit()
         registros_afetados = cursor.rowcount
-        print(f"✅ {registros_afetados} notificações (de {len(lista_npjs)} NPJs) arquivadas em lote.")
+        print(f"[OK] {registros_afetados} notificações (de {len(lista_npjs)} NPJs) arquivadas em lote.")
         return registros_afetados
     except sqlite3.Error as e:
-        print(f"❌ ERRO ao arquivar notificações em lote por NPJ: {e}")
+        print(f"[ERRO] ERRO ao arquivar notificações em lote por NPJ: {e}")
         return 0
     finally:
         if conn:
             conn.close()
+

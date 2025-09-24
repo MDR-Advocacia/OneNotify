@@ -1,6 +1,6 @@
 # arquivo: processamento_detalhado.py
 import traceback
-from playwright.sync_api import Page, TimeoutError
+from playwright.sync_api import Page, TimeoutError, BrowserContext
 from datetime import datetime, timedelta
 from pathlib import Path
 import database
@@ -57,18 +57,18 @@ def extrair_andamentos_na_janela(page: Page, datas_alvo: set[str]) -> list[dict]
 
                         texto_completo = modal.locator("texto-grande-detalhar p[align='justify']").inner_text()
                         andamento_info["texto"] = texto_completo.strip() if texto_completo else "Texto não extraído."
-                        print("      - ✅ Texto da publicação capturado.")
+                        print("      - [OK] Texto da publicação capturado.")
                         
                         modal.locator("div.modal__close").click()
                         modal.wait_for(state="hidden", timeout=5000)
                 
                 andamentos_encontrados.append(andamento_info)
             except Exception as e_linha:
-                print(f"      - ⚠️ Erro ao processar uma linha de andamento: {e_linha}")
+                print(f"      - [AVISO] Erro ao processar uma linha de andamento: {e_linha}")
                 continue
 
     except Exception as e:
-        print(f"    - ⚠️ Aviso geral durante a extração de andamentos: {e}")
+        print(f"    - [AVISO] Aviso geral durante a extração de andamentos: {e}")
     
     return andamentos_encontrados
 
@@ -129,22 +129,22 @@ def baixar_documentos_na_janela(page: Page, npj: str, datas_alvo: set[str]) -> t
                             "nome_arquivo": download.suggested_filename,
                             "caminho_relativo": str(caminho_salvar.relative_to(pasta_base)).replace("\\", "/")
                         })
-                        print(f"      - ✅ Download concluído: {caminho_salvar}")
+                        print(f"      - [OK] Download concluído: {caminho_salvar}")
 
                     except TimeoutError:
-                        print(f"      - ⌛️ Timeout ao esperar pelo download de '{nome_arquivo}'. Verificando se é erro do portal...")
+                        print(f"      - [TIMEOUT] Timeout ao esperar pelo download de '{nome_arquivo}'. Verificando se é erro do portal...")
                         page_content = page.content()
                         if "GED indisponível" in page_content:
-                            print(f"      - ❌ ERRO DO PORTAL: 'GED indisponível'. Abortando downloads para este NPJ.")
+                            print(f"      - [ERRO] ERRO DO PORTAL: 'GED indisponível'. Abortando downloads para este NPJ.")
                             sucesso_geral = False
-                            break # Sai do loop de documentos, pois é um erro do NPJ
+                            break 
                         else:
                             print("      - O portal não indicou erro de GED. Pode ser um arquivo pesado ou falha de rede.")
                     except Exception as e_download:
-                        print(f"      - ❌ ERRO GERAL ao baixar o arquivo '{nome_arquivo}': {e_download}")
+                        print(f"      - [ERRO] ERRO GERAL ao baixar o arquivo '{nome_arquivo}': {e_download}")
 
     except Exception as e:
-        print(f"    - ⚠️ Aviso durante o processo de download de documentos: {e}")
+        print(f"    - [AVISO] Aviso durante o processo de download de documentos: {e}")
         
     return documentos_baixados, sucesso_geral
 
@@ -158,13 +158,12 @@ def extrair_numero_processo(page: Page) -> str:
             print(f"    - Número do Processo encontrado: {numero}")
             return numero
     except Exception as e:
-        print(f"    - ⚠️ Aviso ao extrair número do processo: {e}")
+        print(f"    - [AVISO] Aviso ao extrair número do processo: {e}")
     return ""
 
-def processar_detalhes_pendentes(page: Page):
+def processar_detalhes_pendentes(page: Page, tamanho_lote: int):
     """
-    Processa notificações pendentes por NPJ, lidando com possíveis erros de
-    carregamento do portal e falhas de download antes de prosseguir.
+    Processa um lote de notificações pendentes, abrindo uma nova aba para cada NPJ.
     """
     print("\n" + "="*50)
     print("INICIANDO MÓDULO DE PROCESSAMENTO DETALHADO")
@@ -172,17 +171,18 @@ def processar_detalhes_pendentes(page: Page):
 
     stats = {"sucesso": 0, "falha": 0, "andamentos": 0, "documentos": 0}
     npjs_sucesso = []
+    context: BrowserContext = page.context
     
-    notificacoes_para_processar = database.obter_npjs_pendentes_agrupados()
+    notificacoes_para_processar = database.obter_npjs_pendentes_por_lote(tamanho_lote)
 
     if not notificacoes_para_processar:
-        print("✅ Nenhum NPJ pendente para processar.")
+        print("[OK] Nenhum NPJ pendente para processar neste ciclo.")
         return stats, npjs_sucesso
 
     url_base = "https://juridico.bb.com.br/paj/app/paj-cadastro/spas/processo/consulta/processo-consulta.app.html#/editar/"
     
     total_a_processar = len(notificacoes_para_processar)
-    print(f"Total de {total_a_processar} NPJ(s) únicos a serem processados.")
+    print(f"Total de {total_a_processar} NPJ(s) únicos a serem processados neste lote.")
 
     for i, item_processo in enumerate(notificacoes_para_processar):
         npj = item_processo['NPJ']
@@ -190,7 +190,10 @@ def processar_detalhes_pendentes(page: Page):
         
         print(f"\n[{i+1}/{total_a_processar}] Processando NPJ: {npj} (baseado na notificação mais recente de: {data_notificacao_str})")
         
+        page_processo = None
         try:
+            page_processo = context.new_page()
+
             data_base = datetime.strptime(data_notificacao_str, '%d/%m/%Y')
             datas_alvo = { (data_base - timedelta(days=d)).strftime('%d/%m/%Y') for d in range(3) }
             print(f"    - Janela de datas para busca: {sorted(list(datas_alvo), reverse=True)}")
@@ -199,34 +202,34 @@ def processar_detalhes_pendentes(page: Page):
             numero, variacao_str = resto.split('-')
             url_final = f"{url_base}{ano + numero}/{int(variacao_str)}/1"
             
-            page.goto(url_final)
-            page.wait_for_load_state("networkidle", timeout=30000)
+            page_processo.goto(url_final)
+            page_processo.wait_for_load_state("networkidle", timeout=30000)
 
             seletor_erro_portal = "div.alert--warn:has-text('Erro ao carregar o processo')"
             time.sleep(2)
             
-            if page.locator(seletor_erro_portal).count() > 0:
-                print(f"    - ❌ ERRO DO PORTAL: A página para o NPJ {npj} falhou ao carregar ('Erro ao carregar o processo').")
+            if page_processo.locator(seletor_erro_portal).count() > 0:
+                print(f"    - [ERRO] ERRO DO PORTAL: A página para o NPJ {npj} falhou ao carregar ('Erro ao carregar o processo').")
                 stats["falha"] += 1
                 database.marcar_npj_como_erro(npj)
                 continue
 
-            page.locator("i.ci.ci--barcode").first.wait_for(state="visible", timeout=30000)
-            page.locator("div.loader.is-loading").wait_for(state="hidden", timeout=45000)
+            page_processo.locator("i.ci.ci--barcode").first.wait_for(state="visible", timeout=30000)
+            page_processo.locator("div.loader.is-loading").wait_for(state="hidden", timeout=45000)
             print("    - Página de detalhes do NPJ carregada e estável.")
 
-            numero_processo = extrair_numero_processo(page)
-            andamentos_coletados = extrair_andamentos_na_janela(page, datas_alvo)
+            numero_processo = extrair_numero_processo(page_processo)
+            andamentos_coletados = extrair_andamentos_na_janela(page_processo, datas_alvo)
             stats["andamentos"] += len(andamentos_coletados)
 
-            documentos_coletados, download_sucesso = baixar_documentos_na_janela(page, npj, datas_alvo)
+            documentos_coletados, download_sucesso = baixar_documentos_na_janela(page_processo, npj, datas_alvo)
             stats["documentos"] += len(documentos_coletados)
             
-            # Se o download falhou por causa do GED, marca como erro e pula
             if not download_sucesso:
-                print(f"    - ❌ Falha crítica de download (GED) detectada para o NPJ {npj}. Marcando como erro.")
+                # AÇÃO 1: Se o download falhou por GED, marca com status de quarentena
+                print(f"    - [ERRO] Falha crítica de download (GED) detectada para o NPJ {npj}. Marcando para quarentena.")
                 stats["falha"] += 1
-                database.marcar_npj_como_erro(npj)
+                database.marcar_npj_como_erro(npj, status_erro='Erro_GED')
                 continue
 
             database.atualizar_notificacoes_de_npj_processado(
@@ -239,11 +242,14 @@ def processar_detalhes_pendentes(page: Page):
             npjs_sucesso.append(npj)
 
         except Exception as e:
-            print(f"    - ❌ ERRO GERAL no processamento do NPJ {npj}: {e}")
+            print(f"    - [ERRO] ERRO GERAL no processamento do NPJ {npj}: {e}")
             traceback.print_exc()
             stats["falha"] += 1
             database.marcar_npj_como_erro(npj)
             continue
+        finally:
+            if page_processo:
+                page_processo.close()
             
     print("\n" + "="*50)
     print("PROCESSAMENTO DETALHADO CONCLUÍDO")

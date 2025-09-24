@@ -35,13 +35,14 @@ def main_test_session():
             # Apenas uma verificação simples de que o login funcionou
             page.goto("https://juridico.bb.com.br/paj/juridico")
             page.locator("#aPaginaInicial").wait_for(state="visible", timeout=30000)
-            print("✅ Verificação de login OK. Iniciando processamento de pendentes.")
+            print("[OK] Verificação de login OK. Iniciando processamento de pendentes.")
 
             # Pula a extração e vai direto para o processamento detalhado
-            stats_processamento = processamento_detalhado.processar_detalhes_pendentes(page)
+            # A função processar_detalhes_pendentes agora retorna uma tupla (stats, npjs_sucesso)
+            stats_processamento, _ = processamento_detalhado.processar_detalhes_pendentes(page)
 
         except Exception as e:
-            print(f"\n❌ Ocorreu uma falha crítica na sessão de teste: {e}")
+            print(f"\n[ERRO] Ocorreu uma falha crítica na sessão de teste: {e}")
             raise
         finally:
             end_time = time.time()
@@ -64,7 +65,7 @@ def main_test_session():
 
             resumo = f"""
 ============================================================
-📊 RESUMO DA SESSÃO DE TESTE ({log_data['timestamp']})
+RESUMO DA SESSÃO DE TESTE ({log_data['timestamp']})
 ============================================================
 - Tempo Total: {formatar_duracao(log_data['duracao_total'])}
 - Média por NPJ: {formatar_duracao(log_data['tempo_medio_npj'])}

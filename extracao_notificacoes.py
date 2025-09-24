@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 import database 
 import re
 import time
+# ALTERAÇÃO: Importa a configuração do novo arquivo central e remove a dependência circular.
+from config import TAREFAS_CONFIG
 
 def extrair_dados_com_paginacao(page: Page, id_tabela: str, colunas_desejadas: list[str], limite_registros: int) -> list[dict]:
     """
@@ -18,7 +20,7 @@ def extrair_dados_com_paginacao(page: Page, id_tabela: str, colunas_desejadas: l
         corpo_da_tabela.locator("tr").first.wait_for(state="visible", timeout=20000)
         print("    - Tabela de notificações encontrada.")
     except TimeoutError:
-        print("    - ⚠️ A tabela de notificações não foi encontrada a tempo. Pulando tarefa.")
+        print("    - [AVISO] A tabela de notificações não foi encontrada a tempo. Pulando tarefa.")
         return []
     
     indices_colunas = {}
@@ -82,7 +84,7 @@ def extrair_dados_com_paginacao(page: Page, id_tabela: str, colunas_desejadas: l
 
     return dados_extraidos
 
-def extrair_novas_notificacoes(page: Page, url_lista_tarefas: str) -> int:
+def extrair_novas_notificacoes(page: Page):
     """
     Navega pela central, extrai os dados básicos, salva no DB e retorna a contagem de itens encontrados.
     """
@@ -90,13 +92,28 @@ def extrair_novas_notificacoes(page: Page, url_lista_tarefas: str) -> int:
     print("INICIANDO MÓDULO DE EXTRAÇÃO DE NOTIFICAÇÕES")
     print("="*50)
     
-    TAREFAS_CONFIG = [
-        { "nome": "Andamento de publicação em processo de condução terceirizada", "colunas": ["NPJ", "Adverso Principal", "Gerada em", "Qtd Dias Gerada"] },
-        { "nome": "Doc. anexado por empresa externa em processo terceirizado", "colunas": ["NPJ", "Adverso Principal", "Gerada em", "Qtd Dias Gerada"] },
-        { "nome": "Inclusão de Documentos no NPJ", "colunas": ["NPJ", "Adverso Principal", "Gerada em", "Qtd Dias Gerada"] },
-    ]
-    
+    URL_CENTRAL_NOTIFICACOES = "https://juridico.bb.com.br/paj/app/paj-central-notificacoes/spas/central-notificacoes/central-notificacoes.app.html"
     notificacoes_coletadas = []
+
+    try:
+        page.goto(URL_CENTRAL_NOTIFICACOES)
+        page.wait_for_load_state("networkidle", timeout=60000)
+        print("[OK] Central de Notificações carregada.")
+        
+        # CORREÇÃO DEFINITIVA: Espera pelo card específico que precisamos interagir.
+        # Isso é mais confiável do que esperar por um container genérico ou um texto.
+        print("[INFO] Aguardando o card de 'Processos' ficar visível...")
+        terceiro_card = page.locator("div.box-body").locator("div.pendencias-card").nth(2)
+        terceiro_card.wait_for(state="visible", timeout=30000)
+
+        terceiro_card.locator("a.mi--forward").click()
+        page.wait_for_load_state("networkidle", timeout=30000)
+        url_lista_tarefas = page.url
+        print(f"[OK] URL da lista de tarefas capturada: {url_lista_tarefas}")
+
+    except Exception as e:
+        print(f"[ERRO] Falha crítica ao navegar para a lista de tarefas: {e}")
+        return 0 
 
     for tarefa in TAREFAS_CONFIG:
         try:
@@ -123,9 +140,6 @@ def extrair_novas_notificacoes(page: Page, url_lista_tarefas: str) -> int:
                 botao_detalhar = linha_alvo.locator('input[title="Detalhar notificações e pendências do subtipo"]')
                 botao_detalhar.click(force=True)
                 
-                # --- AJUSTE FINAL E CRUCIAL ---
-                # Adiciona uma pausa explícita para garantir que a tabela e a paginação carreguem completamente
-                # antes de prosseguir, especialmente para tarefas com muitos itens.
                 print("    - Aguardando carregamento completo da lista detalhada...")
                 time.sleep(5) 
                 
@@ -152,7 +166,7 @@ def extrair_novas_notificacoes(page: Page, url_lista_tarefas: str) -> int:
                         })
 
         except Exception as e:
-            print(f"    - ❌ ERRO ao processar tarefa '{tarefa['nome']}': {e}")
+            print(f"    - [ERRO] ao processar tarefa '{tarefa['nome']}': {e}")
             continue
 
     if notificacoes_coletadas:
