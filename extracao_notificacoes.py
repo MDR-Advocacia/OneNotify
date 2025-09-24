@@ -1,10 +1,8 @@
 # arquivo: extracao_notificacoes.py
 from playwright.sync_api import Page, TimeoutError
 from datetime import datetime, timedelta
-import database 
 import re
 import time
-# ALTERAÇÃO: Importa a configuração do novo arquivo central e remove a dependência circular.
 from config import TAREFAS_CONFIG
 
 def extrair_dados_com_paginacao(page: Page, id_tabela: str, colunas_desejadas: list[str], limite_registros: int) -> list[dict]:
@@ -84,36 +82,43 @@ def extrair_dados_com_paginacao(page: Page, id_tabela: str, colunas_desejadas: l
 
     return dados_extraidos
 
-def extrair_novas_notificacoes(page: Page):
+def extrair_e_obter_npjs(page: Page) -> tuple[list[dict], list[str]]:
     """
-    Navega pela central, extrai os dados básicos, salva no DB e retorna a contagem de itens encontrados.
+    Navega pela central, extrai os dados básicos e retorna uma tupla com:
+    1. A lista de dicionários de notificações para salvar no DB.
+    2. A lista de strings de NPJs únicos para dar ciência.
     """
     print("\n" + "="*50)
     print("INICIANDO MÓDULO DE EXTRAÇÃO DE NOTIFICAÇÕES")
     print("="*50)
     
+    URL_JURIDICO_HOME = "https://juridico.bb.com.br/paj/juridico"
     URL_CENTRAL_NOTIFICACOES = "https://juridico.bb.com.br/paj/app/paj-central-notificacoes/spas/central-notificacoes/central-notificacoes.app.html"
     notificacoes_coletadas = []
+    npjs_unicos = set()
 
     try:
+        print("[INFO] Verificando e estabilizando a sessão...")
+        page.goto(URL_JURIDICO_HOME)
+        page.locator("#aPaginaInicial").wait_for(state="visible", timeout=45000)
+        print("[OK] Sessão estabilizada. Navegando para a Central de Notificações...")
+
         page.goto(URL_CENTRAL_NOTIFICACOES)
         page.wait_for_load_state("networkidle", timeout=60000)
         print("[OK] Central de Notificações carregada.")
         
-        # CORREÇÃO DEFINITIVA: Espera pelo card específico que precisamos interagir.
-        # Isso é mais confiável do que esperar por um container genérico ou um texto.
         print("[INFO] Aguardando o card de 'Processos' ficar visível...")
-        terceiro_card = page.locator("div.box-body").locator("div.pendencias-card").nth(2)
-        terceiro_card.wait_for(state="visible", timeout=30000)
-
-        terceiro_card.locator("a.mi--forward").click()
+        card_processos = page.locator("div.pendencias-card", has_text="Processos - Visao Advogado")
+        card_processos.wait_for(state="visible", timeout=45000)
+        
+        card_processos.locator("a.mi--forward").click()
         page.wait_for_load_state("networkidle", timeout=30000)
         url_lista_tarefas = page.url
         print(f"[OK] URL da lista de tarefas capturada: {url_lista_tarefas}")
 
     except Exception as e:
         print(f"[ERRO] Falha crítica ao navegar para a lista de tarefas: {e}")
-        return 0 
+        raise  # Lança o erro para ser capturado pelo main.py
 
     for tarefa in TAREFAS_CONFIG:
         try:
@@ -141,9 +146,8 @@ def extrair_novas_notificacoes(page: Page):
                 botao_detalhar.click(force=True)
                 
                 print("    - Aguardando carregamento completo da lista detalhada...")
-                time.sleep(5) 
-                
-                page.wait_for_load_state("networkidle", timeout=30000)
+                page.wait_for_load_state("networkidle", timeout=45000)
+                time.sleep(2) 
                 
                 id_tabela = "notificacoesNaoLidasForm:notificacoesNaoLidasDetalhamentoForm:dataTabletableNotificacoesNaoLidas"
                 dados_brutos = extrair_dados_com_paginacao(page, id_tabela, tarefa["colunas"], limite_registros=contagem_numero)
@@ -158,8 +162,10 @@ def extrair_novas_notificacoes(page: Page):
                         data_notif = data_notif_obj.strftime('%d/%m/%Y')
 
                     if data_notif and item.get("NPJ"):
+                        npj = item.get("NPJ")
+                        npjs_unicos.add(npj)
                         notificacoes_coletadas.append({
-                            "NPJ": item.get("NPJ"),
+                            "NPJ": npj,
                             "tipo_notificacao": tarefa["nome"],
                             "adverso_principal": item.get("Adverso Principal", ""), 
                             "data_notificacao": data_notif
@@ -168,11 +174,6 @@ def extrair_novas_notificacoes(page: Page):
         except Exception as e:
             print(f"    - [ERRO] ao processar tarefa '{tarefa['nome']}': {e}")
             continue
-
-    if notificacoes_coletadas:
-        total_salvo = database.salvar_notificacoes(notificacoes_coletadas)
-        return total_salvo
-    else:
-        print("\nNenhuma nova notificação encontrada para ser salva.")
-        return 0
+    
+    return notificacoes_coletadas, list(npjs_unicos)
 

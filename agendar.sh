@@ -14,6 +14,11 @@ echo ""
 
 # Loop infinito
 while true; do
+    # --- AÇÃO CORRETIVA: Forçar o encerramento de qualquer processo do Chrome ---
+    echo "$(date): Garantindo que não há processos residuais do Chrome..." | tee -a "$LOG_FILE"
+    pkill -f "Google Chrome" > /dev/null 2>&1
+    sleep 5 # Pausa para garantir que os processos foram encerrados
+
     # Captura o tempo de início
     INICIO_SEGUNDOS=$(date +%s)
 
@@ -40,11 +45,7 @@ while true; do
     else
         TEMPO_ESPERA=$((CICLO_SEGUNDOS - DURACAO_SEGUNDOS))
     fi
-
-    # Limpa processos residuais do Chrome (específico para macOS/Linux)
-    echo "$(date): Limpando processos residuais do Chrome..." | tee -a "$LOG_FILE"
-    pkill -f "Google Chrome" > /dev/null 2>&1
-
+    
     # Aguarda o tempo calculado
     echo "$(date): Próxima execução em aproximadamente $TEMPO_ESPERA segundos..." | tee -a "$LOG_FILE"
     sleep "$TEMPO_ESPERA"

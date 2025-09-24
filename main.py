@@ -11,111 +11,112 @@ import processamento_detalhado
 import ciencia_notificacoes
 
 # --- CONFIGURAÇÃO DO CICLO ---
-TAMANHO_LOTE = 50 # Processa 50 NPJs por ciclo de login/logout
+TAMANHO_LOTE = 2 
 
 def formatar_duracao(segundos):
-    """Formata segundos em uma string legível (minutos e segundos)."""
     if segundos < 0: return "0 segundos"
     if segundos < 60:
         return f"{segundos:.2f} segundos"
     minutos, seg = divmod(segundos, 60)
     return f"{int(minutos)} minuto(s) e {int(seg)} segundo(s)"
 
-def executar_ciclo_extracao(playwright):
-    """
-    Executa um ciclo rápido e dedicado apenas para extrair novas notificações.
-    Isso garante que a lista de trabalho esteja sempre atualizada antes de começar
-    os ciclos de processamento intensivo.
-    """
-    print("\n" + "="*60)
-    print("INICIANDO CICLO DEDICADO DE EXTRAÇÃO DE NOTIFICAÇÕES")
-    print("="*60)
-    
-    notificacoes_salvas = 0
-    browser_process = None
+def executar_ciclo_extracao_e_ciencia(playwright):
+    stats = {"notificacoes_salvas": 0, "ciencias_registradas": 0, "sucesso": False}
     browser = None
+    browser_process = None
     try:
-        browser, context, browser_process = realizar_login_automatico(playwright)
+        browser, _, browser_process = realizar_login_automatico(playwright)
         time.sleep(60)
-        page = context.new_page()
+        page = browser.contexts[0].new_page()
         
-        # A função de extração agora é autônoma e sabe para onde navegar.
-        notificacoes_salvas = extracao_notificacoes.extrair_novas_notificacoes(page)
+        notificacoes_brutas, npjs_coletados = extracao_notificacoes.extrair_e_obter_npjs(page)
+        
+        if notificacoes_brutas:
+            stats["notificacoes_salvas"] = database.salvar_notificacoes(notificacoes_brutas)
+        else:
+            print("\nNenhuma nova notificação encontrada para ser salva.")
 
+        if npjs_coletados:
+            stats["ciencias_registradas"] = ciencia_notificacoes.registrar_ciencia_para_npjs(page, npjs_coletados)
+        else:
+            print("\nNenhum NPJ para registrar ciência nesta execução.")
+        
+        stats["sucesso"] = True
     except Exception as e:
-        print(f"\n[ERRO] Ocorreu uma falha crítica no ciclo de extração: {e}")
+        print(f"[ERRO] Ocorreu uma falha crítica no ciclo de extração e ciência: {e}")
         traceback.print_exc()
+        stats["sucesso"] = False
     finally:
-        print("\n--- Finalizando ciclo de extração. ---")
+        print("\n--- Finalizando ciclo de extração e ciência. ---")
         if browser and browser.is_connected():
+            print("    - Desconectando do navegador...")
             browser.close()
-        elif browser_process:
+        if browser_process:
+            print("    - Encerrando o processo do navegador...")
             browser_process.kill()
             
-    return notificacoes_salvas
+    return stats
 
 def executar_ciclo_processamento(playwright):
-    """
-    Executa um ciclo de processamento focado: login, processamento de lote e ciência.
-    NÃO faz extração para economizar o tempo de sessão.
-    """
     stats_ciclo = {
-        "sucesso": 0, "falha": 0, "andamentos": 0, 
-        "documentos": 0, "registradas": 0
+        "sucesso": 0, "falha": 0, "andamentos": 0, "documentos": 0
     }
-    browser_process = None
     browser = None
-
+    browser_process = None
     try:
-        browser, context, browser_process = realizar_login_automatico(playwright)
+        browser, _, browser_process = realizar_login_automatico(playwright)
         time.sleep(60)
-        page = context.new_page()
+        page = browser.contexts[0].new_page()
         
-        # Verificação rápida para garantir que a sessão está ativa
         page.goto("https://juridico.bb.com.br/paj/juridico")
         page.locator("#aPaginaInicial").wait_for(state="visible", timeout=30000)
         print("[OK] Verificação de login OK.")
         
-        stats_processamento, npjs_de_sucesso_ciclo = processamento_detalhado.processar_detalhes_pendentes(page, TAMANHO_LOTE)
+        stats_processamento, _ = processamento_detalhado.processar_detalhes_pendentes(page, TAMANHO_LOTE)
         stats_ciclo.update(stats_processamento)
         
-        if npjs_de_sucesso_ciclo:
-            url_central_notificacoes = "https://juridico.bb.com.br/paj/app/paj-central-notificacoes/spas/central-notificacoes/central-notificacoes.app.html"
-            stats_ciclo["registradas"] = ciencia_notificacoes.dar_ciencia_em_lote(page, url_central_notificacoes, npjs_de_sucesso_ciclo)
-
     except Exception as e:
         print(f"\n[ERRO] Ocorreu uma falha crítica no ciclo de processamento: {e}")
-        # Se falhar, incrementa o contador de falhas baseado no tamanho do lote para refletir o impacto
-        stats_ciclo["falha"] += TAMANHO_LOTE 
+        stats_ciclo["falha"] = (stats_ciclo.get("falha", 0) or 0) + 1
         traceback.print_exc()
     finally:
         print("\n--- Finalizando ciclo de processamento, fechando navegador para renovar a sessão. ---")
         if browser and browser.is_connected():
+            print("    - Desconectando do navegador...")
             browser.close()
-        elif browser_process:
+        if browser_process:
+            print("    - Encerrando o processo do navegador...")
             browser_process.kill()
-            
+
     return stats_ciclo
 
 def main():
     database.inicializar_banco()
-    database.resetar_notificacoes_em_erro()
     
     start_time_geral = time.time()
-    
     stats_gerais = {
-        "notificacoes": 0, "sucesso": 0, "falha": 0, 
-        "andamentos": 0, "documentos": 0, "registradas": 0
+        "notificacoes_salvas": 0, "sucesso": 0, "falha": 0, "andamentos": 0, 
+        "documentos": 0, "ciencias_registradas": 0
     }
 
-    # --- ETAPA 1: CICLO DE EXTRAÇÃO ---
+    # --- CICLO DEDICADO DE EXTRAÇÃO E CIÊNCIA ---
+    print("\n" + "="*60)
+    print("INICIANDO CICLO DE EXTRAÇÃO E CIÊNCIA")
+    print("="*60)
     with sync_playwright() as playwright:
-        notificacoes_salvas = executar_ciclo_extracao(playwright)
-        stats_gerais["notificacoes"] = notificacoes_salvas
+        stats_extracao = executar_ciclo_extracao_e_ciencia(playwright)
+        stats_gerais["notificacoes_salvas"] = stats_extracao["notificacoes_salvas"]
+        stats_gerais["ciencias_registradas"] = stats_extracao["ciencias_registradas"]
 
-    # --- ETAPA 2: LOOP DE PROCESSAMENTO ---
+    # --- CONTROLE DE FLUXO ---
+    if not stats_extracao.get("sucesso", False):
+        print("\n[CRÍTICO] O ciclo de extração e ciência falhou. O robô será encerrado para evitar inconsistências.")
+        sys.exit(1)
+
+    # --- LOOP DE CICLOS DE PROCESSAMENTO ---
     ciclo_num = 1
     while True:
+        database.resetar_notificacoes_em_erro()
         pendentes_antes = database.contar_pendentes()
         if pendentes_antes == 0:
             print("\n[OK] Nenhuma notificação pendente para processar. Encerrando.")
@@ -129,9 +130,11 @@ def main():
         with sync_playwright() as playwright:
             stats_ciclo = executar_ciclo_processamento(playwright)
         
-        for key in stats_gerais:
-            stats_gerais[key] += stats_ciclo.get(key, 0)
-
+        stats_gerais["sucesso"] += stats_ciclo.get("sucesso", 0)
+        stats_gerais["falha"] += stats_ciclo.get("falha", 0)
+        stats_gerais["andamentos"] += stats_ciclo.get("andamentos", 0)
+        stats_gerais["documentos"] += stats_ciclo.get("documentos", 0)
+        
         pendentes_depois = database.contar_pendentes()
         print(f"\n--- FIM DO CICLO Nº {ciclo_num} ---")
         print(f"Notificações pendentes restantes: {pendentes_depois}")
@@ -155,14 +158,8 @@ def main():
 
     log_data = {
         "timestamp": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
-        "duracao_total": duracao_total,
-        "tempo_medio_npj": tempo_medio,
-        "notificacoes_salvas": stats_gerais["notificacoes"],
-        "andamentos_capturados": stats_gerais["andamentos"],
-        "documentos_baixados": stats_gerais["documentos"],
-        "npjs_sucesso": stats_gerais["sucesso"],
-        "npjs_falha": stats_gerais["falha"],
-        "ciencias_registradas": stats_gerais["registradas"]
+        "duracao_total": duracao_total, "tempo_medio_npj": tempo_medio,
+        **stats_gerais
     }
     
     database.salvar_log_execucao(log_data)
@@ -175,18 +172,17 @@ RESUMO FINAL DA EXECUÇÃO DA RPA ({log_data['timestamp']})
 - Média por NPJ Processado: {formatar_duracao(log_data['tempo_medio_npj'])}
 
 - Notificações Novas Salvas: {log_data['notificacoes_salvas']}
-- Andamentos Capturados: {log_data['andamentos_capturados']}
-- Documentos Baixados: {log_data['documentos_baixados']}
+- Andamentos Capturados: {log_data['andamentos']}
+- Documentos Baixados: {log_data['documentos']}
 
-- Processos com Sucesso: {log_data['npjs_sucesso']}
-- Processos com Falha: {log_data['npjs_falha']}
+- Processos com Sucesso: {log_data['sucesso']}
+- Processos com Falha: {log_data['falha']}
 - Notificações com Ciência: {log_data['ciencias_registradas']}
 ============================================================
 """
     print(resumo)
 
-    is_manual_run = '--automated' not in sys.argv
-    if is_manual_run:
+    if '--automated' not in sys.argv:
         input("\n... Processo finalizado. Pressione Enter para sair ...")
 
 if __name__ == "__main__":
