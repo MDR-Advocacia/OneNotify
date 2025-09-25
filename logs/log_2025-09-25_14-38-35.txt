@@ -1,0 +1,55 @@
+2025-09-25 14:38:35,045 [INFO] - ============================================================
+2025-09-25 14:38:35,045 [INFO] - INICIANDO NOVA EXECUÇÃO DA RPA
+2025-09-25 14:38:35,045 [INFO] - ============================================================
+2025-09-25 14:38:35,050 [INFO] - 216 notificações com status 'Erro' ou 'Em Processamento' foram resetadas para 'Pendente'.
+2025-09-25 14:38:35,272 [INFO] - 
+FASE 1: LOGIN E CONFIGURAÇÃO DA SESSÃO
+2025-09-25 14:38:51,398 [INFO] - 
+FASE 2: EXTRAÇÃO DE NOVAS NOTIFICAÇÕES E REGISTRO DE CIÊNCIA
+2025-09-25 14:38:51,401 [INFO] - Iniciando módulo de extração e ciência...
+2025-09-25 14:38:51,402 [INFO] - Navegando para a Central de Notificações...
+2025-09-25 14:38:52,759 [INFO] - Acessando a 'Visão do Advogado'...
+2025-09-25 14:38:53,457 [INFO] - --- Processando tarefa: Andamento de publicação em processo de condução terceirizada ---
+2025-09-25 14:38:53,467 [WARNING] - Tarefa 'Andamento de publicação em processo de condução terceirizada' não encontrada. Pulando.
+2025-09-25 14:38:53,467 [INFO] - --- Processando tarefa: Doc. anexado por empresa externa em processo terceirizado ---
+2025-09-25 14:38:53,468 [WARNING] - Tarefa 'Doc. anexado por empresa externa em processo terceirizado' não encontrada. Pulando.
+2025-09-25 14:38:53,468 [INFO] - --- Processando tarefa: Inclusão de Documentos no NPJ ---
+2025-09-25 14:38:53,472 [INFO] - 1 itens encontrados. Abrindo detalhes...
+2025-09-25 14:38:53,799 [INFO] -     - Verificando página 1...
+2025-09-25 14:38:53,831 [INFO] -     - Fim da paginação.
+2025-09-25 14:38:53,831 [INFO] -     - Confirmando a ciência...
+2025-09-25 14:39:04,401 [WARNING] -     - Modal de carregamento final não apareceu, seguindo em frente.
+2025-09-25 14:39:04,410 [INFO] - Processamento da tarefa 'Inclusão de Documentos no NPJ' concluído.
+2025-09-25 14:39:04,413 [INFO] - Tarefa 'Inclusão de Documentos no NPJ' finalizada. 1 novas notificações salvas. 1 ciências registradas.
+2025-09-25 14:39:04,414 [INFO] - Extração/ciência concluídas. Salvas: 1, Ciências: 1.
+2025-09-25 14:39:04,414 [INFO] - 
+FASE 3: PROCESSAMENTO DETALHADO EM LOTES
+2025-09-25 14:39:04,416 [INFO] - Total de 526 NPJs pendentes para detalhamento.
+2025-09-25 14:39:04,419 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-25 14:39:04,419 [INFO] - 
+[1/50] Processando NPJ: 2003/0114453-000
+2025-09-25 14:39:04,508 [INFO] -     - Construindo URL de detalhe para o NPJ: 2003/0114453-000
+2025-09-25 14:39:04,508 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 14:39:39,830 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2003/0114453-000: Page.wait_for_selector: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("div.card-header:has-text(\"Dados do Processo\")") to be visible
+
+2025-09-25 14:39:39,851 [INFO] - 
+[2/50] Processando NPJ: 2004/0091686-001
+2025-09-25 14:39:39,940 [INFO] -     - Construindo URL de detalhe para o NPJ: 2004/0091686-001
+2025-09-25 14:39:39,940 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 14:39:43,342 [INFO] - Finalizando a automação e fechando o navegador.
+2025-09-25 14:39:43,343 [INFO] - 
+--- RESUMO DA EXECUÇÃO ---
+- Timestamp: 25/09/2025 14:39:43
+- Duracao Total: 1 minuto(s) e 8 segundo(s)
+- Tempo Medio Npj: 0.00s
+- Notificacoes Salvas: 1
+- Ciencias Registradas: 1
+- Andamentos: 0
+- Documentos: 0
+- Sucesso: 0
+- Falha: 0
+============================================================
+
+2025-09-25 14:39:43,343 [INFO] - Execução finalizada. Log completo em: logs/log_2025-09-25_14-38-35.txt

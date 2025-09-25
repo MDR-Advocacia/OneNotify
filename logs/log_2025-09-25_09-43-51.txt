@@ -1,0 +1,41 @@
+2025-09-25 09:43:51,749 [INFO] - ============================================================
+2025-09-25 09:43:51,749 [INFO] - INICIANDO NOVA EXECUÇÃO DA RPA
+2025-09-25 09:43:51,749 [INFO] - ============================================================
+2025-09-25 09:43:51,968 [INFO] - 
+FASE 1: LOGIN E CONFIGURAÇÃO DA SESSÃO
+2025-09-25 09:44:09,913 [INFO] - 
+FASE 2: EXTRAÇÃO DE NOVAS NOTIFICAÇÕES E REGISTRO DE CIÊNCIA
+2025-09-25 09:44:09,914 [INFO] - Iniciando módulo de extração e ciência...
+2025-09-25 09:44:09,914 [INFO] - Navegando para a Central de Notificações...
+2025-09-25 09:44:11,183 [INFO] - Acessando a 'Visão do Advogado'...
+2025-09-25 09:44:11,848 [INFO] - --- Processando tarefa: Andamento de publicação em processo de condução terceirizada ---
+2025-09-25 09:44:11,858 [WARNING] - Tarefa 'Andamento de publicação em processo de condução terceirizada' não encontrada. Pulando.
+2025-09-25 09:44:11,858 [INFO] - --- Processando tarefa: Doc. anexado por empresa externa em processo terceirizado ---
+2025-09-25 09:44:11,861 [WARNING] - Tarefa 'Doc. anexado por empresa externa em processo terceirizado' não encontrada. Pulando.
+2025-09-25 09:44:11,861 [INFO] - --- Processando tarefa: Inclusão de Documentos no NPJ ---
+2025-09-25 09:44:11,864 [INFO] - 1 itens encontrados. Abrindo detalhes...
+2025-09-25 09:44:12,190 [INFO] -     - Verificando página 1...
+2025-09-25 09:44:12,220 [INFO] -     - Fim da paginação.
+2025-09-25 09:44:12,220 [INFO] -     - Confirmando a ciência...
+2025-09-25 09:44:22,776 [WARNING] -     - Modal de carregamento final não apareceu, seguindo em frente.
+2025-09-25 09:44:22,784 [INFO] - Processamento da tarefa 'Inclusão de Documentos no NPJ' concluído.
+2025-09-25 09:44:22,786 [INFO] - Tarefa 'Inclusão de Documentos no NPJ' finalizada. 1 novas notificações salvas. 1 ciências registradas.
+2025-09-25 09:44:22,786 [INFO] - Extração/ciência concluídas. Salvas: 1, Ciências: 1.
+2025-09-25 09:44:22,786 [INFO] - 
+FASE 3: PROCESSAMENTO DETALHADO EM LOTES
+2025-09-25 09:44:22,787 [INFO] - Total de 0 NPJs pendentes para detalhamento.
+2025-09-25 09:44:22,801 [INFO] - Finalizando a automação e fechando o navegador.
+2025-09-25 09:44:22,803 [INFO] - 
+--- RESUMO DA EXECUÇÃO ---
+- Timestamp: 25/09/2025 09:44:22
+- Duracao Total: 31.05 segundos
+- Tempo Medio Npj: 0.00s
+- Notificacoes Salvas: 1
+- Ciencias Registradas: 1
+- Andamentos: 0
+- Documentos: 0
+- Sucesso: 0
+- Falha: 0
+============================================================
+
+2025-09-25 09:44:22,803 [INFO] - Execução finalizada. Log completo em: logs/log_2025-09-25_09-43-51.txt

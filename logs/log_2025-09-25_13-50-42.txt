@@ -1,0 +1,1599 @@
+2025-09-25 13:50:42,404 [INFO] - ============================================================
+2025-09-25 13:50:42,404 [INFO] - INICIANDO NOVA EXECUÇÃO DA RPA
+2025-09-25 13:50:42,405 [INFO] - ============================================================
+2025-09-25 13:50:42,409 [INFO] - 715 notificações com status 'Erro' ou 'Em Processamento' foram resetadas para 'Pendente'.
+2025-09-25 13:50:42,623 [INFO] - 
+FASE 1: LOGIN E CONFIGURAÇÃO DA SESSÃO
+2025-09-25 13:50:58,552 [INFO] - 
+FASE 2: EXTRAÇÃO DE NOVAS NOTIFICAÇÕES E REGISTRO DE CIÊNCIA
+2025-09-25 13:50:58,552 [INFO] - Iniciando módulo de extração e ciência...
+2025-09-25 13:50:58,553 [INFO] - Navegando para a Central de Notificações...
+2025-09-25 13:50:59,847 [INFO] - Acessando a 'Visão do Advogado'...
+2025-09-25 13:51:00,536 [INFO] - --- Processando tarefa: Andamento de publicação em processo de condução terceirizada ---
+2025-09-25 13:51:00,546 [WARNING] - Tarefa 'Andamento de publicação em processo de condução terceirizada' não encontrada. Pulando.
+2025-09-25 13:51:00,547 [INFO] - --- Processando tarefa: Doc. anexado por empresa externa em processo terceirizado ---
+2025-09-25 13:51:00,549 [WARNING] - Tarefa 'Doc. anexado por empresa externa em processo terceirizado' não encontrada. Pulando.
+2025-09-25 13:51:00,549 [INFO] - --- Processando tarefa: Inclusão de Documentos no NPJ ---
+2025-09-25 13:51:00,550 [WARNING] - Tarefa 'Inclusão de Documentos no NPJ' não encontrada. Pulando.
+2025-09-25 13:51:00,550 [INFO] - Extração/ciência concluídas. Salvas: 0, Ciências: 0.
+2025-09-25 13:51:00,550 [INFO] - 
+FASE 3: PROCESSAMENTO DETALHADO EM LOTES
+2025-09-25 13:51:00,551 [INFO] - Total de 510 NPJs pendentes para detalhamento.
+2025-09-25 13:51:00,552 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-25 13:51:00,552 [INFO] - 
+[1/50] Processando NPJ: 2003/0114453-000
+2025-09-25 13:51:00,552 [WARNING] -   - NPJ 2003/0114453-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,553 [INFO] - 
+[2/50] Processando NPJ: 2004/0091686-001
+2025-09-25 13:51:00,553 [WARNING] -   - NPJ 2004/0091686-001 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,554 [INFO] - 
+[3/50] Processando NPJ: 2008/0158298-000
+2025-09-25 13:51:00,554 [WARNING] -   - NPJ 2008/0158298-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,554 [INFO] - 
+[4/50] Processando NPJ: 2008/0176330-000
+2025-09-25 13:51:00,554 [WARNING] -   - NPJ 2008/0176330-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,555 [INFO] - 
+[5/50] Processando NPJ: 2009/0079019-000
+2025-09-25 13:51:00,555 [WARNING] -   - NPJ 2009/0079019-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,555 [INFO] - 
+[6/50] Processando NPJ: 2010/0140919-000
+2025-09-25 13:51:00,555 [WARNING] -   - NPJ 2010/0140919-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,556 [INFO] - 
+[7/50] Processando NPJ: 2010/0294280-000
+2025-09-25 13:51:00,556 [WARNING] -   - NPJ 2010/0294280-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,557 [INFO] - 
+[8/50] Processando NPJ: 2011/0085767-000
+2025-09-25 13:51:00,557 [WARNING] -   - NPJ 2011/0085767-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,557 [INFO] - 
+[9/50] Processando NPJ: 2011/0089436-000
+2025-09-25 13:51:00,557 [WARNING] -   - NPJ 2011/0089436-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,558 [INFO] - 
+[10/50] Processando NPJ: 2011/0169228-000
+2025-09-25 13:51:00,558 [WARNING] -   - NPJ 2011/0169228-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,558 [INFO] - 
+[11/50] Processando NPJ: 2011/0174045-000
+2025-09-25 13:51:00,558 [WARNING] -   - NPJ 2011/0174045-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,559 [INFO] - 
+[12/50] Processando NPJ: 2011/0193726-000
+2025-09-25 13:51:00,559 [WARNING] -   - NPJ 2011/0193726-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,559 [INFO] - 
+[13/50] Processando NPJ: 2012/0192824-000
+2025-09-25 13:51:00,559 [WARNING] -   - NPJ 2012/0192824-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,560 [INFO] - 
+[14/50] Processando NPJ: 2013/0180109-000
+2025-09-25 13:51:00,560 [WARNING] -   - NPJ 2013/0180109-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,560 [INFO] - 
+[15/50] Processando NPJ: 2013/0229537-000
+2025-09-25 13:51:00,560 [WARNING] -   - NPJ 2013/0229537-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,561 [INFO] - 
+[16/50] Processando NPJ: 2013/0238736-000
+2025-09-25 13:51:00,561 [WARNING] -   - NPJ 2013/0238736-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,561 [INFO] - 
+[17/50] Processando NPJ: 2014/0160200-000
+2025-09-25 13:51:00,561 [WARNING] -   - NPJ 2014/0160200-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,562 [INFO] - 
+[18/50] Processando NPJ: 2015/0108865-000
+2025-09-25 13:51:00,562 [WARNING] -   - NPJ 2015/0108865-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,562 [INFO] - 
+[19/50] Processando NPJ: 2015/0124487-000
+2025-09-25 13:51:00,562 [WARNING] -   - NPJ 2015/0124487-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,563 [INFO] - 
+[20/50] Processando NPJ: 2015/0218750-000
+2025-09-25 13:51:00,563 [WARNING] -   - NPJ 2015/0218750-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,563 [INFO] - 
+[21/50] Processando NPJ: 2015/0225433-000
+2025-09-25 13:51:00,563 [WARNING] -   - NPJ 2015/0225433-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,564 [INFO] - 
+[22/50] Processando NPJ: 2015/0230631-000
+2025-09-25 13:51:00,564 [WARNING] -   - NPJ 2015/0230631-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,564 [INFO] - 
+[23/50] Processando NPJ: 2015/0233697-000
+2025-09-25 13:51:00,564 [WARNING] -   - NPJ 2015/0233697-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,564 [INFO] - 
+[24/50] Processando NPJ: 2016/0015655-000
+2025-09-25 13:51:00,564 [WARNING] -   - NPJ 2016/0015655-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,565 [INFO] - 
+[25/50] Processando NPJ: 2016/0046140-000
+2025-09-25 13:51:00,565 [WARNING] -   - NPJ 2016/0046140-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,565 [INFO] - 
+[26/50] Processando NPJ: 2016/0080794-000
+2025-09-25 13:51:00,565 [WARNING] -   - NPJ 2016/0080794-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,566 [INFO] - 
+[27/50] Processando NPJ: 2016/0087561-000
+2025-09-25 13:51:00,566 [WARNING] -   - NPJ 2016/0087561-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,566 [INFO] - 
+[28/50] Processando NPJ: 2016/0129588-000
+2025-09-25 13:51:00,566 [WARNING] -   - NPJ 2016/0129588-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,566 [INFO] - 
+[29/50] Processando NPJ: 2016/0149324-000
+2025-09-25 13:51:00,566 [WARNING] -   - NPJ 2016/0149324-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,567 [INFO] - 
+[30/50] Processando NPJ: 2016/0167336-000
+2025-09-25 13:51:00,567 [WARNING] -   - NPJ 2016/0167336-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,567 [INFO] - 
+[31/50] Processando NPJ: 2016/0196173-000
+2025-09-25 13:51:00,567 [WARNING] -   - NPJ 2016/0196173-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,567 [INFO] - 
+[32/50] Processando NPJ: 2016/0216635-000
+2025-09-25 13:51:00,567 [WARNING] -   - NPJ 2016/0216635-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,568 [INFO] - 
+[33/50] Processando NPJ: 2016/0216789-000
+2025-09-25 13:51:00,568 [WARNING] -   - NPJ 2016/0216789-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,568 [INFO] - 
+[34/50] Processando NPJ: 2016/0218165-000
+2025-09-25 13:51:00,568 [WARNING] -   - NPJ 2016/0218165-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,569 [INFO] - 
+[35/50] Processando NPJ: 2016/0230755-000
+2025-09-25 13:51:00,569 [WARNING] -   - NPJ 2016/0230755-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,569 [INFO] - 
+[36/50] Processando NPJ: 2016/0261994-000
+2025-09-25 13:51:00,569 [WARNING] -   - NPJ 2016/0261994-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,569 [INFO] - 
+[37/50] Processando NPJ: 2017/0162001-000
+2025-09-25 13:51:00,569 [WARNING] -   - NPJ 2017/0162001-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,570 [INFO] - 
+[38/50] Processando NPJ: 2017/0197977-000
+2025-09-25 13:51:00,570 [WARNING] -   - NPJ 2017/0197977-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,570 [INFO] - 
+[39/50] Processando NPJ: 2017/0203070-000
+2025-09-25 13:51:00,570 [WARNING] -   - NPJ 2017/0203070-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,570 [INFO] - 
+[40/50] Processando NPJ: 2017/0204158-000
+2025-09-25 13:51:00,570 [WARNING] -   - NPJ 2017/0204158-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,571 [INFO] - 
+[41/50] Processando NPJ: 2017/0207600-000
+2025-09-25 13:51:00,571 [WARNING] -   - NPJ 2017/0207600-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,571 [INFO] - 
+[42/50] Processando NPJ: 2017/0215696-000
+2025-09-25 13:51:00,571 [WARNING] -   - NPJ 2017/0215696-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,572 [INFO] - 
+[43/50] Processando NPJ: 2017/0223301-000
+2025-09-25 13:51:00,572 [WARNING] -   - NPJ 2017/0223301-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,572 [INFO] - 
+[44/50] Processando NPJ: 2017/0231717-000
+2025-09-25 13:51:00,572 [WARNING] -   - NPJ 2017/0231717-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,572 [INFO] - 
+[45/50] Processando NPJ: 2017/0265668-000
+2025-09-25 13:51:00,572 [WARNING] -   - NPJ 2017/0265668-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,573 [INFO] - 
+[46/50] Processando NPJ: 2017/0282075-000
+2025-09-25 13:51:00,573 [WARNING] -   - NPJ 2017/0282075-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,573 [INFO] - 
+[47/50] Processando NPJ: 2018/0224964-000
+2025-09-25 13:51:00,573 [WARNING] -   - NPJ 2018/0224964-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,574 [INFO] - 
+[48/50] Processando NPJ: 2018/0231007-000
+2025-09-25 13:51:00,574 [WARNING] -   - NPJ 2018/0231007-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,574 [INFO] - 
+[49/50] Processando NPJ: 2018/0254659-000
+2025-09-25 13:51:00,574 [WARNING] -   - NPJ 2018/0254659-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,574 [INFO] - 
+[50/50] Processando NPJ: 2018/0254996-000
+2025-09-25 13:51:00,574 [WARNING] -   - NPJ 2018/0254996-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,575 [INFO] - Processamento do lote concluído.
+2025-09-25 13:51:00,575 [INFO] - Lote finalizado. Restam 460 NPJs pendentes.
+2025-09-25 13:51:00,576 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-25 13:51:00,576 [INFO] - 
+[1/50] Processando NPJ: 2018/0331504-000
+2025-09-25 13:51:00,576 [WARNING] -   - NPJ 2018/0331504-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,576 [INFO] - 
+[2/50] Processando NPJ: 2018/0357633-000
+2025-09-25 13:51:00,576 [WARNING] -   - NPJ 2018/0357633-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,577 [INFO] - 
+[3/50] Processando NPJ: 2019/0010947-000
+2025-09-25 13:51:00,577 [WARNING] -   - NPJ 2019/0010947-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,577 [INFO] - 
+[4/50] Processando NPJ: 2019/0048908-000
+2025-09-25 13:51:00,577 [WARNING] -   - NPJ 2019/0048908-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,577 [INFO] - 
+[5/50] Processando NPJ: 2019/0066799-000
+2025-09-25 13:51:00,577 [WARNING] -   - NPJ 2019/0066799-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,578 [INFO] - 
+[6/50] Processando NPJ: 2019/0069054-000
+2025-09-25 13:51:00,578 [WARNING] -   - NPJ 2019/0069054-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,578 [INFO] - 
+[7/50] Processando NPJ: 2019/0078747-000
+2025-09-25 13:51:00,578 [WARNING] -   - NPJ 2019/0078747-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,578 [INFO] - 
+[8/50] Processando NPJ: 2019/0086789-000
+2025-09-25 13:51:00,578 [WARNING] -   - NPJ 2019/0086789-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,579 [INFO] - 
+[9/50] Processando NPJ: 2019/0088795-000
+2025-09-25 13:51:00,579 [WARNING] -   - NPJ 2019/0088795-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,579 [INFO] - 
+[10/50] Processando NPJ: 2019/0205889-000
+2025-09-25 13:51:00,579 [WARNING] -   - NPJ 2019/0205889-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,579 [INFO] - 
+[11/50] Processando NPJ: 2019/0206474-000
+2025-09-25 13:51:00,579 [WARNING] -   - NPJ 2019/0206474-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,580 [INFO] - 
+[12/50] Processando NPJ: 2019/0227730-000
+2025-09-25 13:51:00,580 [WARNING] -   - NPJ 2019/0227730-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,580 [INFO] - 
+[13/50] Processando NPJ: 2019/0246737-000
+2025-09-25 13:51:00,580 [WARNING] -   - NPJ 2019/0246737-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,580 [INFO] - 
+[14/50] Processando NPJ: 2019/0253595-000
+2025-09-25 13:51:00,580 [WARNING] -   - NPJ 2019/0253595-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,581 [INFO] - 
+[15/50] Processando NPJ: 2019/0256855-000
+2025-09-25 13:51:00,581 [WARNING] -   - NPJ 2019/0256855-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,581 [INFO] - 
+[16/50] Processando NPJ: 2020/0055366-000
+2025-09-25 13:51:00,581 [WARNING] -   - NPJ 2020/0055366-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,581 [INFO] - 
+[17/50] Processando NPJ: 2020/0073431-000
+2025-09-25 13:51:00,581 [WARNING] -   - NPJ 2020/0073431-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,582 [INFO] - 
+[18/50] Processando NPJ: 2020/0121023-000
+2025-09-25 13:51:00,582 [WARNING] -   - NPJ 2020/0121023-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,582 [INFO] - 
+[19/50] Processando NPJ: 2020/0137514-000
+2025-09-25 13:51:00,582 [WARNING] -   - NPJ 2020/0137514-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,582 [INFO] - 
+[20/50] Processando NPJ: 2020/0160157-000
+2025-09-25 13:51:00,582 [WARNING] -   - NPJ 2020/0160157-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,583 [INFO] - 
+[21/50] Processando NPJ: 2020/0164739-000
+2025-09-25 13:51:00,583 [WARNING] -   - NPJ 2020/0164739-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,583 [INFO] - 
+[22/50] Processando NPJ: 2020/0165737-000
+2025-09-25 13:51:00,583 [WARNING] -   - NPJ 2020/0165737-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,583 [INFO] - 
+[23/50] Processando NPJ: 2020/0172094-000
+2025-09-25 13:51:00,583 [WARNING] -   - NPJ 2020/0172094-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,584 [INFO] - 
+[24/50] Processando NPJ: 2020/0175083-000
+2025-09-25 13:51:00,584 [WARNING] -   - NPJ 2020/0175083-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,584 [INFO] - 
+[25/50] Processando NPJ: 2020/0184959-000
+2025-09-25 13:51:00,584 [WARNING] -   - NPJ 2020/0184959-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,584 [INFO] - 
+[26/50] Processando NPJ: 2020/0220383-000
+2025-09-25 13:51:00,584 [WARNING] -   - NPJ 2020/0220383-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,585 [INFO] - 
+[27/50] Processando NPJ: 2020/0233121-000
+2025-09-25 13:51:00,585 [WARNING] -   - NPJ 2020/0233121-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,585 [INFO] - 
+[28/50] Processando NPJ: 2020/0233599-000
+2025-09-25 13:51:00,585 [WARNING] -   - NPJ 2020/0233599-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,585 [INFO] - 
+[29/50] Processando NPJ: 2020/0246882-000
+2025-09-25 13:51:00,585 [WARNING] -   - NPJ 2020/0246882-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,586 [INFO] - 
+[30/50] Processando NPJ: 2021/0005943-000
+2025-09-25 13:51:00,586 [WARNING] -   - NPJ 2021/0005943-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,586 [INFO] - 
+[31/50] Processando NPJ: 2021/0011986-000
+2025-09-25 13:51:00,586 [WARNING] -   - NPJ 2021/0011986-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,586 [INFO] - 
+[32/50] Processando NPJ: 2021/0029131-000
+2025-09-25 13:51:00,586 [WARNING] -   - NPJ 2021/0029131-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,587 [INFO] - 
+[33/50] Processando NPJ: 2021/0030231-000
+2025-09-25 13:51:00,587 [WARNING] -   - NPJ 2021/0030231-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,587 [INFO] - 
+[34/50] Processando NPJ: 2021/0039781-000
+2025-09-25 13:51:00,587 [WARNING] -   - NPJ 2021/0039781-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,587 [INFO] - 
+[35/50] Processando NPJ: 2021/0044280-000
+2025-09-25 13:51:00,587 [WARNING] -   - NPJ 2021/0044280-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,588 [INFO] - 
+[36/50] Processando NPJ: 2021/0069094-000
+2025-09-25 13:51:00,588 [WARNING] -   - NPJ 2021/0069094-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,588 [INFO] - 
+[37/50] Processando NPJ: 2021/0088527-000
+2025-09-25 13:51:00,588 [WARNING] -   - NPJ 2021/0088527-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,588 [INFO] - 
+[38/50] Processando NPJ: 2021/0126388-000
+2025-09-25 13:51:00,588 [WARNING] -   - NPJ 2021/0126388-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,589 [INFO] - 
+[39/50] Processando NPJ: 2021/0146719-000
+2025-09-25 13:51:00,589 [WARNING] -   - NPJ 2021/0146719-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,589 [INFO] - 
+[40/50] Processando NPJ: 2021/0149765-000
+2025-09-25 13:51:00,589 [WARNING] -   - NPJ 2021/0149765-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,589 [INFO] - 
+[41/50] Processando NPJ: 2021/0174829-000
+2025-09-25 13:51:00,589 [WARNING] -   - NPJ 2021/0174829-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,590 [INFO] - 
+[42/50] Processando NPJ: 2021/0217597-000
+2025-09-25 13:51:00,590 [WARNING] -   - NPJ 2021/0217597-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,590 [INFO] - 
+[43/50] Processando NPJ: 2021/0246028-000
+2025-09-25 13:51:00,590 [WARNING] -   - NPJ 2021/0246028-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,590 [INFO] - 
+[44/50] Processando NPJ: 2021/0251822-000
+2025-09-25 13:51:00,590 [WARNING] -   - NPJ 2021/0251822-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,591 [INFO] - 
+[45/50] Processando NPJ: 2021/0267367-000
+2025-09-25 13:51:00,591 [WARNING] -   - NPJ 2021/0267367-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,591 [INFO] - 
+[46/50] Processando NPJ: 2021/0279440-000
+2025-09-25 13:51:00,591 [WARNING] -   - NPJ 2021/0279440-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,591 [INFO] - 
+[47/50] Processando NPJ: 2022/0031947-000
+2025-09-25 13:51:00,591 [WARNING] -   - NPJ 2022/0031947-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,592 [INFO] - 
+[48/50] Processando NPJ: 2022/0047487-000
+2025-09-25 13:51:00,592 [WARNING] -   - NPJ 2022/0047487-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,592 [INFO] - 
+[49/50] Processando NPJ: 2022/0050350-000
+2025-09-25 13:51:00,592 [WARNING] -   - NPJ 2022/0050350-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,592 [INFO] - 
+[50/50] Processando NPJ: 2022/0075861-000
+2025-09-25 13:51:00,592 [WARNING] -   - NPJ 2022/0075861-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,593 [INFO] - Processamento do lote concluído.
+2025-09-25 13:51:00,593 [INFO] - Lote finalizado. Restam 410 NPJs pendentes.
+2025-09-25 13:51:00,594 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-25 13:51:00,594 [INFO] - 
+[1/50] Processando NPJ: 2022/0103181-000
+2025-09-25 13:51:00,594 [WARNING] -   - NPJ 2022/0103181-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,594 [INFO] - 
+[2/50] Processando NPJ: 2022/0104685-000
+2025-09-25 13:51:00,594 [WARNING] -   - NPJ 2022/0104685-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,594 [INFO] - 
+[3/50] Processando NPJ: 2022/0104911-000
+2025-09-25 13:51:00,594 [WARNING] -   - NPJ 2022/0104911-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,595 [INFO] - 
+[4/50] Processando NPJ: 2022/0105618-000
+2025-09-25 13:51:00,595 [WARNING] -   - NPJ 2022/0105618-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,595 [INFO] - 
+[5/50] Processando NPJ: 2022/0105720-000
+2025-09-25 13:51:00,595 [WARNING] -   - NPJ 2022/0105720-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,595 [INFO] - 
+[6/50] Processando NPJ: 2022/0111376-000
+2025-09-25 13:51:00,595 [WARNING] -   - NPJ 2022/0111376-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,596 [INFO] - 
+[7/50] Processando NPJ: 2022/0115484-000
+2025-09-25 13:51:00,596 [WARNING] -   - NPJ 2022/0115484-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,596 [INFO] - 
+[8/50] Processando NPJ: 2022/0123514-000
+2025-09-25 13:51:00,596 [WARNING] -   - NPJ 2022/0123514-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,596 [INFO] - 
+[9/50] Processando NPJ: 2022/0132064-000
+2025-09-25 13:51:00,596 [WARNING] -   - NPJ 2022/0132064-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,597 [INFO] - 
+[10/50] Processando NPJ: 2022/0145582-000
+2025-09-25 13:51:00,597 [WARNING] -   - NPJ 2022/0145582-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,597 [INFO] - 
+[11/50] Processando NPJ: 2022/0145903-000
+2025-09-25 13:51:00,597 [WARNING] -   - NPJ 2022/0145903-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,597 [INFO] - 
+[12/50] Processando NPJ: 2022/0151135-000
+2025-09-25 13:51:00,597 [WARNING] -   - NPJ 2022/0151135-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,597 [INFO] - 
+[13/50] Processando NPJ: 2022/0163530-000
+2025-09-25 13:51:00,597 [WARNING] -   - NPJ 2022/0163530-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,598 [INFO] - 
+[14/50] Processando NPJ: 2022/0164000-000
+2025-09-25 13:51:00,598 [WARNING] -   - NPJ 2022/0164000-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,598 [INFO] - 
+[15/50] Processando NPJ: 2022/0170801-000
+2025-09-25 13:51:00,598 [WARNING] -   - NPJ 2022/0170801-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,598 [INFO] - 
+[16/50] Processando NPJ: 2022/0174394-000
+2025-09-25 13:51:00,598 [WARNING] -   - NPJ 2022/0174394-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,599 [INFO] - 
+[17/50] Processando NPJ: 2022/0177278-000
+2025-09-25 13:51:00,599 [WARNING] -   - NPJ 2022/0177278-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,599 [INFO] - 
+[18/50] Processando NPJ: 2022/0183790-000
+2025-09-25 13:51:00,599 [WARNING] -   - NPJ 2022/0183790-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,599 [INFO] - 
+[19/50] Processando NPJ: 2022/0184283-000
+2025-09-25 13:51:00,599 [WARNING] -   - NPJ 2022/0184283-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,600 [INFO] - 
+[20/50] Processando NPJ: 2022/0185828-000
+2025-09-25 13:51:00,600 [WARNING] -   - NPJ 2022/0185828-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,600 [INFO] - 
+[21/50] Processando NPJ: 2022/0193563-000
+2025-09-25 13:51:00,600 [WARNING] -   - NPJ 2022/0193563-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,600 [INFO] - 
+[22/50] Processando NPJ: 2022/0195124-000
+2025-09-25 13:51:00,600 [WARNING] -   - NPJ 2022/0195124-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,601 [INFO] - 
+[23/50] Processando NPJ: 2022/0219855-000
+2025-09-25 13:51:00,601 [WARNING] -   - NPJ 2022/0219855-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,601 [INFO] - 
+[24/50] Processando NPJ: 2022/0233949-000
+2025-09-25 13:51:00,601 [WARNING] -   - NPJ 2022/0233949-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,601 [INFO] - 
+[25/50] Processando NPJ: 2022/0234299-000
+2025-09-25 13:51:00,601 [WARNING] -   - NPJ 2022/0234299-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,602 [INFO] - 
+[26/50] Processando NPJ: 2022/0235209-000
+2025-09-25 13:51:00,602 [WARNING] -   - NPJ 2022/0235209-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,602 [INFO] - 
+[27/50] Processando NPJ: 2022/0242938-000
+2025-09-25 13:51:00,602 [WARNING] -   - NPJ 2022/0242938-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,602 [INFO] - 
+[28/50] Processando NPJ: 2022/0244014-000
+2025-09-25 13:51:00,602 [WARNING] -   - NPJ 2022/0244014-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,603 [INFO] - 
+[29/50] Processando NPJ: 2022/0260375-000
+2025-09-25 13:51:00,603 [WARNING] -   - NPJ 2022/0260375-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,603 [INFO] - 
+[30/50] Processando NPJ: 2023/0030265-000
+2025-09-25 13:51:00,603 [WARNING] -   - NPJ 2023/0030265-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,603 [INFO] - 
+[31/50] Processando NPJ: 2023/0032233-000
+2025-09-25 13:51:00,603 [WARNING] -   - NPJ 2023/0032233-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,604 [INFO] - 
+[32/50] Processando NPJ: 2023/0044992-000
+2025-09-25 13:51:00,604 [WARNING] -   - NPJ 2023/0044992-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,604 [INFO] - 
+[33/50] Processando NPJ: 2023/0076512-000
+2025-09-25 13:51:00,604 [WARNING] -   - NPJ 2023/0076512-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,604 [INFO] - 
+[34/50] Processando NPJ: 2023/0079948-000
+2025-09-25 13:51:00,604 [WARNING] -   - NPJ 2023/0079948-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,605 [INFO] - 
+[35/50] Processando NPJ: 2023/0080192-000
+2025-09-25 13:51:00,605 [WARNING] -   - NPJ 2023/0080192-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,605 [INFO] - 
+[36/50] Processando NPJ: 2023/0080283-000
+2025-09-25 13:51:00,605 [WARNING] -   - NPJ 2023/0080283-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,605 [INFO] - 
+[37/50] Processando NPJ: 2023/0080327-000
+2025-09-25 13:51:00,605 [WARNING] -   - NPJ 2023/0080327-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,606 [INFO] - 
+[38/50] Processando NPJ: 2023/0107667-000
+2025-09-25 13:51:00,606 [WARNING] -   - NPJ 2023/0107667-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,606 [INFO] - 
+[39/50] Processando NPJ: 2023/0109257-000
+2025-09-25 13:51:00,606 [WARNING] -   - NPJ 2023/0109257-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,606 [INFO] - 
+[40/50] Processando NPJ: 2023/0109303-000
+2025-09-25 13:51:00,606 [WARNING] -   - NPJ 2023/0109303-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,606 [INFO] - 
+[41/50] Processando NPJ: 2023/0110333-000
+2025-09-25 13:51:00,606 [WARNING] -   - NPJ 2023/0110333-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,607 [INFO] - 
+[42/50] Processando NPJ: 2023/0114953-000
+2025-09-25 13:51:00,607 [WARNING] -   - NPJ 2023/0114953-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,607 [INFO] - 
+[43/50] Processando NPJ: 2023/0115725-000
+2025-09-25 13:51:00,607 [WARNING] -   - NPJ 2023/0115725-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,608 [INFO] - 
+[44/50] Processando NPJ: 2023/0118046-000
+2025-09-25 13:51:00,608 [WARNING] -   - NPJ 2023/0118046-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,608 [INFO] - 
+[45/50] Processando NPJ: 2023/0121148-000
+2025-09-25 13:51:00,608 [WARNING] -   - NPJ 2023/0121148-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,608 [INFO] - 
+[46/50] Processando NPJ: 2023/0130949-000
+2025-09-25 13:51:00,608 [WARNING] -   - NPJ 2023/0130949-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,609 [INFO] - 
+[47/50] Processando NPJ: 2023/0139738-000
+2025-09-25 13:51:00,609 [WARNING] -   - NPJ 2023/0139738-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,609 [INFO] - 
+[48/50] Processando NPJ: 2023/0152553-000
+2025-09-25 13:51:00,609 [WARNING] -   - NPJ 2023/0152553-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,609 [INFO] - 
+[49/50] Processando NPJ: 2023/0154667-000
+2025-09-25 13:51:00,609 [WARNING] -   - NPJ 2023/0154667-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,609 [INFO] - 
+[50/50] Processando NPJ: 2023/0186242-000
+2025-09-25 13:51:00,609 [WARNING] -   - NPJ 2023/0186242-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,610 [INFO] - Processamento do lote concluído.
+2025-09-25 13:51:00,610 [INFO] - Lote finalizado. Restam 360 NPJs pendentes.
+2025-09-25 13:51:00,611 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-25 13:51:00,611 [INFO] - 
+[1/50] Processando NPJ: 2023/0201474-000
+2025-09-25 13:51:00,611 [WARNING] -   - NPJ 2023/0201474-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,611 [INFO] - 
+[2/50] Processando NPJ: 2023/0201980-000
+2025-09-25 13:51:00,611 [WARNING] -   - NPJ 2023/0201980-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,611 [INFO] - 
+[3/50] Processando NPJ: 2023/0219158-000
+2025-09-25 13:51:00,611 [WARNING] -   - NPJ 2023/0219158-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,612 [INFO] - 
+[4/50] Processando NPJ: 2023/0226794-000
+2025-09-25 13:51:00,612 [WARNING] -   - NPJ 2023/0226794-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,612 [INFO] - 
+[5/50] Processando NPJ: 2023/0229209-000
+2025-09-25 13:51:00,612 [WARNING] -   - NPJ 2023/0229209-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,612 [INFO] - 
+[6/50] Processando NPJ: 2023/0236746-000
+2025-09-25 13:51:00,612 [WARNING] -   - NPJ 2023/0236746-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,613 [INFO] - 
+[7/50] Processando NPJ: 2023/0241006-000
+2025-09-25 13:51:00,613 [WARNING] -   - NPJ 2023/0241006-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,613 [INFO] - 
+[8/50] Processando NPJ: 2023/0241033-000
+2025-09-25 13:51:00,613 [WARNING] -   - NPJ 2023/0241033-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,613 [INFO] - 
+[9/50] Processando NPJ: 2023/0242811-000
+2025-09-25 13:51:00,613 [WARNING] -   - NPJ 2023/0242811-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,614 [INFO] - 
+[10/50] Processando NPJ: 2023/0243447-000
+2025-09-25 13:51:00,614 [WARNING] -   - NPJ 2023/0243447-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,614 [INFO] - 
+[11/50] Processando NPJ: 2023/0244081-000
+2025-09-25 13:51:00,614 [WARNING] -   - NPJ 2023/0244081-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,614 [INFO] - 
+[12/50] Processando NPJ: 2023/0252582-000
+2025-09-25 13:51:00,614 [WARNING] -   - NPJ 2023/0252582-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,615 [INFO] - 
+[13/50] Processando NPJ: 2023/0253567-000
+2025-09-25 13:51:00,615 [WARNING] -   - NPJ 2023/0253567-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,615 [INFO] - 
+[14/50] Processando NPJ: 2023/0266629-000
+2025-09-25 13:51:00,615 [WARNING] -   - NPJ 2023/0266629-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,615 [INFO] - 
+[15/50] Processando NPJ: 2023/0270899-000
+2025-09-25 13:51:00,615 [WARNING] -   - NPJ 2023/0270899-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,616 [INFO] - 
+[16/50] Processando NPJ: 2023/0282316-000
+2025-09-25 13:51:00,616 [WARNING] -   - NPJ 2023/0282316-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,616 [INFO] - 
+[17/50] Processando NPJ: 2023/0282404-000
+2025-09-25 13:51:00,616 [WARNING] -   - NPJ 2023/0282404-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,616 [INFO] - 
+[18/50] Processando NPJ: 2023/0287530-000
+2025-09-25 13:51:00,616 [WARNING] -   - NPJ 2023/0287530-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,617 [INFO] - 
+[19/50] Processando NPJ: 2023/0287883-000
+2025-09-25 13:51:00,617 [WARNING] -   - NPJ 2023/0287883-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,617 [INFO] - 
+[20/50] Processando NPJ: 2023/0289826-000
+2025-09-25 13:51:00,617 [WARNING] -   - NPJ 2023/0289826-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,617 [INFO] - 
+[21/50] Processando NPJ: 2023/0296140-000
+2025-09-25 13:51:00,617 [WARNING] -   - NPJ 2023/0296140-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,618 [INFO] - 
+[22/50] Processando NPJ: 2023/0296141-000
+2025-09-25 13:51:00,618 [WARNING] -   - NPJ 2023/0296141-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,618 [INFO] - 
+[23/50] Processando NPJ: 2024/0002575-000
+2025-09-25 13:51:00,618 [WARNING] -   - NPJ 2024/0002575-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,618 [INFO] - 
+[24/50] Processando NPJ: 2024/0003731-000
+2025-09-25 13:51:00,618 [WARNING] -   - NPJ 2024/0003731-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,619 [INFO] - 
+[25/50] Processando NPJ: 2024/0005534-000
+2025-09-25 13:51:00,619 [WARNING] -   - NPJ 2024/0005534-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,619 [INFO] - 
+[26/50] Processando NPJ: 2024/0006208-000
+2025-09-25 13:51:00,619 [WARNING] -   - NPJ 2024/0006208-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,619 [INFO] - 
+[27/50] Processando NPJ: 2024/0006512-000
+2025-09-25 13:51:00,619 [WARNING] -   - NPJ 2024/0006512-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,620 [INFO] - 
+[28/50] Processando NPJ: 2024/0007687-000
+2025-09-25 13:51:00,620 [WARNING] -   - NPJ 2024/0007687-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,620 [INFO] - 
+[29/50] Processando NPJ: 2024/0009850-000
+2025-09-25 13:51:00,620 [WARNING] -   - NPJ 2024/0009850-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,620 [INFO] - 
+[30/50] Processando NPJ: 2024/0010113-000
+2025-09-25 13:51:00,620 [WARNING] -   - NPJ 2024/0010113-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,621 [INFO] - 
+[31/50] Processando NPJ: 2024/0010772-000
+2025-09-25 13:51:00,621 [WARNING] -   - NPJ 2024/0010772-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,621 [INFO] - 
+[32/50] Processando NPJ: 2024/0010773-000
+2025-09-25 13:51:00,621 [WARNING] -   - NPJ 2024/0010773-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,621 [INFO] - 
+[33/50] Processando NPJ: 2024/0017866-000
+2025-09-25 13:51:00,621 [WARNING] -   - NPJ 2024/0017866-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,622 [INFO] - 
+[34/50] Processando NPJ: 2024/0017916-000
+2025-09-25 13:51:00,622 [WARNING] -   - NPJ 2024/0017916-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,622 [INFO] - 
+[35/50] Processando NPJ: 2024/0020501-000
+2025-09-25 13:51:00,622 [WARNING] -   - NPJ 2024/0020501-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,622 [INFO] - 
+[36/50] Processando NPJ: 2024/0024240-000
+2025-09-25 13:51:00,622 [WARNING] -   - NPJ 2024/0024240-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,623 [INFO] - 
+[37/50] Processando NPJ: 2024/0024280-000
+2025-09-25 13:51:00,623 [WARNING] -   - NPJ 2024/0024280-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,623 [INFO] - 
+[38/50] Processando NPJ: 2024/0029395-000
+2025-09-25 13:51:00,623 [WARNING] -   - NPJ 2024/0029395-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,623 [INFO] - 
+[39/50] Processando NPJ: 2024/0029782-000
+2025-09-25 13:51:00,623 [WARNING] -   - NPJ 2024/0029782-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,624 [INFO] - 
+[40/50] Processando NPJ: 2024/0034483-000
+2025-09-25 13:51:00,624 [WARNING] -   - NPJ 2024/0034483-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,624 [INFO] - 
+[41/50] Processando NPJ: 2024/0034670-000
+2025-09-25 13:51:00,624 [WARNING] -   - NPJ 2024/0034670-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,624 [INFO] - 
+[42/50] Processando NPJ: 2024/0037493-000
+2025-09-25 13:51:00,624 [WARNING] -   - NPJ 2024/0037493-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,625 [INFO] - 
+[43/50] Processando NPJ: 2024/0038610-000
+2025-09-25 13:51:00,625 [WARNING] -   - NPJ 2024/0038610-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,625 [INFO] - 
+[44/50] Processando NPJ: 2024/0042148-000
+2025-09-25 13:51:00,625 [WARNING] -   - NPJ 2024/0042148-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,625 [INFO] - 
+[45/50] Processando NPJ: 2024/0044433-000
+2025-09-25 13:51:00,625 [WARNING] -   - NPJ 2024/0044433-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,625 [INFO] - 
+[46/50] Processando NPJ: 2024/0059627-000
+2025-09-25 13:51:00,626 [WARNING] -   - NPJ 2024/0059627-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,626 [INFO] - 
+[47/50] Processando NPJ: 2024/0062763-000
+2025-09-25 13:51:00,626 [WARNING] -   - NPJ 2024/0062763-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,626 [INFO] - 
+[48/50] Processando NPJ: 2024/0063953-000
+2025-09-25 13:51:00,626 [WARNING] -   - NPJ 2024/0063953-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,626 [INFO] - 
+[49/50] Processando NPJ: 2024/0065277-000
+2025-09-25 13:51:00,626 [WARNING] -   - NPJ 2024/0065277-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,627 [INFO] - 
+[50/50] Processando NPJ: 2024/0065311-000
+2025-09-25 13:51:00,627 [WARNING] -   - NPJ 2024/0065311-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,627 [INFO] - Processamento do lote concluído.
+2025-09-25 13:51:00,627 [INFO] - Lote finalizado. Restam 310 NPJs pendentes.
+2025-09-25 13:51:00,628 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-25 13:51:00,628 [INFO] - 
+[1/50] Processando NPJ: 2024/0070641-000
+2025-09-25 13:51:00,628 [WARNING] -   - NPJ 2024/0070641-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,628 [INFO] - 
+[2/50] Processando NPJ: 2024/0073371-000
+2025-09-25 13:51:00,628 [WARNING] -   - NPJ 2024/0073371-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,629 [INFO] - 
+[3/50] Processando NPJ: 2024/0077815-000
+2025-09-25 13:51:00,629 [WARNING] -   - NPJ 2024/0077815-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,629 [INFO] - 
+[4/50] Processando NPJ: 2024/0087560-000
+2025-09-25 13:51:00,629 [WARNING] -   - NPJ 2024/0087560-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,629 [INFO] - 
+[5/50] Processando NPJ: 2024/0087775-000
+2025-09-25 13:51:00,629 [WARNING] -   - NPJ 2024/0087775-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,630 [INFO] - 
+[6/50] Processando NPJ: 2024/0087873-000
+2025-09-25 13:51:00,630 [WARNING] -   - NPJ 2024/0087873-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,630 [INFO] - 
+[7/50] Processando NPJ: 2024/0094458-000
+2025-09-25 13:51:00,630 [WARNING] -   - NPJ 2024/0094458-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,630 [INFO] - 
+[8/50] Processando NPJ: 2024/0106544-000
+2025-09-25 13:51:00,630 [WARNING] -   - NPJ 2024/0106544-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,631 [INFO] - 
+[9/50] Processando NPJ: 2024/0110767-000
+2025-09-25 13:51:00,631 [WARNING] -   - NPJ 2024/0110767-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,631 [INFO] - 
+[10/50] Processando NPJ: 2024/0110808-000
+2025-09-25 13:51:00,631 [WARNING] -   - NPJ 2024/0110808-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,631 [INFO] - 
+[11/50] Processando NPJ: 2024/0116502-000
+2025-09-25 13:51:00,631 [WARNING] -   - NPJ 2024/0116502-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,632 [INFO] - 
+[12/50] Processando NPJ: 2024/0118094-000
+2025-09-25 13:51:00,632 [WARNING] -   - NPJ 2024/0118094-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,632 [INFO] - 
+[13/50] Processando NPJ: 2024/0133027-000
+2025-09-25 13:51:00,632 [WARNING] -   - NPJ 2024/0133027-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,632 [INFO] - 
+[14/50] Processando NPJ: 2024/0136804-000
+2025-09-25 13:51:00,632 [WARNING] -   - NPJ 2024/0136804-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,633 [INFO] - 
+[15/50] Processando NPJ: 2024/0140768-000
+2025-09-25 13:51:00,633 [WARNING] -   - NPJ 2024/0140768-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,633 [INFO] - 
+[16/50] Processando NPJ: 2024/0151189-000
+2025-09-25 13:51:00,633 [WARNING] -   - NPJ 2024/0151189-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,633 [INFO] - 
+[17/50] Processando NPJ: 2024/0158844-000
+2025-09-25 13:51:00,633 [WARNING] -   - NPJ 2024/0158844-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,634 [INFO] - 
+[18/50] Processando NPJ: 2024/0166320-000
+2025-09-25 13:51:00,634 [WARNING] -   - NPJ 2024/0166320-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,634 [INFO] - 
+[19/50] Processando NPJ: 2024/0170694-000
+2025-09-25 13:51:00,634 [WARNING] -   - NPJ 2024/0170694-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,635 [INFO] - 
+[20/50] Processando NPJ: 2024/0173958-000
+2025-09-25 13:51:00,635 [WARNING] -   - NPJ 2024/0173958-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,635 [INFO] - 
+[21/50] Processando NPJ: 2024/0174277-000
+2025-09-25 13:51:00,635 [WARNING] -   - NPJ 2024/0174277-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,635 [INFO] - 
+[22/50] Processando NPJ: 2024/0174454-000
+2025-09-25 13:51:00,635 [WARNING] -   - NPJ 2024/0174454-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,636 [INFO] - 
+[23/50] Processando NPJ: 2024/0182364-000
+2025-09-25 13:51:00,636 [WARNING] -   - NPJ 2024/0182364-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,636 [INFO] - 
+[24/50] Processando NPJ: 2024/0185894-000
+2025-09-25 13:51:00,636 [WARNING] -   - NPJ 2024/0185894-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,637 [INFO] - 
+[25/50] Processando NPJ: 2024/0190186-000
+2025-09-25 13:51:00,637 [WARNING] -   - NPJ 2024/0190186-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,637 [INFO] - 
+[26/50] Processando NPJ: 2024/0193221-000
+2025-09-25 13:51:00,637 [WARNING] -   - NPJ 2024/0193221-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,638 [INFO] - 
+[27/50] Processando NPJ: 2024/0195872-000
+2025-09-25 13:51:00,638 [WARNING] -   - NPJ 2024/0195872-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,638 [INFO] - 
+[28/50] Processando NPJ: 2024/0197426-000
+2025-09-25 13:51:00,638 [WARNING] -   - NPJ 2024/0197426-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,639 [INFO] - 
+[29/50] Processando NPJ: 2024/0201118-000
+2025-09-25 13:51:00,639 [WARNING] -   - NPJ 2024/0201118-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,639 [INFO] - 
+[30/50] Processando NPJ: 2024/0203106-000
+2025-09-25 13:51:00,639 [WARNING] -   - NPJ 2024/0203106-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,640 [INFO] - 
+[31/50] Processando NPJ: 2024/0209619-000
+2025-09-25 13:51:00,640 [WARNING] -   - NPJ 2024/0209619-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,640 [INFO] - 
+[32/50] Processando NPJ: 2024/0211863-000
+2025-09-25 13:51:00,640 [WARNING] -   - NPJ 2024/0211863-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,641 [INFO] - 
+[33/50] Processando NPJ: 2024/0212391-000
+2025-09-25 13:51:00,641 [WARNING] -   - NPJ 2024/0212391-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,641 [INFO] - 
+[34/50] Processando NPJ: 2024/0212410-000
+2025-09-25 13:51:00,641 [WARNING] -   - NPJ 2024/0212410-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,641 [INFO] - 
+[35/50] Processando NPJ: 2024/0215958-000
+2025-09-25 13:51:00,642 [WARNING] -   - NPJ 2024/0215958-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,642 [INFO] - 
+[36/50] Processando NPJ: 2024/0220100-000
+2025-09-25 13:51:00,642 [WARNING] -   - NPJ 2024/0220100-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,642 [INFO] - 
+[37/50] Processando NPJ: 2024/0221679-000
+2025-09-25 13:51:00,642 [WARNING] -   - NPJ 2024/0221679-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,643 [INFO] - 
+[38/50] Processando NPJ: 2024/0222841-000
+2025-09-25 13:51:00,643 [WARNING] -   - NPJ 2024/0222841-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,643 [INFO] - 
+[39/50] Processando NPJ: 2024/0230273-000
+2025-09-25 13:51:00,643 [WARNING] -   - NPJ 2024/0230273-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,644 [INFO] - 
+[40/50] Processando NPJ: 2024/0234692-000
+2025-09-25 13:51:00,644 [WARNING] -   - NPJ 2024/0234692-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,644 [INFO] - 
+[41/50] Processando NPJ: 2024/0239409-000
+2025-09-25 13:51:00,644 [WARNING] -   - NPJ 2024/0239409-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,644 [INFO] - 
+[42/50] Processando NPJ: 2024/0240678-000
+2025-09-25 13:51:00,644 [WARNING] -   - NPJ 2024/0240678-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,645 [INFO] - 
+[43/50] Processando NPJ: 2024/0243669-000
+2025-09-25 13:51:00,645 [WARNING] -   - NPJ 2024/0243669-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,645 [INFO] - 
+[44/50] Processando NPJ: 2024/0244582-000
+2025-09-25 13:51:00,645 [WARNING] -   - NPJ 2024/0244582-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,645 [INFO] - 
+[45/50] Processando NPJ: 2024/0251478-000
+2025-09-25 13:51:00,645 [WARNING] -   - NPJ 2024/0251478-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,646 [INFO] - 
+[46/50] Processando NPJ: 2024/0256325-000
+2025-09-25 13:51:00,646 [WARNING] -   - NPJ 2024/0256325-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,646 [INFO] - 
+[47/50] Processando NPJ: 2024/0262696-000
+2025-09-25 13:51:00,646 [WARNING] -   - NPJ 2024/0262696-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,646 [INFO] - 
+[48/50] Processando NPJ: 2024/0265306-000
+2025-09-25 13:51:00,646 [WARNING] -   - NPJ 2024/0265306-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,647 [INFO] - 
+[49/50] Processando NPJ: 2024/0270537-000
+2025-09-25 13:51:00,647 [WARNING] -   - NPJ 2024/0270537-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,647 [INFO] - 
+[50/50] Processando NPJ: 2024/0271691-000
+2025-09-25 13:51:00,647 [WARNING] -   - NPJ 2024/0271691-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,647 [INFO] - Processamento do lote concluído.
+2025-09-25 13:51:00,648 [INFO] - Lote finalizado. Restam 260 NPJs pendentes.
+2025-09-25 13:51:00,648 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-25 13:51:00,648 [INFO] - 
+[1/50] Processando NPJ: 2024/0277600-000
+2025-09-25 13:51:00,648 [WARNING] -   - NPJ 2024/0277600-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,649 [INFO] - 
+[2/50] Processando NPJ: 2024/0278557-000
+2025-09-25 13:51:00,649 [WARNING] -   - NPJ 2024/0278557-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,649 [INFO] - 
+[3/50] Processando NPJ: 2024/0289062-000
+2025-09-25 13:51:00,649 [WARNING] -   - NPJ 2024/0289062-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,649 [INFO] - 
+[4/50] Processando NPJ: 2024/0290629-000
+2025-09-25 13:51:00,649 [WARNING] -   - NPJ 2024/0290629-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,650 [INFO] - 
+[5/50] Processando NPJ: 2024/0292028-000
+2025-09-25 13:51:00,650 [WARNING] -   - NPJ 2024/0292028-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,650 [INFO] - 
+[6/50] Processando NPJ: 2024/0292049-000
+2025-09-25 13:51:00,650 [WARNING] -   - NPJ 2024/0292049-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,650 [INFO] - 
+[7/50] Processando NPJ: 2024/0296273-000
+2025-09-25 13:51:00,650 [WARNING] -   - NPJ 2024/0296273-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,651 [INFO] - 
+[8/50] Processando NPJ: 2024/0298546-000
+2025-09-25 13:51:00,651 [WARNING] -   - NPJ 2024/0298546-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,651 [INFO] - 
+[9/50] Processando NPJ: 2024/0299886-000
+2025-09-25 13:51:00,651 [WARNING] -   - NPJ 2024/0299886-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,651 [INFO] - 
+[10/50] Processando NPJ: 2024/0309450-000
+2025-09-25 13:51:00,651 [WARNING] -   - NPJ 2024/0309450-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,651 [INFO] - 
+[11/50] Processando NPJ: 2024/0312107-000
+2025-09-25 13:51:00,651 [WARNING] -   - NPJ 2024/0312107-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,652 [INFO] - 
+[12/50] Processando NPJ: 2024/0312808-000
+2025-09-25 13:51:00,652 [WARNING] -   - NPJ 2024/0312808-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,652 [INFO] - 
+[13/50] Processando NPJ: 2024/0315874-000
+2025-09-25 13:51:00,652 [WARNING] -   - NPJ 2024/0315874-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,652 [INFO] - 
+[14/50] Processando NPJ: 2024/0316990-000
+2025-09-25 13:51:00,652 [WARNING] -   - NPJ 2024/0316990-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,653 [INFO] - 
+[15/50] Processando NPJ: 2024/0322031-000
+2025-09-25 13:51:00,653 [WARNING] -   - NPJ 2024/0322031-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,653 [INFO] - 
+[16/50] Processando NPJ: 2024/0323833-000
+2025-09-25 13:51:00,653 [WARNING] -   - NPJ 2024/0323833-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,653 [INFO] - 
+[17/50] Processando NPJ: 2024/0330040-000
+2025-09-25 13:51:00,653 [WARNING] -   - NPJ 2024/0330040-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,654 [INFO] - 
+[18/50] Processando NPJ: 2024/0335460-000
+2025-09-25 13:51:00,654 [WARNING] -   - NPJ 2024/0335460-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,654 [INFO] - 
+[19/50] Processando NPJ: 2024/0346750-000
+2025-09-25 13:51:00,654 [WARNING] -   - NPJ 2024/0346750-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,654 [INFO] - 
+[20/50] Processando NPJ: 2024/0352497-000
+2025-09-25 13:51:00,654 [WARNING] -   - NPJ 2024/0352497-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,655 [INFO] - 
+[21/50] Processando NPJ: 2024/0354775-000
+2025-09-25 13:51:00,655 [WARNING] -   - NPJ 2024/0354775-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,655 [INFO] - 
+[22/50] Processando NPJ: 2024/0355800-000
+2025-09-25 13:51:00,655 [WARNING] -   - NPJ 2024/0355800-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,655 [INFO] - 
+[23/50] Processando NPJ: 2024/0358317-000
+2025-09-25 13:51:00,655 [WARNING] -   - NPJ 2024/0358317-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,656 [INFO] - 
+[24/50] Processando NPJ: 2024/0359016-000
+2025-09-25 13:51:00,656 [WARNING] -   - NPJ 2024/0359016-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,656 [INFO] - 
+[25/50] Processando NPJ: 2024/0362982-000
+2025-09-25 13:51:00,656 [WARNING] -   - NPJ 2024/0362982-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,656 [INFO] - 
+[26/50] Processando NPJ: 2024/0363935-000
+2025-09-25 13:51:00,656 [WARNING] -   - NPJ 2024/0363935-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,656 [INFO] - 
+[27/50] Processando NPJ: 2024/0366312-000
+2025-09-25 13:51:00,656 [WARNING] -   - NPJ 2024/0366312-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,657 [INFO] - 
+[28/50] Processando NPJ: 2024/0374394-000
+2025-09-25 13:51:00,657 [WARNING] -   - NPJ 2024/0374394-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,657 [INFO] - 
+[29/50] Processando NPJ: 2024/0374833-000
+2025-09-25 13:51:00,657 [WARNING] -   - NPJ 2024/0374833-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,657 [INFO] - 
+[30/50] Processando NPJ: 2024/0375657-000
+2025-09-25 13:51:00,657 [WARNING] -   - NPJ 2024/0375657-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,658 [INFO] - 
+[31/50] Processando NPJ: 2024/0376652-000
+2025-09-25 13:51:00,658 [WARNING] -   - NPJ 2024/0376652-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,658 [INFO] - 
+[32/50] Processando NPJ: 2024/0381832-000
+2025-09-25 13:51:00,658 [WARNING] -   - NPJ 2024/0381832-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,658 [INFO] - 
+[33/50] Processando NPJ: 2024/0387649-000
+2025-09-25 13:51:00,658 [WARNING] -   - NPJ 2024/0387649-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,659 [INFO] - 
+[34/50] Processando NPJ: 2024/0393080-000
+2025-09-25 13:51:00,659 [WARNING] -   - NPJ 2024/0393080-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,659 [INFO] - 
+[35/50] Processando NPJ: 2024/0394878-000
+2025-09-25 13:51:00,659 [WARNING] -   - NPJ 2024/0394878-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,659 [INFO] - 
+[36/50] Processando NPJ: 2024/0395374-000
+2025-09-25 13:51:00,659 [WARNING] -   - NPJ 2024/0395374-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,660 [INFO] - 
+[37/50] Processando NPJ: 2024/0395712-000
+2025-09-25 13:51:00,660 [WARNING] -   - NPJ 2024/0395712-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,660 [INFO] - 
+[38/50] Processando NPJ: 2024/0396022-000
+2025-09-25 13:51:00,660 [WARNING] -   - NPJ 2024/0396022-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,660 [INFO] - 
+[39/50] Processando NPJ: 2024/0396066-000
+2025-09-25 13:51:00,660 [WARNING] -   - NPJ 2024/0396066-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,661 [INFO] - 
+[40/50] Processando NPJ: 2024/0402725-000
+2025-09-25 13:51:00,661 [WARNING] -   - NPJ 2024/0402725-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,661 [INFO] - 
+[41/50] Processando NPJ: 2024/0404271-000
+2025-09-25 13:51:00,661 [WARNING] -   - NPJ 2024/0404271-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,661 [INFO] - 
+[42/50] Processando NPJ: 2024/0404389-000
+2025-09-25 13:51:00,661 [WARNING] -   - NPJ 2024/0404389-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,662 [INFO] - 
+[43/50] Processando NPJ: 2024/0410185-000
+2025-09-25 13:51:00,662 [WARNING] -   - NPJ 2024/0410185-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,662 [INFO] - 
+[44/50] Processando NPJ: 2024/0410280-000
+2025-09-25 13:51:00,662 [WARNING] -   - NPJ 2024/0410280-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,662 [INFO] - 
+[45/50] Processando NPJ: 2024/0410537-000
+2025-09-25 13:51:00,662 [WARNING] -   - NPJ 2024/0410537-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,662 [INFO] - 
+[46/50] Processando NPJ: 2024/0410604-000
+2025-09-25 13:51:00,662 [WARNING] -   - NPJ 2024/0410604-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,663 [INFO] - 
+[47/50] Processando NPJ: 2024/0411080-000
+2025-09-25 13:51:00,663 [WARNING] -   - NPJ 2024/0411080-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,663 [INFO] - 
+[48/50] Processando NPJ: 2024/0412115-000
+2025-09-25 13:51:00,663 [WARNING] -   - NPJ 2024/0412115-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,663 [INFO] - 
+[49/50] Processando NPJ: 2024/0413395-000
+2025-09-25 13:51:00,663 [WARNING] -   - NPJ 2024/0413395-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,664 [INFO] - 
+[50/50] Processando NPJ: 2024/0413499-000
+2025-09-25 13:51:00,664 [WARNING] -   - NPJ 2024/0413499-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,664 [INFO] - Processamento do lote concluído.
+2025-09-25 13:51:00,664 [INFO] - Lote finalizado. Restam 210 NPJs pendentes.
+2025-09-25 13:51:00,665 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-25 13:51:00,665 [INFO] - 
+[1/50] Processando NPJ: 2024/0413582-000
+2025-09-25 13:51:00,665 [WARNING] -   - NPJ 2024/0413582-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,665 [INFO] - 
+[2/50] Processando NPJ: 2024/0415997-000
+2025-09-25 13:51:00,665 [WARNING] -   - NPJ 2024/0415997-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,666 [INFO] - 
+[3/50] Processando NPJ: 2024/0416803-000
+2025-09-25 13:51:00,666 [WARNING] -   - NPJ 2024/0416803-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,666 [INFO] - 
+[4/50] Processando NPJ: 2024/0417106-000
+2025-09-25 13:51:00,666 [WARNING] -   - NPJ 2024/0417106-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,666 [INFO] - 
+[5/50] Processando NPJ: 2024/0418620-000
+2025-09-25 13:51:00,666 [WARNING] -   - NPJ 2024/0418620-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,667 [INFO] - 
+[6/50] Processando NPJ: 2024/0419008-000
+2025-09-25 13:51:00,667 [WARNING] -   - NPJ 2024/0419008-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,667 [INFO] - 
+[7/50] Processando NPJ: 2024/0422257-000
+2025-09-25 13:51:00,667 [WARNING] -   - NPJ 2024/0422257-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,667 [INFO] - 
+[8/50] Processando NPJ: 2024/0425784-000
+2025-09-25 13:51:00,667 [WARNING] -   - NPJ 2024/0425784-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,668 [INFO] - 
+[9/50] Processando NPJ: 2024/0430467-000
+2025-09-25 13:51:00,668 [WARNING] -   - NPJ 2024/0430467-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,668 [INFO] - 
+[10/50] Processando NPJ: 2024/0437539-000
+2025-09-25 13:51:00,668 [WARNING] -   - NPJ 2024/0437539-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,668 [INFO] - 
+[11/50] Processando NPJ: 2025/0002145-000
+2025-09-25 13:51:00,668 [WARNING] -   - NPJ 2025/0002145-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,669 [INFO] - 
+[12/50] Processando NPJ: 2025/0003993-000
+2025-09-25 13:51:00,669 [WARNING] -   - NPJ 2025/0003993-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,669 [INFO] - 
+[13/50] Processando NPJ: 2025/0004545-000
+2025-09-25 13:51:00,669 [WARNING] -   - NPJ 2025/0004545-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,669 [INFO] - 
+[14/50] Processando NPJ: 2025/0007676-000
+2025-09-25 13:51:00,669 [WARNING] -   - NPJ 2025/0007676-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,669 [INFO] - 
+[15/50] Processando NPJ: 2025/0008083-000
+2025-09-25 13:51:00,669 [WARNING] -   - NPJ 2025/0008083-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,670 [INFO] - 
+[16/50] Processando NPJ: 2025/0010405-000
+2025-09-25 13:51:00,670 [WARNING] -   - NPJ 2025/0010405-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,670 [INFO] - 
+[17/50] Processando NPJ: 2025/0011975-000
+2025-09-25 13:51:00,670 [WARNING] -   - NPJ 2025/0011975-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,670 [INFO] - 
+[18/50] Processando NPJ: 2025/0012378-000
+2025-09-25 13:51:00,670 [WARNING] -   - NPJ 2025/0012378-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,671 [INFO] - 
+[19/50] Processando NPJ: 2025/0012400-000
+2025-09-25 13:51:00,671 [WARNING] -   - NPJ 2025/0012400-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,671 [INFO] - 
+[20/50] Processando NPJ: 2025/0016131-000
+2025-09-25 13:51:00,671 [WARNING] -   - NPJ 2025/0016131-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,671 [INFO] - 
+[21/50] Processando NPJ: 2025/0017973-000
+2025-09-25 13:51:00,671 [WARNING] -   - NPJ 2025/0017973-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,672 [INFO] - 
+[22/50] Processando NPJ: 2025/0023712-000
+2025-09-25 13:51:00,672 [WARNING] -   - NPJ 2025/0023712-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,672 [INFO] - 
+[23/50] Processando NPJ: 2025/0024513-000
+2025-09-25 13:51:00,672 [WARNING] -   - NPJ 2025/0024513-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,672 [INFO] - 
+[24/50] Processando NPJ: 2025/0026223-000
+2025-09-25 13:51:00,672 [WARNING] -   - NPJ 2025/0026223-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,673 [INFO] - 
+[25/50] Processando NPJ: 2025/0027035-000
+2025-09-25 13:51:00,673 [WARNING] -   - NPJ 2025/0027035-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,673 [INFO] - 
+[26/50] Processando NPJ: 2025/0027146-000
+2025-09-25 13:51:00,673 [WARNING] -   - NPJ 2025/0027146-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,673 [INFO] - 
+[27/50] Processando NPJ: 2025/0027801-000
+2025-09-25 13:51:00,673 [WARNING] -   - NPJ 2025/0027801-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,674 [INFO] - 
+[28/50] Processando NPJ: 2025/0032278-000
+2025-09-25 13:51:00,674 [WARNING] -   - NPJ 2025/0032278-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,674 [INFO] - 
+[29/50] Processando NPJ: 2025/0034267-000
+2025-09-25 13:51:00,674 [WARNING] -   - NPJ 2025/0034267-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,674 [INFO] - 
+[30/50] Processando NPJ: 2025/0035920-000
+2025-09-25 13:51:00,674 [WARNING] -   - NPJ 2025/0035920-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,675 [INFO] - 
+[31/50] Processando NPJ: 2025/0036864-000
+2025-09-25 13:51:00,675 [WARNING] -   - NPJ 2025/0036864-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,675 [INFO] - 
+[32/50] Processando NPJ: 2025/0041772-000
+2025-09-25 13:51:00,675 [WARNING] -   - NPJ 2025/0041772-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,675 [INFO] - 
+[33/50] Processando NPJ: 2025/0043368-000
+2025-09-25 13:51:00,675 [WARNING] -   - NPJ 2025/0043368-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,676 [INFO] - 
+[34/50] Processando NPJ: 2025/0045238-000
+2025-09-25 13:51:00,676 [WARNING] -   - NPJ 2025/0045238-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,676 [INFO] - 
+[35/50] Processando NPJ: 2025/0045303-000
+2025-09-25 13:51:00,676 [WARNING] -   - NPJ 2025/0045303-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,676 [INFO] - 
+[36/50] Processando NPJ: 2025/0047467-000
+2025-09-25 13:51:00,676 [WARNING] -   - NPJ 2025/0047467-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,677 [INFO] - 
+[37/50] Processando NPJ: 2025/0048352-000
+2025-09-25 13:51:00,677 [WARNING] -   - NPJ 2025/0048352-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,677 [INFO] - 
+[38/50] Processando NPJ: 2025/0050065-000
+2025-09-25 13:51:00,677 [WARNING] -   - NPJ 2025/0050065-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,677 [INFO] - 
+[39/50] Processando NPJ: 2025/0051039-000
+2025-09-25 13:51:00,677 [WARNING] -   - NPJ 2025/0051039-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,678 [INFO] - 
+[40/50] Processando NPJ: 2025/0051696-000
+2025-09-25 13:51:00,678 [WARNING] -   - NPJ 2025/0051696-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,678 [INFO] - 
+[41/50] Processando NPJ: 2025/0052212-000
+2025-09-25 13:51:00,678 [WARNING] -   - NPJ 2025/0052212-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,678 [INFO] - 
+[42/50] Processando NPJ: 2025/0052386-000
+2025-09-25 13:51:00,678 [WARNING] -   - NPJ 2025/0052386-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,678 [INFO] - 
+[43/50] Processando NPJ: 2025/0054620-000
+2025-09-25 13:51:00,678 [WARNING] -   - NPJ 2025/0054620-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,679 [INFO] - 
+[44/50] Processando NPJ: 2025/0054877-000
+2025-09-25 13:51:00,679 [WARNING] -   - NPJ 2025/0054877-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,679 [INFO] - 
+[45/50] Processando NPJ: 2025/0054887-000
+2025-09-25 13:51:00,679 [WARNING] -   - NPJ 2025/0054887-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,679 [INFO] - 
+[46/50] Processando NPJ: 2025/0055238-000
+2025-09-25 13:51:00,679 [WARNING] -   - NPJ 2025/0055238-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,680 [INFO] - 
+[47/50] Processando NPJ: 2025/0055616-000
+2025-09-25 13:51:00,680 [WARNING] -   - NPJ 2025/0055616-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,680 [INFO] - 
+[48/50] Processando NPJ: 2025/0066767-000
+2025-09-25 13:51:00,680 [WARNING] -   - NPJ 2025/0066767-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,680 [INFO] - 
+[49/50] Processando NPJ: 2025/0071479-000
+2025-09-25 13:51:00,680 [WARNING] -   - NPJ 2025/0071479-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,681 [INFO] - 
+[50/50] Processando NPJ: 2025/0072908-000
+2025-09-25 13:51:00,681 [WARNING] -   - NPJ 2025/0072908-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,681 [INFO] - Processamento do lote concluído.
+2025-09-25 13:51:00,681 [INFO] - Lote finalizado. Restam 160 NPJs pendentes.
+2025-09-25 13:51:00,682 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-25 13:51:00,682 [INFO] - 
+[1/50] Processando NPJ: 2025/0074286-000
+2025-09-25 13:51:00,682 [WARNING] -   - NPJ 2025/0074286-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,682 [INFO] - 
+[2/50] Processando NPJ: 2025/0074313-000
+2025-09-25 13:51:00,682 [WARNING] -   - NPJ 2025/0074313-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,683 [INFO] - 
+[3/50] Processando NPJ: 2025/0076728-000
+2025-09-25 13:51:00,683 [WARNING] -   - NPJ 2025/0076728-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,683 [INFO] - 
+[4/50] Processando NPJ: 2025/0081261-000
+2025-09-25 13:51:00,683 [WARNING] -   - NPJ 2025/0081261-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,683 [INFO] - 
+[5/50] Processando NPJ: 2025/0083350-000
+2025-09-25 13:51:00,683 [WARNING] -   - NPJ 2025/0083350-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,684 [INFO] - 
+[6/50] Processando NPJ: 2025/0083649-000
+2025-09-25 13:51:00,684 [WARNING] -   - NPJ 2025/0083649-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,684 [INFO] - 
+[7/50] Processando NPJ: 2025/0086518-000
+2025-09-25 13:51:00,684 [WARNING] -   - NPJ 2025/0086518-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,684 [INFO] - 
+[8/50] Processando NPJ: 2025/0086617-000
+2025-09-25 13:51:00,684 [WARNING] -   - NPJ 2025/0086617-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,685 [INFO] - 
+[9/50] Processando NPJ: 2025/0086895-000
+2025-09-25 13:51:00,685 [WARNING] -   - NPJ 2025/0086895-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,685 [INFO] - 
+[10/50] Processando NPJ: 2025/0087517-000
+2025-09-25 13:51:00,685 [WARNING] -   - NPJ 2025/0087517-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,685 [INFO] - 
+[11/50] Processando NPJ: 2025/0089078-000
+2025-09-25 13:51:00,685 [WARNING] -   - NPJ 2025/0089078-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,686 [INFO] - 
+[12/50] Processando NPJ: 2025/0090318-000
+2025-09-25 13:51:00,686 [WARNING] -   - NPJ 2025/0090318-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,686 [INFO] - 
+[13/50] Processando NPJ: 2025/0097355-000
+2025-09-25 13:51:00,686 [WARNING] -   - NPJ 2025/0097355-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,686 [INFO] - 
+[14/50] Processando NPJ: 2025/0098550-000
+2025-09-25 13:51:00,686 [WARNING] -   - NPJ 2025/0098550-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,687 [INFO] - 
+[15/50] Processando NPJ: 2025/0099571-000
+2025-09-25 13:51:00,687 [WARNING] -   - NPJ 2025/0099571-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,687 [INFO] - 
+[16/50] Processando NPJ: 2025/0103598-000
+2025-09-25 13:51:00,687 [WARNING] -   - NPJ 2025/0103598-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,687 [INFO] - 
+[17/50] Processando NPJ: 2025/0104060-000
+2025-09-25 13:51:00,687 [WARNING] -   - NPJ 2025/0104060-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,687 [INFO] - 
+[18/50] Processando NPJ: 2025/0108350-000
+2025-09-25 13:51:00,688 [WARNING] -   - NPJ 2025/0108350-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,688 [INFO] - 
+[19/50] Processando NPJ: 2025/0110042-000
+2025-09-25 13:51:00,688 [WARNING] -   - NPJ 2025/0110042-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,688 [INFO] - 
+[20/50] Processando NPJ: 2025/0110240-000
+2025-09-25 13:51:00,688 [WARNING] -   - NPJ 2025/0110240-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,688 [INFO] - 
+[21/50] Processando NPJ: 2025/0113429-000
+2025-09-25 13:51:00,688 [WARNING] -   - NPJ 2025/0113429-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,689 [INFO] - 
+[22/50] Processando NPJ: 2025/0113774-000
+2025-09-25 13:51:00,689 [WARNING] -   - NPJ 2025/0113774-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,689 [INFO] - 
+[23/50] Processando NPJ: 2025/0117579-000
+2025-09-25 13:51:00,689 [WARNING] -   - NPJ 2025/0117579-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,689 [INFO] - 
+[24/50] Processando NPJ: 2025/0118636-000
+2025-09-25 13:51:00,689 [WARNING] -   - NPJ 2025/0118636-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,690 [INFO] - 
+[25/50] Processando NPJ: 2025/0121497-000
+2025-09-25 13:51:00,690 [WARNING] -   - NPJ 2025/0121497-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,690 [INFO] - 
+[26/50] Processando NPJ: 2025/0121500-000
+2025-09-25 13:51:00,690 [WARNING] -   - NPJ 2025/0121500-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,690 [INFO] - 
+[27/50] Processando NPJ: 2025/0125573-000
+2025-09-25 13:51:00,690 [WARNING] -   - NPJ 2025/0125573-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,691 [INFO] - 
+[28/50] Processando NPJ: 2025/0129798-000
+2025-09-25 13:51:00,691 [WARNING] -   - NPJ 2025/0129798-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,691 [INFO] - 
+[29/50] Processando NPJ: 2025/0130026-000
+2025-09-25 13:51:00,691 [WARNING] -   - NPJ 2025/0130026-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,691 [INFO] - 
+[30/50] Processando NPJ: 2025/0130223-000
+2025-09-25 13:51:00,691 [WARNING] -   - NPJ 2025/0130223-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,692 [INFO] - 
+[31/50] Processando NPJ: 2025/0131087-000
+2025-09-25 13:51:00,692 [WARNING] -   - NPJ 2025/0131087-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,692 [INFO] - 
+[32/50] Processando NPJ: 2025/0137584-000
+2025-09-25 13:51:00,692 [WARNING] -   - NPJ 2025/0137584-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,692 [INFO] - 
+[33/50] Processando NPJ: 2025/0139941-000
+2025-09-25 13:51:00,692 [WARNING] -   - NPJ 2025/0139941-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,693 [INFO] - 
+[34/50] Processando NPJ: 2025/0148220-000
+2025-09-25 13:51:00,693 [WARNING] -   - NPJ 2025/0148220-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,693 [INFO] - 
+[35/50] Processando NPJ: 2025/0148922-000
+2025-09-25 13:51:00,693 [WARNING] -   - NPJ 2025/0148922-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,693 [INFO] - 
+[36/50] Processando NPJ: 2025/0151343-000
+2025-09-25 13:51:00,693 [WARNING] -   - NPJ 2025/0151343-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,694 [INFO] - 
+[37/50] Processando NPJ: 2025/0154254-000
+2025-09-25 13:51:00,694 [WARNING] -   - NPJ 2025/0154254-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,694 [INFO] - 
+[38/50] Processando NPJ: 2025/0155682-000
+2025-09-25 13:51:00,694 [WARNING] -   - NPJ 2025/0155682-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,694 [INFO] - 
+[39/50] Processando NPJ: 2025/0155959-000
+2025-09-25 13:51:00,694 [WARNING] -   - NPJ 2025/0155959-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,695 [INFO] - 
+[40/50] Processando NPJ: 2025/0157673-000
+2025-09-25 13:51:00,695 [WARNING] -   - NPJ 2025/0157673-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,695 [INFO] - 
+[41/50] Processando NPJ: 2025/0159233-000
+2025-09-25 13:51:00,695 [WARNING] -   - NPJ 2025/0159233-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,695 [INFO] - 
+[42/50] Processando NPJ: 2025/0161481-000
+2025-09-25 13:51:00,695 [WARNING] -   - NPJ 2025/0161481-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,696 [INFO] - 
+[43/50] Processando NPJ: 2025/0161591-000
+2025-09-25 13:51:00,696 [WARNING] -   - NPJ 2025/0161591-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,696 [INFO] - 
+[44/50] Processando NPJ: 2025/0170551-000
+2025-09-25 13:51:00,696 [WARNING] -   - NPJ 2025/0170551-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,696 [INFO] - 
+[45/50] Processando NPJ: 2025/0171348-000
+2025-09-25 13:51:00,696 [WARNING] -   - NPJ 2025/0171348-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,697 [INFO] - 
+[46/50] Processando NPJ: 2025/0173805-000
+2025-09-25 13:51:00,697 [WARNING] -   - NPJ 2025/0173805-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,697 [INFO] - 
+[47/50] Processando NPJ: 2025/0175652-000
+2025-09-25 13:51:00,697 [WARNING] -   - NPJ 2025/0175652-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,697 [INFO] - 
+[48/50] Processando NPJ: 2025/0176667-000
+2025-09-25 13:51:00,697 [WARNING] -   - NPJ 2025/0176667-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,698 [INFO] - 
+[49/50] Processando NPJ: 2025/0177765-000
+2025-09-25 13:51:00,698 [WARNING] -   - NPJ 2025/0177765-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,698 [INFO] - 
+[50/50] Processando NPJ: 2025/0181878-000
+2025-09-25 13:51:00,698 [WARNING] -   - NPJ 2025/0181878-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,698 [INFO] - Processamento do lote concluído.
+2025-09-25 13:51:00,698 [INFO] - Lote finalizado. Restam 110 NPJs pendentes.
+2025-09-25 13:51:00,699 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-25 13:51:00,699 [INFO] - 
+[1/50] Processando NPJ: 2025/0182673-000
+2025-09-25 13:51:00,699 [WARNING] -   - NPJ 2025/0182673-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,700 [INFO] - 
+[2/50] Processando NPJ: 2025/0185068-000
+2025-09-25 13:51:00,700 [WARNING] -   - NPJ 2025/0185068-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,700 [INFO] - 
+[3/50] Processando NPJ: 2025/0185184-000
+2025-09-25 13:51:00,700 [WARNING] -   - NPJ 2025/0185184-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,700 [INFO] - 
+[4/50] Processando NPJ: 2025/0186150-000
+2025-09-25 13:51:00,700 [WARNING] -   - NPJ 2025/0186150-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,701 [INFO] - 
+[5/50] Processando NPJ: 2025/0189620-000
+2025-09-25 13:51:00,701 [WARNING] -   - NPJ 2025/0189620-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,701 [INFO] - 
+[6/50] Processando NPJ: 2025/0190931-000
+2025-09-25 13:51:00,701 [WARNING] -   - NPJ 2025/0190931-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,701 [INFO] - 
+[7/50] Processando NPJ: 2025/0191952-000
+2025-09-25 13:51:00,701 [WARNING] -   - NPJ 2025/0191952-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,702 [INFO] - 
+[8/50] Processando NPJ: 2025/0192443-000
+2025-09-25 13:51:00,702 [WARNING] -   - NPJ 2025/0192443-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,702 [INFO] - 
+[9/50] Processando NPJ: 2025/0192699-000
+2025-09-25 13:51:00,702 [WARNING] -   - NPJ 2025/0192699-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,702 [INFO] - 
+[10/50] Processando NPJ: 2025/0194406-000
+2025-09-25 13:51:00,702 [WARNING] -   - NPJ 2025/0194406-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,702 [INFO] - 
+[11/50] Processando NPJ: 2025/0195404-000
+2025-09-25 13:51:00,702 [WARNING] -   - NPJ 2025/0195404-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,703 [INFO] - 
+[12/50] Processando NPJ: 2025/0196142-000
+2025-09-25 13:51:00,703 [WARNING] -   - NPJ 2025/0196142-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,703 [INFO] - 
+[13/50] Processando NPJ: 2025/0200966-000
+2025-09-25 13:51:00,703 [WARNING] -   - NPJ 2025/0200966-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,703 [INFO] - 
+[14/50] Processando NPJ: 2025/0201005-000
+2025-09-25 13:51:00,703 [WARNING] -   - NPJ 2025/0201005-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,704 [INFO] - 
+[15/50] Processando NPJ: 2025/0201116-000
+2025-09-25 13:51:00,704 [WARNING] -   - NPJ 2025/0201116-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,704 [INFO] - 
+[16/50] Processando NPJ: 2025/0201380-000
+2025-09-25 13:51:00,704 [WARNING] -   - NPJ 2025/0201380-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,704 [INFO] - 
+[17/50] Processando NPJ: 2025/0201393-000
+2025-09-25 13:51:00,704 [WARNING] -   - NPJ 2025/0201393-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,705 [INFO] - 
+[18/50] Processando NPJ: 2025/0201590-000
+2025-09-25 13:51:00,705 [WARNING] -   - NPJ 2025/0201590-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,705 [INFO] - 
+[19/50] Processando NPJ: 2025/0202382-000
+2025-09-25 13:51:00,705 [WARNING] -   - NPJ 2025/0202382-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,705 [INFO] - 
+[20/50] Processando NPJ: 2025/0202407-000
+2025-09-25 13:51:00,705 [WARNING] -   - NPJ 2025/0202407-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,706 [INFO] - 
+[21/50] Processando NPJ: 2025/0203410-000
+2025-09-25 13:51:00,706 [WARNING] -   - NPJ 2025/0203410-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,706 [INFO] - 
+[22/50] Processando NPJ: 2025/0204573-000
+2025-09-25 13:51:00,706 [WARNING] -   - NPJ 2025/0204573-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,706 [INFO] - 
+[23/50] Processando NPJ: 2025/0205490-000
+2025-09-25 13:51:00,706 [WARNING] -   - NPJ 2025/0205490-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,707 [INFO] - 
+[24/50] Processando NPJ: 2025/0206901-000
+2025-09-25 13:51:00,707 [WARNING] -   - NPJ 2025/0206901-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,707 [INFO] - 
+[25/50] Processando NPJ: 2025/0207822-000
+2025-09-25 13:51:00,707 [WARNING] -   - NPJ 2025/0207822-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,707 [INFO] - 
+[26/50] Processando NPJ: 2025/0208016-000
+2025-09-25 13:51:00,707 [WARNING] -   - NPJ 2025/0208016-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,708 [INFO] - 
+[27/50] Processando NPJ: 2025/0208022-000
+2025-09-25 13:51:00,708 [WARNING] -   - NPJ 2025/0208022-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,708 [INFO] - 
+[28/50] Processando NPJ: 2025/0208105-000
+2025-09-25 13:51:00,708 [WARNING] -   - NPJ 2025/0208105-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,708 [INFO] - 
+[29/50] Processando NPJ: 2025/0210845-000
+2025-09-25 13:51:00,708 [WARNING] -   - NPJ 2025/0210845-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,709 [INFO] - 
+[30/50] Processando NPJ: 2025/0211030-000
+2025-09-25 13:51:00,709 [WARNING] -   - NPJ 2025/0211030-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,709 [INFO] - 
+[31/50] Processando NPJ: 2025/0211639-000
+2025-09-25 13:51:00,709 [WARNING] -   - NPJ 2025/0211639-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,709 [INFO] - 
+[32/50] Processando NPJ: 2025/0211686-000
+2025-09-25 13:51:00,709 [WARNING] -   - NPJ 2025/0211686-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,710 [INFO] - 
+[33/50] Processando NPJ: 2025/0212069-000
+2025-09-25 13:51:00,710 [WARNING] -   - NPJ 2025/0212069-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,710 [INFO] - 
+[34/50] Processando NPJ: 2025/0214410-000
+2025-09-25 13:51:00,710 [WARNING] -   - NPJ 2025/0214410-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,710 [INFO] - 
+[35/50] Processando NPJ: 2025/0214966-000
+2025-09-25 13:51:00,710 [WARNING] -   - NPJ 2025/0214966-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,710 [INFO] - 
+[36/50] Processando NPJ: 2025/0216385-000
+2025-09-25 13:51:00,710 [WARNING] -   - NPJ 2025/0216385-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,711 [INFO] - 
+[37/50] Processando NPJ: 2025/0216787-000
+2025-09-25 13:51:00,711 [WARNING] -   - NPJ 2025/0216787-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,711 [INFO] - 
+[38/50] Processando NPJ: 2025/0217463-000
+2025-09-25 13:51:00,711 [WARNING] -   - NPJ 2025/0217463-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,711 [INFO] - 
+[39/50] Processando NPJ: 2025/0217498-000
+2025-09-25 13:51:00,711 [WARNING] -   - NPJ 2025/0217498-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,712 [INFO] - 
+[40/50] Processando NPJ: 2025/0217631-000
+2025-09-25 13:51:00,712 [WARNING] -   - NPJ 2025/0217631-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,712 [INFO] - 
+[41/50] Processando NPJ: 2025/0219223-000
+2025-09-25 13:51:00,712 [WARNING] -   - NPJ 2025/0219223-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,713 [INFO] - 
+[42/50] Processando NPJ: 2025/0220106-000
+2025-09-25 13:51:00,713 [WARNING] -   - NPJ 2025/0220106-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,713 [INFO] - 
+[43/50] Processando NPJ: 2025/0220177-000
+2025-09-25 13:51:00,713 [WARNING] -   - NPJ 2025/0220177-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,713 [INFO] - 
+[44/50] Processando NPJ: 2025/0221582-000
+2025-09-25 13:51:00,713 [WARNING] -   - NPJ 2025/0221582-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,714 [INFO] - 
+[45/50] Processando NPJ: 2025/0221967-000
+2025-09-25 13:51:00,714 [WARNING] -   - NPJ 2025/0221967-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,714 [INFO] - 
+[46/50] Processando NPJ: 2025/0222136-000
+2025-09-25 13:51:00,714 [WARNING] -   - NPJ 2025/0222136-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,715 [INFO] - 
+[47/50] Processando NPJ: 2025/0223028-000
+2025-09-25 13:51:00,715 [WARNING] -   - NPJ 2025/0223028-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,715 [INFO] - 
+[48/50] Processando NPJ: 2025/0223764-000
+2025-09-25 13:51:00,715 [WARNING] -   - NPJ 2025/0223764-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,715 [INFO] - 
+[49/50] Processando NPJ: 2025/0225010-000
+2025-09-25 13:51:00,715 [WARNING] -   - NPJ 2025/0225010-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,716 [INFO] - 
+[50/50] Processando NPJ: 2025/0226442-000
+2025-09-25 13:51:00,716 [WARNING] -   - NPJ 2025/0226442-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,716 [INFO] - Processamento do lote concluído.
+2025-09-25 13:51:00,716 [INFO] - Lote finalizado. Restam 60 NPJs pendentes.
+2025-09-25 13:51:00,718 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-25 13:51:00,718 [INFO] - 
+[1/50] Processando NPJ: 2025/0226712-000
+2025-09-25 13:51:00,718 [WARNING] -   - NPJ 2025/0226712-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,718 [INFO] - 
+[2/50] Processando NPJ: 2025/0230376-000
+2025-09-25 13:51:00,718 [WARNING] -   - NPJ 2025/0230376-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,718 [INFO] - 
+[3/50] Processando NPJ: 2025/0234264-000
+2025-09-25 13:51:00,718 [WARNING] -   - NPJ 2025/0234264-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,719 [INFO] - 
+[4/50] Processando NPJ: 2025/0234915-000
+2025-09-25 13:51:00,719 [WARNING] -   - NPJ 2025/0234915-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,719 [INFO] - 
+[5/50] Processando NPJ: 2025/0236448-000
+2025-09-25 13:51:00,719 [WARNING] -   - NPJ 2025/0236448-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,720 [INFO] - 
+[6/50] Processando NPJ: 2025/0236626-000
+2025-09-25 13:51:00,720 [WARNING] -   - NPJ 2025/0236626-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,720 [INFO] - 
+[7/50] Processando NPJ: 2025/0244048-000
+2025-09-25 13:51:00,720 [WARNING] -   - NPJ 2025/0244048-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,720 [INFO] - 
+[8/50] Processando NPJ: 2025/0244711-000
+2025-09-25 13:51:00,720 [WARNING] -   - NPJ 2025/0244711-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,721 [INFO] - 
+[9/50] Processando NPJ: 2025/0245802-000
+2025-09-25 13:51:00,721 [WARNING] -   - NPJ 2025/0245802-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,721 [INFO] - 
+[10/50] Processando NPJ: 2025/0249247-000
+2025-09-25 13:51:00,721 [WARNING] -   - NPJ 2025/0249247-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,722 [INFO] - 
+[11/50] Processando NPJ: 2025/0250687-000
+2025-09-25 13:51:00,722 [WARNING] -   - NPJ 2025/0250687-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,722 [INFO] - 
+[12/50] Processando NPJ: 2025/0251028-000
+2025-09-25 13:51:00,722 [WARNING] -   - NPJ 2025/0251028-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,722 [INFO] - 
+[13/50] Processando NPJ: 2025/0252439-000
+2025-09-25 13:51:00,722 [WARNING] -   - NPJ 2025/0252439-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,723 [INFO] - 
+[14/50] Processando NPJ: 2025/0253308-000
+2025-09-25 13:51:00,723 [WARNING] -   - NPJ 2025/0253308-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,723 [INFO] - 
+[15/50] Processando NPJ: 2025/0258039-000
+2025-09-25 13:51:00,723 [WARNING] -   - NPJ 2025/0258039-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,724 [INFO] - 
+[16/50] Processando NPJ: 2025/0261045-000
+2025-09-25 13:51:00,724 [WARNING] -   - NPJ 2025/0261045-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,724 [INFO] - 
+[17/50] Processando NPJ: 2025/0261141-000
+2025-09-25 13:51:00,724 [WARNING] -   - NPJ 2025/0261141-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,724 [INFO] - 
+[18/50] Processando NPJ: 2025/0261320-000
+2025-09-25 13:51:00,724 [WARNING] -   - NPJ 2025/0261320-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,725 [INFO] - 
+[19/50] Processando NPJ: 2025/0261556-000
+2025-09-25 13:51:00,725 [WARNING] -   - NPJ 2025/0261556-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,725 [INFO] - 
+[20/50] Processando NPJ: 2025/0262462-000
+2025-09-25 13:51:00,725 [WARNING] -   - NPJ 2025/0262462-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,725 [INFO] - 
+[21/50] Processando NPJ: 2025/0262641-000
+2025-09-25 13:51:00,725 [WARNING] -   - NPJ 2025/0262641-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,726 [INFO] - 
+[22/50] Processando NPJ: 2025/0263318-000
+2025-09-25 13:51:00,726 [WARNING] -   - NPJ 2025/0263318-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,726 [INFO] - 
+[23/50] Processando NPJ: 2025/0263357-000
+2025-09-25 13:51:00,726 [WARNING] -   - NPJ 2025/0263357-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,726 [INFO] - 
+[24/50] Processando NPJ: 2025/0263474-000
+2025-09-25 13:51:00,726 [WARNING] -   - NPJ 2025/0263474-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,727 [INFO] - 
+[25/50] Processando NPJ: 2025/0264454-000
+2025-09-25 13:51:00,727 [WARNING] -   - NPJ 2025/0264454-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,727 [INFO] - 
+[26/50] Processando NPJ: 2025/0264588-000
+2025-09-25 13:51:00,727 [WARNING] -   - NPJ 2025/0264588-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,727 [INFO] - 
+[27/50] Processando NPJ: 2025/0264695-000
+2025-09-25 13:51:00,727 [WARNING] -   - NPJ 2025/0264695-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,728 [INFO] - 
+[28/50] Processando NPJ: 2025/0264746-000
+2025-09-25 13:51:00,728 [WARNING] -   - NPJ 2025/0264746-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,728 [INFO] - 
+[29/50] Processando NPJ: 2025/0265298-000
+2025-09-25 13:51:00,728 [WARNING] -   - NPJ 2025/0265298-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,728 [INFO] - 
+[30/50] Processando NPJ: 2025/0265376-000
+2025-09-25 13:51:00,728 [WARNING] -   - NPJ 2025/0265376-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,729 [INFO] - 
+[31/50] Processando NPJ: 2025/0266096-000
+2025-09-25 13:51:00,729 [WARNING] -   - NPJ 2025/0266096-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,729 [INFO] - 
+[32/50] Processando NPJ: 2025/0266149-000
+2025-09-25 13:51:00,729 [WARNING] -   - NPJ 2025/0266149-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,729 [INFO] - 
+[33/50] Processando NPJ: 2025/0266427-000
+2025-09-25 13:51:00,729 [WARNING] -   - NPJ 2025/0266427-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,729 [INFO] - 
+[34/50] Processando NPJ: 2025/0266581-000
+2025-09-25 13:51:00,729 [WARNING] -   - NPJ 2025/0266581-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,730 [INFO] - 
+[35/50] Processando NPJ: 2025/0266709-000
+2025-09-25 13:51:00,730 [WARNING] -   - NPJ 2025/0266709-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,730 [INFO] - 
+[36/50] Processando NPJ: 2025/0266734-000
+2025-09-25 13:51:00,730 [WARNING] -   - NPJ 2025/0266734-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,730 [INFO] - 
+[37/50] Processando NPJ: 2025/0266908-000
+2025-09-25 13:51:00,730 [WARNING] -   - NPJ 2025/0266908-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,731 [INFO] - 
+[38/50] Processando NPJ: 2025/0266937-000
+2025-09-25 13:51:00,731 [WARNING] -   - NPJ 2025/0266937-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,731 [INFO] - 
+[39/50] Processando NPJ: 2025/0268081-000
+2025-09-25 13:51:00,731 [WARNING] -   - NPJ 2025/0268081-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,731 [INFO] - 
+[40/50] Processando NPJ: 2025/0269748-000
+2025-09-25 13:51:00,731 [WARNING] -   - NPJ 2025/0269748-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,732 [INFO] - 
+[41/50] Processando NPJ: 2025/0269763-000
+2025-09-25 13:51:00,732 [WARNING] -   - NPJ 2025/0269763-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,732 [INFO] - 
+[42/50] Processando NPJ: 2025/0270023-000
+2025-09-25 13:51:00,732 [WARNING] -   - NPJ 2025/0270023-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,732 [INFO] - 
+[43/50] Processando NPJ: 2025/0270636-000
+2025-09-25 13:51:00,732 [WARNING] -   - NPJ 2025/0270636-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,733 [INFO] - 
+[44/50] Processando NPJ: 2025/0271001-000
+2025-09-25 13:51:00,733 [WARNING] -   - NPJ 2025/0271001-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,733 [INFO] - 
+[45/50] Processando NPJ: 2025/0272742-000
+2025-09-25 13:51:00,733 [WARNING] -   - NPJ 2025/0272742-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,733 [INFO] - 
+[46/50] Processando NPJ: 2025/0273456-000
+2025-09-25 13:51:00,733 [WARNING] -   - NPJ 2025/0273456-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,734 [INFO] - 
+[47/50] Processando NPJ: 2025/0277083-000
+2025-09-25 13:51:00,734 [WARNING] -   - NPJ 2025/0277083-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,734 [INFO] - 
+[48/50] Processando NPJ: 2025/0277349-000
+2025-09-25 13:51:00,734 [WARNING] -   - NPJ 2025/0277349-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,734 [INFO] - 
+[49/50] Processando NPJ: 2025/0281436-000
+2025-09-25 13:51:00,734 [WARNING] -   - NPJ 2025/0281436-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,734 [INFO] - 
+[50/50] Processando NPJ: 2025/0281584-000
+2025-09-25 13:51:00,735 [WARNING] -   - NPJ 2025/0281584-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,735 [INFO] - Processamento do lote concluído.
+2025-09-25 13:51:00,735 [INFO] - Lote finalizado. Restam 10 NPJs pendentes.
+2025-09-25 13:51:00,736 [INFO] - Iniciando processamento detalhado de 10 NPJ(s).
+2025-09-25 13:51:00,736 [INFO] - 
+[1/10] Processando NPJ: 2025/0281603-000
+2025-09-25 13:51:00,736 [WARNING] -   - NPJ 2025/0281603-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,736 [INFO] - 
+[2/10] Processando NPJ: 2025/0281658-000
+2025-09-25 13:51:00,736 [WARNING] -   - NPJ 2025/0281658-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,736 [INFO] - 
+[3/10] Processando NPJ: 2025/0281757-000
+2025-09-25 13:51:00,736 [WARNING] -   - NPJ 2025/0281757-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,736 [INFO] - 
+[4/10] Processando NPJ: 2025/0282273-000
+2025-09-25 13:51:00,737 [WARNING] -   - NPJ 2025/0282273-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,737 [INFO] - 
+[5/10] Processando NPJ: 2025/0282453-000
+2025-09-25 13:51:00,737 [WARNING] -   - NPJ 2025/0282453-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,737 [INFO] - 
+[6/10] Processando NPJ: 2025/0282774-000
+2025-09-25 13:51:00,737 [WARNING] -   - NPJ 2025/0282774-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,737 [INFO] - 
+[7/10] Processando NPJ: 2025/0282987-000
+2025-09-25 13:51:00,737 [WARNING] -   - NPJ 2025/0282987-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,738 [INFO] - 
+[8/10] Processando NPJ: 2025/0283551-000
+2025-09-25 13:51:00,738 [WARNING] -   - NPJ 2025/0283551-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,738 [INFO] - 
+[9/10] Processando NPJ: 8646/3552594-000
+2025-09-25 13:51:00,738 [WARNING] -   - NPJ 8646/3552594-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,738 [INFO] - 
+[10/10] Processando NPJ: 8658/5300783-000
+2025-09-25 13:51:00,738 [WARNING] -   - NPJ 8658/5300783-000 não possui um ID de processo válido. Não é possível continuar.
+2025-09-25 13:51:00,739 [INFO] - Processamento do lote concluído.
+2025-09-25 13:51:00,739 [INFO] - Lote finalizado. Restam 0 NPJs pendentes.
+2025-09-25 13:51:00,743 [INFO] - Finalizando a automação e fechando o navegador.
+2025-09-25 13:51:00,744 [INFO] - 
+--- RESUMO DA EXECUÇÃO ---
+- Timestamp: 25/09/2025 13:51:00
+- Duracao Total: 18.34 segundos
+- Tempo Medio Npj: 0.04s
+- Notificacoes Salvas: 0
+- Ciencias Registradas: 0
+- Andamentos: 0
+- Documentos: 0
+- Sucesso: 0
+- Falha: 510
+============================================================
+
+2025-09-25 13:51:00,744 [INFO] - Execução finalizada. Log completo em: logs/log_2025-09-25_13-50-42.txt

@@ -1,0 +1,92 @@
+2025-09-25 09:00:21,274 [INFO] - ============================================================
+2025-09-25 09:00:21,274 [INFO] - INICIANDO NOVA EXECUÇÃO DA RPA
+2025-09-25 09:00:21,274 [INFO] - ============================================================
+2025-09-25 09:00:21,277 [INFO] - 50 notificações com erro ou travadas foram resetadas para 'Pendente'.
+2025-09-25 09:00:21,495 [INFO] - 
+FASE 1: LOGIN E CONFIGURAÇÃO DA SESSÃO
+2025-09-25 09:01:10,287 [INFO] - 
+FASE 2: EXTRAÇÃO DE NOVAS NOTIFICAÇÕES E REGISTRO DE CIÊNCIA
+2025-09-25 09:01:10,287 [INFO] - Iniciando módulo de extração e ciência...
+2025-09-25 09:01:10,288 [INFO] - Navegando para a Central de Notificações...
+2025-09-25 09:01:11,591 [INFO] - Acessando a 'Visão do Advogado'...
+2025-09-25 09:01:12,275 [INFO] - --- Processando tarefa: Andamento de publicação em processo de condução terceirizada ---
+2025-09-25 09:01:12,287 [INFO] - 10 itens encontrados. Abrindo detalhes...
+2025-09-25 09:01:13,157 [INFO] -     - Verificando página 1...
+2025-09-25 09:01:15,835 [INFO] -     - Confirmando a ciência...
+2025-09-25 09:01:16,626 [INFO] - Processamento da tarefa 'Andamento de publicação em processo de condução terceirizada' concluído.
+2025-09-25 09:01:16,627 [INFO] - Tarefa 'Andamento de publicação em processo de condução terceirizada' concluída. 9 novas notificações salvas. 10 ciências registradas.
+2025-09-25 09:01:16,627 [INFO] - --- Processando tarefa: Doc. anexado por empresa externa em processo terceirizado ---
+2025-09-25 09:01:16,628 [WARNING] - Tarefa 'Doc. anexado por empresa externa em processo terceirizado' não encontrada na lista principal. Pulando.
+2025-09-25 09:01:16,628 [INFO] - --- Processando tarefa: Inclusão de Documentos no NPJ ---
+2025-09-25 09:01:16,629 [WARNING] - Tarefa 'Inclusão de Documentos no NPJ' não encontrada na lista principal. Pulando.
+2025-09-25 09:01:16,629 [INFO] - Extração/ciência concluídas. Salvas: 9, Ciências: 10.
+2025-09-25 09:01:16,629 [INFO] - 
+FASE 3: PROCESSAMENTO DETALHADO EM LOTES
+2025-09-25 09:01:16,630 [INFO] - Total de 62 NPJs pendentes para detalhamento.
+2025-09-25 09:01:16,630 [INFO] - Iniciando processamento detalhado de um lote de 50 NPJs.
+2025-09-25 09:01:16,679 [INFO] - 
+[1/50] Processando NPJ: 2009/0079019-000
+2025-09-25 09:01:16,865 [ERROR] -   Falha ao processar NPJ 2009/0079019-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti?numeroNpj=2009/0079019-000
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti?numeroNpj=2009/0079019-000", waiting until "load"
+Traceback (most recent call last):
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/processamento_detalhado.py", line 90, in processar_detalhes_de_lote
+    page.goto(f"{url_base}{npj}")
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/venv/lib/python3.9/site-packages/playwright/sync_api/_generated.py", line 9019, in goto
+    self._sync(
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/venv/lib/python3.9/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/venv/lib/python3.9/site-packages/playwright/_impl/_page.py", line 556, in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/venv/lib/python3.9/site-packages/playwright/_impl/_frame.py", line 153, in goto
+    await self._channel.send(
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/venv/lib/python3.9/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/venv/lib/python3.9/site-packages/playwright/_impl/_connection.py", line 558, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti?numeroNpj=2009/0079019-000
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti?numeroNpj=2009/0079019-000", waiting until "load"
+
+2025-09-25 09:01:16,866 [CRITICAL] - Erro crítico durante o processamento do lote: name 'database' is not defined
+Traceback (most recent call last):
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/processamento_detalhado.py", line 90, in processar_detalhes_de_lote
+    page.goto(f"{url_base}{npj}")
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/venv/lib/python3.9/site-packages/playwright/sync_api/_generated.py", line 9019, in goto
+    self._sync(
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/venv/lib/python3.9/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/venv/lib/python3.9/site-packages/playwright/_impl/_page.py", line 556, in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/venv/lib/python3.9/site-packages/playwright/_impl/_frame.py", line 153, in goto
+    await self._channel.send(
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/venv/lib/python3.9/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/venv/lib/python3.9/site-packages/playwright/_impl/_connection.py", line 558, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti?numeroNpj=2009/0079019-000
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti?numeroNpj=2009/0079019-000", waiting until "load"
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/processamento_detalhado.py", line 120, in processar_detalhes_de_lote
+    database.marcar_npj_como_erro(npj)
+NameError: name 'database' is not defined
+2025-09-25 09:01:16,874 [INFO] - Processamento do lote concluído.
+2025-09-25 09:01:16,874 [INFO] - Finalizando a automação e fechando o navegador.
+2025-09-25 09:01:16,883 [INFO] - 
+--- RESUMO DA EXECUÇÃO ---
+2025-09-25 09:01:16,883 [INFO] - Timestamp: 2025-09-25 09:01:16
+2025-09-25 09:01:16,883 [INFO] - Duracao Total: 55.61
+2025-09-25 09:01:16,883 [INFO] - Tempo Medio Npj: 0
+2025-09-25 09:01:16,883 [INFO] - Notificacoes Salvas: 9
+2025-09-25 09:01:16,883 [INFO] - Ciencias Registradas: 10
+2025-09-25 09:01:16,883 [INFO] - Andamentos: 0
+2025-09-25 09:01:16,883 [INFO] - Documentos: 0
+2025-09-25 09:01:16,883 [INFO] - Sucesso: 0
+2025-09-25 09:01:16,883 [INFO] - Falha: 0
+2025-09-25 09:01:16,883 [INFO] - ============================================================
+2025-09-25 09:01:16,883 [INFO] - Execução finalizada. Log completo em: logs/log_2025-09-25_09-00-21.txt

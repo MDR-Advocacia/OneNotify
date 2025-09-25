@@ -1,0 +1,825 @@
+2025-09-25 14:33:50,247 [INFO] - ============================================================
+2025-09-25 14:33:50,247 [INFO] - INICIANDO NOVA EXECUÇÃO DA RPA
+2025-09-25 14:33:50,247 [INFO] - ============================================================
+2025-09-25 14:33:50,363 [INFO] - 
+FASE 1: LOGIN E CONFIGURAÇÃO DA SESSÃO
+2025-09-25 14:34:26,656 [INFO] - 
+FASE 2: EXTRAÇÃO DE NOVAS NOTIFICAÇÕES E REGISTRO DE CIÊNCIA
+2025-09-25 14:34:26,657 [INFO] - Iniciando módulo de extração e ciência...
+2025-09-25 14:34:26,657 [INFO] - Navegando para a Central de Notificações...
+2025-09-25 14:34:28,090 [INFO] - Acessando a 'Visão do Advogado'...
+2025-09-25 14:34:28,781 [INFO] - --- Processando tarefa: Andamento de publicação em processo de condução terceirizada ---
+2025-09-25 14:34:28,793 [INFO] - 10 itens encontrados. Abrindo detalhes...
+2025-09-25 14:34:29,654 [INFO] -     - Verificando página 1...
+2025-09-25 14:34:32,371 [INFO] -     - Fim da paginação.
+2025-09-25 14:34:32,371 [INFO] -     - Confirmando a ciência...
+2025-09-25 14:34:43,053 [WARNING] -     - Modal de carregamento final não apareceu, seguindo em frente.
+2025-09-25 14:34:43,062 [INFO] - Processamento da tarefa 'Andamento de publicação em processo de condução terceirizada' concluído.
+2025-09-25 14:34:43,070 [INFO] - Tarefa 'Andamento de publicação em processo de condução terceirizada' finalizada. 10 novas notificações salvas. 10 ciências registradas.
+2025-09-25 14:34:43,070 [INFO] - --- Processando tarefa: Doc. anexado por empresa externa em processo terceirizado ---
+2025-09-25 14:34:43,083 [INFO] - 4 itens encontrados. Abrindo detalhes...
+2025-09-25 14:34:43,446 [INFO] -     - Verificando página 1...
+2025-09-25 14:34:44,389 [INFO] -     - Fim da paginação.
+2025-09-25 14:34:44,389 [INFO] -     - Confirmando a ciência...
+2025-09-25 14:34:54,873 [WARNING] -     - Modal de carregamento final não apareceu, seguindo em frente.
+2025-09-25 14:34:54,881 [INFO] - Processamento da tarefa 'Doc. anexado por empresa externa em processo terceirizado' concluído.
+2025-09-25 14:34:54,884 [INFO] - Tarefa 'Doc. anexado por empresa externa em processo terceirizado' finalizada. 3 novas notificações salvas. 3 ciências registradas.
+2025-09-25 14:34:54,884 [INFO] - --- Processando tarefa: Inclusão de Documentos no NPJ ---
+2025-09-25 14:34:54,898 [INFO] - 3 itens encontrados. Abrindo detalhes...
+2025-09-25 14:34:55,269 [INFO] -     - Verificando página 1...
+2025-09-25 14:34:56,233 [INFO] -     - Fim da paginação.
+2025-09-25 14:34:56,233 [INFO] -     - Confirmando a ciência...
+2025-09-25 14:35:06,793 [WARNING] -     - Modal de carregamento final não apareceu, seguindo em frente.
+2025-09-25 14:35:06,802 [INFO] - Processamento da tarefa 'Inclusão de Documentos no NPJ' concluído.
+2025-09-25 14:35:06,805 [INFO] - Tarefa 'Inclusão de Documentos no NPJ' finalizada. 4 novas notificações salvas. 4 ciências registradas.
+2025-09-25 14:35:06,805 [INFO] - Extração/ciência concluídas. Salvas: 17, Ciências: 17.
+2025-09-25 14:35:06,805 [INFO] - 
+FASE 3: PROCESSAMENTO DETALHADO EM LOTES
+2025-09-25 14:35:06,806 [INFO] - Total de 525 NPJs pendentes para detalhamento.
+2025-09-25 14:35:06,810 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-25 14:35:06,811 [INFO] - 
+[1/50] Processando NPJ: 2003/0114453-000
+2025-09-25 14:35:06,892 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:07,072 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2003/0114453-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:07,085 [INFO] - 
+[2/50] Processando NPJ: 2004/0091686-001
+2025-09-25 14:35:07,141 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:07,380 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2004/0091686-001: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:07,397 [INFO] - 
+[3/50] Processando NPJ: 2007/0102180-000
+2025-09-25 14:35:07,458 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:07,605 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2007/0102180-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:07,617 [INFO] - 
+[4/50] Processando NPJ: 2008/0158298-000
+2025-09-25 14:35:07,671 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:07,915 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2008/0158298-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:07,959 [INFO] - 
+[5/50] Processando NPJ: 2008/0176330-000
+2025-09-25 14:35:08,012 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:08,238 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2008/0176330-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:08,254 [INFO] - 
+[6/50] Processando NPJ: 2009/0079019-000
+2025-09-25 14:35:08,314 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:08,480 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2009/0079019-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:08,491 [INFO] - 
+[7/50] Processando NPJ: 2010/0140919-000
+2025-09-25 14:35:08,546 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:08,745 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2010/0140919-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:08,758 [INFO] - 
+[8/50] Processando NPJ: 2010/0294280-000
+2025-09-25 14:35:08,818 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:08,971 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2010/0294280-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:08,982 [INFO] - 
+[9/50] Processando NPJ: 2011/0085767-000
+2025-09-25 14:35:09,035 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:09,463 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2011/0085767-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:09,513 [INFO] - 
+[10/50] Processando NPJ: 2011/0089436-000
+2025-09-25 14:35:09,566 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:09,815 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2011/0089436-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:09,832 [INFO] - 
+[11/50] Processando NPJ: 2011/0169228-000
+2025-09-25 14:35:09,888 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:10,032 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2011/0169228-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:10,042 [INFO] - 
+[12/50] Processando NPJ: 2011/0174045-000
+2025-09-25 14:35:10,094 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:10,332 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2011/0174045-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:10,348 [INFO] - 
+[13/50] Processando NPJ: 2011/0193726-000
+2025-09-25 14:35:10,408 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:10,545 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2011/0193726-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:10,555 [INFO] - 
+[14/50] Processando NPJ: 2012/0192824-000
+2025-09-25 14:35:10,609 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:10,764 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2012/0192824-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:10,774 [INFO] - 
+[15/50] Processando NPJ: 2013/0180109-000
+2025-09-25 14:35:10,824 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:10,969 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2013/0180109-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:10,977 [INFO] - 
+[16/50] Processando NPJ: 2013/0229537-000
+2025-09-25 14:35:11,023 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:11,164 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2013/0229537-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:11,175 [INFO] - 
+[17/50] Processando NPJ: 2013/0238736-000
+2025-09-25 14:35:11,227 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:11,376 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2013/0238736-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:11,387 [INFO] - 
+[18/50] Processando NPJ: 2014/0160200-000
+2025-09-25 14:35:11,440 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:11,589 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2014/0160200-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:11,602 [INFO] - 
+[19/50] Processando NPJ: 2015/0108865-000
+2025-09-25 14:35:11,653 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:11,800 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2015/0108865-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:11,806 [INFO] - 
+[20/50] Processando NPJ: 2015/0124487-000
+2025-09-25 14:35:11,858 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:12,008 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2015/0124487-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:12,019 [INFO] - 
+[21/50] Processando NPJ: 2015/0218750-000
+2025-09-25 14:35:12,076 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:12,217 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2015/0218750-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:12,228 [INFO] - 
+[22/50] Processando NPJ: 2015/0225433-000
+2025-09-25 14:35:12,280 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:12,445 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2015/0225433-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:12,452 [INFO] - 
+[23/50] Processando NPJ: 2015/0230631-000
+2025-09-25 14:35:12,509 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:12,654 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2015/0230631-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:12,663 [INFO] - 
+[24/50] Processando NPJ: 2015/0233697-000
+2025-09-25 14:35:12,713 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:12,873 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2015/0233697-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:12,884 [INFO] - 
+[25/50] Processando NPJ: 2016/0015655-000
+2025-09-25 14:35:12,936 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:13,082 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2016/0015655-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:13,088 [INFO] - 
+[26/50] Processando NPJ: 2016/0046140-000
+2025-09-25 14:35:13,137 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:13,286 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2016/0046140-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:13,300 [INFO] - 
+[27/50] Processando NPJ: 2016/0080794-000
+2025-09-25 14:35:13,352 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:13,503 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2016/0080794-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:13,513 [INFO] - 
+[28/50] Processando NPJ: 2016/0087561-000
+2025-09-25 14:35:13,566 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:13,715 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2016/0087561-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:13,725 [INFO] - 
+[29/50] Processando NPJ: 2016/0129588-000
+2025-09-25 14:35:13,778 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:13,918 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2016/0129588-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:13,928 [INFO] - 
+[30/50] Processando NPJ: 2016/0149324-000
+2025-09-25 14:35:13,981 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:14,135 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2016/0149324-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:14,144 [INFO] - 
+[31/50] Processando NPJ: 2016/0167336-000
+2025-09-25 14:35:14,197 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:14,355 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2016/0167336-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:14,367 [INFO] - 
+[32/50] Processando NPJ: 2016/0196173-000
+2025-09-25 14:35:14,419 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:14,581 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2016/0196173-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:14,592 [INFO] - 
+[33/50] Processando NPJ: 2016/0216635-000
+2025-09-25 14:35:14,646 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:14,806 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2016/0216635-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:14,817 [INFO] - 
+[34/50] Processando NPJ: 2016/0216789-000
+2025-09-25 14:35:14,868 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:15,033 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2016/0216789-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:15,044 [INFO] - 
+[35/50] Processando NPJ: 2016/0218165-000
+2025-09-25 14:35:15,097 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:15,240 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2016/0218165-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:15,247 [INFO] - 
+[36/50] Processando NPJ: 2016/0230755-000
+2025-09-25 14:35:15,311 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:15,464 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2016/0230755-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:15,493 [INFO] - 
+[37/50] Processando NPJ: 2016/0255629-000
+2025-09-25 14:35:15,545 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:15,711 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2016/0255629-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:15,722 [INFO] - 
+[38/50] Processando NPJ: 2016/0261994-000
+2025-09-25 14:35:15,777 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:15,936 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2016/0261994-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:15,943 [INFO] - 
+[39/50] Processando NPJ: 2017/0162001-000
+2025-09-25 14:35:15,988 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:16,139 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2017/0162001-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:16,151 [INFO] - 
+[40/50] Processando NPJ: 2017/0197977-000
+2025-09-25 14:35:16,211 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:16,353 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2017/0197977-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:16,361 [INFO] - 
+[41/50] Processando NPJ: 2017/0203070-000
+2025-09-25 14:35:16,418 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:16,575 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2017/0203070-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:16,606 [INFO] - 
+[42/50] Processando NPJ: 2017/0204158-000
+2025-09-25 14:35:16,665 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:16,809 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2017/0204158-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:16,818 [INFO] - 
+[43/50] Processando NPJ: 2017/0207600-000
+2025-09-25 14:35:16,869 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:17,029 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2017/0207600-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:17,057 [INFO] - 
+[44/50] Processando NPJ: 2017/0215696-000
+2025-09-25 14:35:17,107 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:17,247 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2017/0215696-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:17,257 [INFO] - 
+[45/50] Processando NPJ: 2017/0223301-000
+2025-09-25 14:35:17,308 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:17,459 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2017/0223301-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:17,469 [INFO] - 
+[46/50] Processando NPJ: 2017/0231717-000
+2025-09-25 14:35:17,526 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:17,674 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2017/0231717-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:17,682 [INFO] - 
+[47/50] Processando NPJ: 2017/0265668-000
+2025-09-25 14:35:17,744 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:17,903 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2017/0265668-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:17,916 [INFO] - 
+[48/50] Processando NPJ: 2017/0282075-000
+2025-09-25 14:35:17,975 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:18,122 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2017/0282075-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:18,153 [INFO] - 
+[49/50] Processando NPJ: 2018/0224964-000
+2025-09-25 14:35:18,203 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:18,355 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2018/0224964-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:18,368 [INFO] - 
+[50/50] Processando NPJ: 2018/0226258-000
+2025-09-25 14:35:18,424 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:18,575 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2018/0226258-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:18,586 [INFO] - Processamento do lote concluído.
+2025-09-25 14:35:18,587 [INFO] - Lote finalizado. Restam 475 NPJs pendentes.
+2025-09-25 14:35:18,589 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-25 14:35:18,589 [INFO] - 
+[1/50] Processando NPJ: 2018/0231007-000
+2025-09-25 14:35:18,640 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:18,789 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2018/0231007-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:18,801 [INFO] - 
+[2/50] Processando NPJ: 2018/0254659-000
+2025-09-25 14:35:18,853 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:19,008 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2018/0254659-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:19,020 [INFO] - 
+[3/50] Processando NPJ: 2018/0254996-000
+2025-09-25 14:35:19,076 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:19,225 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2018/0254996-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:19,237 [INFO] - 
+[4/50] Processando NPJ: 2018/0331504-000
+2025-09-25 14:35:19,288 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:19,437 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2018/0331504-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:19,451 [INFO] - 
+[5/50] Processando NPJ: 2018/0357633-000
+2025-09-25 14:35:19,502 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:19,668 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2018/0357633-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:19,685 [INFO] - 
+[6/50] Processando NPJ: 2019/0010947-000
+2025-09-25 14:35:19,743 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:19,895 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2019/0010947-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:19,920 [INFO] - 
+[7/50] Processando NPJ: 2019/0048908-000
+2025-09-25 14:35:19,977 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:20,136 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2019/0048908-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:20,148 [INFO] - 
+[8/50] Processando NPJ: 2019/0066799-000
+2025-09-25 14:35:20,205 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:20,357 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2019/0066799-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:20,385 [INFO] - 
+[9/50] Processando NPJ: 2019/0069054-000
+2025-09-25 14:35:20,436 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:20,599 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2019/0069054-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:20,612 [INFO] - 
+[10/50] Processando NPJ: 2019/0078747-000
+2025-09-25 14:35:20,663 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:20,823 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2019/0078747-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:20,854 [INFO] - 
+[11/50] Processando NPJ: 2019/0086789-000
+2025-09-25 14:35:20,912 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:21,077 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2019/0086789-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:21,084 [INFO] - 
+[12/50] Processando NPJ: 2019/0088795-000
+2025-09-25 14:35:21,145 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:21,301 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2019/0088795-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:21,311 [INFO] - 
+[13/50] Processando NPJ: 2019/0205889-000
+2025-09-25 14:35:21,363 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:21,528 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2019/0205889-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:21,558 [INFO] - 
+[14/50] Processando NPJ: 2019/0206474-000
+2025-09-25 14:35:21,608 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:21,774 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2019/0206474-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:21,785 [INFO] - 
+[15/50] Processando NPJ: 2019/0227730-000
+2025-09-25 14:35:21,844 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:22,004 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2019/0227730-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:22,030 [INFO] - 
+[16/50] Processando NPJ: 2019/0246737-000
+2025-09-25 14:35:22,094 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:22,255 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2019/0246737-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:22,267 [INFO] - 
+[17/50] Processando NPJ: 2019/0253595-000
+2025-09-25 14:35:22,318 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:22,468 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2019/0253595-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:22,494 [INFO] - 
+[18/50] Processando NPJ: 2019/0256855-000
+2025-09-25 14:35:22,546 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:22,698 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2019/0256855-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:22,716 [INFO] - 
+[19/50] Processando NPJ: 2020/0055366-000
+2025-09-25 14:35:22,770 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:22,926 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2020/0055366-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:22,938 [INFO] - 
+[20/50] Processando NPJ: 2020/0073431-000
+2025-09-25 14:35:22,989 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:23,142 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2020/0073431-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:23,171 [INFO] - 
+[21/50] Processando NPJ: 2020/0121023-000
+2025-09-25 14:35:23,230 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:23,390 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2020/0121023-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:23,404 [INFO] - 
+[22/50] Processando NPJ: 2020/0137514-000
+2025-09-25 14:35:23,481 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:23,651 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2020/0137514-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:23,662 [INFO] - 
+[23/50] Processando NPJ: 2020/0160157-000
+2025-09-25 14:35:23,720 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:23,870 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2020/0160157-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:23,881 [INFO] - 
+[24/50] Processando NPJ: 2020/0164739-000
+2025-09-25 14:35:23,931 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:24,077 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2020/0164739-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:24,088 [INFO] - 
+[25/50] Processando NPJ: 2020/0165737-000
+2025-09-25 14:35:24,144 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:24,287 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2020/0165737-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:24,300 [INFO] - 
+[26/50] Processando NPJ: 2020/0172094-000
+2025-09-25 14:35:24,350 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:24,494 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2020/0172094-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:24,506 [INFO] - 
+[27/50] Processando NPJ: 2020/0175083-000
+2025-09-25 14:35:24,558 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:24,714 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2020/0175083-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:24,746 [INFO] - 
+[28/50] Processando NPJ: 2020/0184959-000
+2025-09-25 14:35:24,811 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:24,970 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2020/0184959-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:24,992 [INFO] - 
+[29/50] Processando NPJ: 2020/0220383-000
+2025-09-25 14:35:25,063 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:25,214 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2020/0220383-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:25,226 [INFO] - 
+[30/50] Processando NPJ: 2020/0233121-000
+2025-09-25 14:35:25,286 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:25,446 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2020/0233121-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:25,461 [INFO] - 
+[31/50] Processando NPJ: 2020/0233599-000
+2025-09-25 14:35:25,514 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:25,675 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2020/0233599-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:25,687 [INFO] - 
+[32/50] Processando NPJ: 2020/0246882-000
+2025-09-25 14:35:25,742 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:25,898 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2020/0246882-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:25,913 [INFO] - 
+[33/50] Processando NPJ: 2021/0005943-000
+2025-09-25 14:35:25,965 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:26,122 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2021/0005943-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:26,136 [INFO] - 
+[34/50] Processando NPJ: 2021/0011986-000
+2025-09-25 14:35:26,191 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:26,341 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2021/0011986-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:26,352 [INFO] - 
+[35/50] Processando NPJ: 2021/0029131-000
+2025-09-25 14:35:26,421 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:26,581 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2021/0029131-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:26,593 [INFO] - 
+[36/50] Processando NPJ: 2021/0030231-000
+2025-09-25 14:35:26,648 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:26,812 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2021/0030231-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:26,833 [INFO] - 
+[37/50] Processando NPJ: 2021/0039781-000
+2025-09-25 14:35:26,894 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:27,075 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2021/0039781-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:27,086 [INFO] - 
+[38/50] Processando NPJ: 2021/0044280-000
+2025-09-25 14:35:27,143 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:27,284 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2021/0044280-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:27,294 [INFO] - 
+[39/50] Processando NPJ: 2021/0069094-000
+2025-09-25 14:35:27,345 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:27,504 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2021/0069094-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:27,519 [INFO] - 
+[40/50] Processando NPJ: 2021/0088527-000
+2025-09-25 14:35:27,571 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:27,716 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2021/0088527-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:27,728 [INFO] - 
+[41/50] Processando NPJ: 2021/0126388-000
+2025-09-25 14:35:27,787 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:27,932 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2021/0126388-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:27,943 [INFO] - 
+[42/50] Processando NPJ: 2021/0144328-000
+2025-09-25 14:35:27,996 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:28,154 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2021/0144328-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:28,166 [INFO] - 
+[43/50] Processando NPJ: 2021/0146719-000
+2025-09-25 14:35:28,217 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:28,377 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2021/0146719-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:28,388 [INFO] - 
+[44/50] Processando NPJ: 2021/0149765-000
+2025-09-25 14:35:28,441 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:28,593 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2021/0149765-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:28,619 [INFO] - 
+[45/50] Processando NPJ: 2021/0174829-000
+2025-09-25 14:35:28,672 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:28,833 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2021/0174829-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:28,840 [INFO] - 
+[46/50] Processando NPJ: 2021/0217597-000
+2025-09-25 14:35:28,891 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:29,045 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2021/0217597-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:29,056 [INFO] - 
+[47/50] Processando NPJ: 2021/0246028-000
+2025-09-25 14:35:29,110 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:29,277 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2021/0246028-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:29,289 [INFO] - 
+[48/50] Processando NPJ: 2021/0251822-000
+2025-09-25 14:35:29,343 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:29,523 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2021/0251822-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:29,539 [INFO] - 
+[49/50] Processando NPJ: 2021/0267367-000
+2025-09-25 14:35:29,593 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:29,737 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2021/0267367-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:29,751 [INFO] - 
+[50/50] Processando NPJ: 2021/0279440-000
+2025-09-25 14:35:29,801 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:29,991 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2021/0279440-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:30,007 [INFO] - Processamento do lote concluído.
+2025-09-25 14:35:30,008 [INFO] - Lote finalizado. Restam 425 NPJs pendentes.
+2025-09-25 14:35:30,010 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-25 14:35:30,010 [INFO] - 
+[1/50] Processando NPJ: 2022/0031947-000
+2025-09-25 14:35:30,062 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:30,210 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2022/0031947-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:30,219 [INFO] - 
+[2/50] Processando NPJ: 2022/0047487-000
+2025-09-25 14:35:30,281 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:30,448 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2022/0047487-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:30,480 [INFO] - 
+[3/50] Processando NPJ: 2022/0050350-000
+2025-09-25 14:35:30,544 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:30,696 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2022/0050350-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:30,728 [INFO] - 
+[4/50] Processando NPJ: 2022/0075861-000
+2025-09-25 14:35:30,781 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:30,998 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2022/0075861-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:31,008 [INFO] - 
+[5/50] Processando NPJ: 2022/0103181-000
+2025-09-25 14:35:31,057 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:31,212 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2022/0103181-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:31,222 [INFO] - 
+[6/50] Processando NPJ: 2022/0104685-000
+2025-09-25 14:35:31,277 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:31,426 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2022/0104685-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:31,439 [INFO] - 
+[7/50] Processando NPJ: 2022/0104911-000
+2025-09-25 14:35:31,488 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:31,647 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2022/0104911-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:31,658 [INFO] - 
+[8/50] Processando NPJ: 2022/0105618-000
+2025-09-25 14:35:31,711 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:31,871 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2022/0105618-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:31,881 [INFO] - 
+[9/50] Processando NPJ: 2022/0105720-000
+2025-09-25 14:35:31,947 [INFO] -     - Navegando para a busca de processos...
+2025-09-25 14:35:32,096 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2022/0105720-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/resumo/resumo.mti
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/resumo/resumo.mti", waiting until "networkidle"
+
+2025-09-25 14:35:32,126 [INFO] - 
+[10/50] Processando NPJ: 2022/0111376-000
+2025-09-25 14:35:32,177 [INFO] - Finalizando a automação e fechando o navegador.
+2025-09-25 14:35:32,178 [INFO] - 
+--- RESUMO DA EXECUÇÃO ---
+- Timestamp: 25/09/2025 14:35:32
+- Duracao Total: 1 minuto(s) e 41 segundo(s)
+- Tempo Medio Npj: 1.02s
+- Notificacoes Salvas: 17
+- Ciencias Registradas: 17
+- Andamentos: 0
+- Documentos: 0
+- Sucesso: 0
+- Falha: 100
+============================================================
+
+2025-09-25 14:35:32,178 [INFO] - Execução finalizada. Log completo em: logs/log_2025-09-25_14-33-50.txt

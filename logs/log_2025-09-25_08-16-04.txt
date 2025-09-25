@@ -1,0 +1,32 @@
+2025-09-25 08:16:04,578 [INFO] - ============================================================
+2025-09-25 08:16:04,578 [INFO] - INICIANDO NOVA EXECUÇÃO DA RPA
+2025-09-25 08:16:04,578 [INFO] - ============================================================
+2025-09-25 08:16:04,796 [INFO] - FASE 1: LOGIN E CONFIGURAÇÃO DA SESSÃO
+2025-09-25 08:16:17,924 [INFO] - 
+FASE 2: EXTRAÇÃO DE NOVAS NOTIFICAÇÕES E REGISTRO DE CIÊNCIA
+2025-09-25 08:16:17,925 [INFO] - Iniciando módulo de extração e ciência...
+2025-09-25 08:16:20,580 [INFO] - --- Processando tarefa: Andamento de publicação em processo de condução terceirizada ---
+2025-09-25 08:16:21,966 [WARNING] - Tarefa 'Andamento de publicação em processo de condução terceirizada' não encontrada. Pulando.
+2025-09-25 08:16:21,966 [INFO] - --- Processando tarefa: Doc. anexado por empresa externa em processo terceirizado ---
+2025-09-25 08:16:23,293 [WARNING] - Tarefa 'Doc. anexado por empresa externa em processo terceirizado' não encontrada. Pulando.
+2025-09-25 08:16:23,293 [INFO] - --- Processando tarefa: Inclusão de Documentos no NPJ ---
+2025-09-25 08:16:24,633 [WARNING] - Tarefa 'Inclusão de Documentos no NPJ' não encontrada. Pulando.
+2025-09-25 08:16:24,633 [INFO] - Extração/ciência concluídas. Salvas: 0, Ciências: 0.
+2025-09-25 08:16:24,633 [INFO] - 
+FASE 3: PROCESSAMENTO DETALHADO EM LOTES
+2025-09-25 08:16:24,634 [INFO] - Finalizando a automação e fechando o navegador.
+2025-09-25 08:16:24,635 [ERROR] - ERRO ao salvar log de execução: table logs_execucao has no column named andamentos
+Traceback (most recent call last):
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/database.py", line 143, in salvar_log_execucao
+    cursor.execute(query, list(log_data.values()))
+sqlite3.OperationalError: table logs_execucao has no column named andamentos
+2025-09-25 08:16:24,637 [INFO] - 
+============================================================
+RESUMO FINAL DA EXECUÇÃO (25/09/2025 08:16:24)
+============================================================
+- Duração Total: 19.84 segundos
+- Notificações Salvas: 0
+- NPJs com Sucesso: 0
+- NPJs com Falha: 0
+============================================================
+
