@@ -1,0 +1,701 @@
+2025-09-25 17:25:17,495 [INFO] - ============================================================
+2025-09-25 17:25:17,495 [INFO] - INICIANDO NOVA EXECUÇÃO DA RPA
+2025-09-25 17:25:17,495 [INFO] - ============================================================
+2025-09-25 17:25:17,604 [INFO] - 
+FASE 1: LOGIN E CONFIGURAÇÃO DA SESSÃO
+2025-09-25 17:25:55,108 [INFO] - 
+FASE 2: EXTRAÇÃO DE NOVAS NOTIFICAÇÕES E REGISTRO DE CIÊNCIA
+2025-09-25 17:25:55,108 [INFO] - Iniciando módulo de extração e ciência...
+2025-09-25 17:25:55,109 [INFO] - Navegando para a Central de Notificações...
+2025-09-25 17:25:56,349 [INFO] - Acessando a 'Visão do Advogado'...
+2025-09-25 17:25:56,971 [INFO] - --- Processando tarefa: Andamento de publicação em processo de condução terceirizada ---
+2025-09-25 17:25:56,988 [WARNING] - Tarefa 'Andamento de publicação em processo de condução terceirizada' não encontrada. Pulando.
+2025-09-25 17:25:56,988 [INFO] - --- Processando tarefa: Doc. anexado por empresa externa em processo terceirizado ---
+2025-09-25 17:25:56,991 [WARNING] - Tarefa 'Doc. anexado por empresa externa em processo terceirizado' não encontrada. Pulando.
+2025-09-25 17:25:56,992 [INFO] - --- Processando tarefa: Inclusão de Documentos no NPJ ---
+2025-09-25 17:25:57,007 [WARNING] - Tarefa 'Inclusão de Documentos no NPJ' não encontrada. Pulando.
+2025-09-25 17:25:57,007 [INFO] - Extração/ciência concluídas. Salvas: 0, Ciências: 0.
+2025-09-25 17:25:57,007 [INFO] - 
+FASE 3: PROCESSAMENTO DETALHADO EM LOTES
+2025-09-25 17:25:57,008 [INFO] - Total de 389 NPJs pendentes para detalhamento.
+2025-09-25 17:25:57,010 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-25 17:25:57,060 [INFO] - 
+[1/50] Processando NPJ: 2023/0076512-000 (Notificação base: 22/09/2025)
+2025-09-25 17:25:57,060 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0076512-000
+2025-09-25 17:25:57,060 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:25:57,194 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0076512-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230076512&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230076512&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:25:57,196 [INFO] - 
+[2/50] Processando NPJ: 2023/0080283-000 (Notificação base: 25/09/2025)
+2025-09-25 17:25:57,196 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0080283-000
+2025-09-25 17:25:57,196 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:25:57,338 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0080283-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230080283&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230080283&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:25:57,340 [INFO] - 
+[3/50] Processando NPJ: 2023/0080327-000 (Notificação base: 25/09/2025)
+2025-09-25 17:25:57,340 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0080327-000
+2025-09-25 17:25:57,340 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:25:57,489 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0080327-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230080327&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230080327&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:25:57,491 [INFO] - 
+[4/50] Processando NPJ: 2023/0104082-000 (Notificação base: 25/09/2025)
+2025-09-25 17:25:57,491 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0104082-000
+2025-09-25 17:25:57,491 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:25:57,634 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0104082-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230104082&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230104082&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:25:57,636 [INFO] - 
+[5/50] Processando NPJ: 2023/0107667-000 (Notificação base: 25/09/2025)
+2025-09-25 17:25:57,636 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0107667-000
+2025-09-25 17:25:57,636 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:25:57,781 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0107667-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230107667&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230107667&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:25:57,783 [INFO] - 
+[6/50] Processando NPJ: 2023/0109257-000 (Notificação base: 25/09/2025)
+2025-09-25 17:25:57,783 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0109257-000
+2025-09-25 17:25:57,783 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:25:57,937 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0109257-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230109257&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230109257&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:25:57,938 [INFO] - 
+[7/50] Processando NPJ: 2023/0109303-000 (Notificação base: 25/09/2025)
+2025-09-25 17:25:57,938 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0109303-000
+2025-09-25 17:25:57,939 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:25:58,100 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0109303-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230109303&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230109303&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:25:58,101 [INFO] - 
+[8/50] Processando NPJ: 2023/0110333-000 (Notificação base: 24/09/2025)
+2025-09-25 17:25:58,101 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0110333-000
+2025-09-25 17:25:58,101 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:25:58,249 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0110333-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230110333&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230110333&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:25:58,250 [INFO] - 
+[9/50] Processando NPJ: 2023/0114953-000 (Notificação base: 25/09/2025)
+2025-09-25 17:25:58,250 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0114953-000
+2025-09-25 17:25:58,250 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:25:58,394 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0114953-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230114953&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230114953&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:25:58,395 [INFO] - 
+[10/50] Processando NPJ: 2023/0115725-000 (Notificação base: 25/09/2025)
+2025-09-25 17:25:58,395 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0115725-000
+2025-09-25 17:25:58,395 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:25:58,540 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0115725-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230115725&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230115725&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:25:58,541 [INFO] - 
+[11/50] Processando NPJ: 2023/0118046-000 (Notificação base: 25/09/2025)
+2025-09-25 17:25:58,541 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0118046-000
+2025-09-25 17:25:58,541 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:25:58,686 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0118046-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230118046&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230118046&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:25:58,687 [INFO] - 
+[12/50] Processando NPJ: 2023/0121148-000 (Notificação base: 25/09/2025)
+2025-09-25 17:25:58,687 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0121148-000
+2025-09-25 17:25:58,687 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:25:58,837 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0121148-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230121148&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230121148&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:25:58,838 [INFO] - 
+[13/50] Processando NPJ: 2023/0130949-000 (Notificação base: 25/09/2025)
+2025-09-25 17:25:58,838 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0130949-000
+2025-09-25 17:25:58,838 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:25:58,986 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0130949-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230130949&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230130949&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:25:58,987 [INFO] - 
+[14/50] Processando NPJ: 2023/0139738-000 (Notificação base: 25/09/2025)
+2025-09-25 17:25:58,987 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0139738-000
+2025-09-25 17:25:58,987 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:25:59,141 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0139738-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230139738&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230139738&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:25:59,143 [INFO] - 
+[15/50] Processando NPJ: 2023/0152553-000 (Notificação base: 25/09/2025)
+2025-09-25 17:25:59,143 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0152553-000
+2025-09-25 17:25:59,143 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:25:59,291 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0152553-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230152553&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230152553&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:25:59,292 [INFO] - 
+[16/50] Processando NPJ: 2023/0154667-000 (Notificação base: 25/09/2025)
+2025-09-25 17:25:59,292 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0154667-000
+2025-09-25 17:25:59,292 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:25:59,449 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0154667-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230154667&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230154667&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:25:59,451 [INFO] - 
+[17/50] Processando NPJ: 2023/0186242-000 (Notificação base: 25/09/2025)
+2025-09-25 17:25:59,451 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0186242-000
+2025-09-25 17:25:59,451 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:25:59,599 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0186242-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230186242&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230186242&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:25:59,604 [INFO] - 
+[18/50] Processando NPJ: 2023/0201474-000 (Notificação base: 25/09/2025)
+2025-09-25 17:25:59,604 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0201474-000
+2025-09-25 17:25:59,604 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:25:59,750 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0201474-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230201474&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230201474&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:25:59,751 [INFO] - 
+[19/50] Processando NPJ: 2023/0201980-000 (Notificação base: 25/09/2025)
+2025-09-25 17:25:59,751 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0201980-000
+2025-09-25 17:25:59,752 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:25:59,901 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0201980-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230201980&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230201980&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:25:59,902 [INFO] - 
+[20/50] Processando NPJ: 2023/0219158-000 (Notificação base: 25/09/2025)
+2025-09-25 17:25:59,902 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0219158-000
+2025-09-25 17:25:59,902 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:00,067 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0219158-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230219158&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230219158&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:00,068 [INFO] - 
+[21/50] Processando NPJ: 2023/0226794-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:00,069 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0226794-000
+2025-09-25 17:26:00,069 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:00,213 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0226794-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230226794&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230226794&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:00,214 [INFO] - 
+[22/50] Processando NPJ: 2023/0229209-000 (Notificação base: 24/09/2025)
+2025-09-25 17:26:00,214 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0229209-000
+2025-09-25 17:26:00,214 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:00,362 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0229209-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230229209&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230229209&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:00,363 [INFO] - 
+[23/50] Processando NPJ: 2023/0236746-000 (Notificação base: 2025/0015131951)
+2025-09-25 17:26:00,363 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0236746-000
+2025-09-25 17:26:00,363 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:00,564 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0236746-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230236746&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230236746&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:00,566 [INFO] - 
+[24/50] Processando NPJ: 2023/0241006-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:00,566 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0241006-000
+2025-09-25 17:26:00,566 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:00,718 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0241006-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230241006&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230241006&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:00,719 [INFO] - 
+[25/50] Processando NPJ: 2023/0241033-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:00,719 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0241033-000
+2025-09-25 17:26:00,720 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:00,857 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0241033-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230241033&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230241033&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:00,859 [INFO] - 
+[26/50] Processando NPJ: 2023/0242811-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:00,859 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0242811-000
+2025-09-25 17:26:00,859 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:01,010 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0242811-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230242811&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230242811&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:01,011 [INFO] - 
+[27/50] Processando NPJ: 2023/0243447-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:01,011 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0243447-000
+2025-09-25 17:26:01,011 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:01,171 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0243447-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230243447&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230243447&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:01,173 [INFO] - 
+[28/50] Processando NPJ: 2023/0244081-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:01,173 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0244081-000
+2025-09-25 17:26:01,173 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:01,323 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0244081-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230244081&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230244081&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:01,324 [INFO] - 
+[29/50] Processando NPJ: 2023/0252582-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:01,324 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0252582-000
+2025-09-25 17:26:01,324 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:01,494 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0252582-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230252582&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230252582&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:01,495 [INFO] - 
+[30/50] Processando NPJ: 2023/0253567-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:01,496 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0253567-000
+2025-09-25 17:26:01,496 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:01,648 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0253567-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230253567&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230253567&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:01,649 [INFO] - 
+[31/50] Processando NPJ: 2023/0266629-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:01,649 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0266629-000
+2025-09-25 17:26:01,649 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:01,797 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0266629-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230266629&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230266629&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:01,798 [INFO] - 
+[32/50] Processando NPJ: 2023/0270899-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:01,798 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0270899-000
+2025-09-25 17:26:01,798 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:01,953 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0270899-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230270899&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230270899&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:01,954 [INFO] - 
+[33/50] Processando NPJ: 2023/0282316-000 (Notificação base: 2025/0015130429)
+2025-09-25 17:26:01,954 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0282316-000
+2025-09-25 17:26:01,954 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:02,100 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0282316-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230282316&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230282316&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:02,101 [INFO] - 
+[34/50] Processando NPJ: 2023/0282404-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:02,101 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0282404-000
+2025-09-25 17:26:02,101 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:02,257 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0282404-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230282404&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230282404&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:02,259 [INFO] - 
+[35/50] Processando NPJ: 2023/0287530-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:02,259 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0287530-000
+2025-09-25 17:26:02,259 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:02,409 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0287530-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230287530&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230287530&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:02,411 [INFO] - 
+[36/50] Processando NPJ: 2023/0287883-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:02,411 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0287883-000
+2025-09-25 17:26:02,411 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:02,558 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0287883-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230287883&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230287883&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:02,559 [INFO] - 
+[37/50] Processando NPJ: 2023/0289826-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:02,559 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0289826-000
+2025-09-25 17:26:02,559 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:02,705 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0289826-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230289826&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230289826&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:02,706 [INFO] - 
+[38/50] Processando NPJ: 2023/0296140-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:02,706 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0296140-000
+2025-09-25 17:26:02,707 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:02,863 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0296140-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230296140&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230296140&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:02,865 [INFO] - 
+[39/50] Processando NPJ: 2023/0296141-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:02,865 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0296141-000
+2025-09-25 17:26:02,865 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:03,011 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2023/0296141-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230296141&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20230296141&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:03,012 [INFO] - 
+[40/50] Processando NPJ: 2024/0002575-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:03,012 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0002575-000
+2025-09-25 17:26:03,012 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:03,155 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0002575-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240002575&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240002575&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:03,157 [INFO] - 
+[41/50] Processando NPJ: 2024/0003731-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:03,157 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0003731-000
+2025-09-25 17:26:03,157 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:03,300 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0003731-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240003731&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240003731&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:03,302 [INFO] - 
+[42/50] Processando NPJ: 2024/0005534-000 (Notificação base: 24/09/2025)
+2025-09-25 17:26:03,302 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0005534-000
+2025-09-25 17:26:03,302 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:03,452 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0005534-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240005534&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240005534&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:03,454 [INFO] - 
+[43/50] Processando NPJ: 2024/0006208-000 (Notificação base: 2025/0015139686)
+2025-09-25 17:26:03,454 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0006208-000
+2025-09-25 17:26:03,454 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:03,610 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0006208-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240006208&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240006208&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:03,611 [INFO] - 
+[44/50] Processando NPJ: 2024/0006512-000 (Notificação base: 24/09/2025)
+2025-09-25 17:26:03,612 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0006512-000
+2025-09-25 17:26:03,612 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:03,760 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0006512-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240006512&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240006512&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:03,761 [INFO] - 
+[45/50] Processando NPJ: 2024/0007687-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:03,761 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0007687-000
+2025-09-25 17:26:03,761 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:03,921 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0007687-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240007687&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240007687&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:03,923 [INFO] - 
+[46/50] Processando NPJ: 2024/0009850-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:03,923 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0009850-000
+2025-09-25 17:26:03,923 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:04,068 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0009850-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240009850&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240009850&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:04,070 [INFO] - 
+[47/50] Processando NPJ: 2024/0010113-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:04,070 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0010113-000
+2025-09-25 17:26:04,070 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:04,222 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0010113-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240010113&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240010113&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:04,224 [INFO] - 
+[48/50] Processando NPJ: 2024/0010772-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:04,224 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0010772-000
+2025-09-25 17:26:04,224 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:04,383 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0010772-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240010772&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240010772&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:04,384 [INFO] - 
+[49/50] Processando NPJ: 2024/0010773-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:04,384 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0010773-000
+2025-09-25 17:26:04,384 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:04,551 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0010773-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240010773&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240010773&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:04,553 [INFO] - 
+[50/50] Processando NPJ: 2024/0017866-000 (Notificação base: 2025/0015131484)
+2025-09-25 17:26:04,553 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0017866-000
+2025-09-25 17:26:04,553 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:04,704 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0017866-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240017866&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240017866&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:04,714 [INFO] - Processamento do lote concluído.
+2025-09-25 17:26:04,715 [INFO] - Lote finalizado. Restam 339 NPJs pendentes.
+2025-09-25 17:26:04,716 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-25 17:26:04,759 [INFO] - 
+[1/50] Processando NPJ: 2024/0017916-000 (Notificação base: 23/09/2025)
+2025-09-25 17:26:04,759 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0017916-000
+2025-09-25 17:26:04,759 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:04,913 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0017916-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240017916&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240017916&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:04,914 [INFO] - 
+[2/50] Processando NPJ: 2024/0020501-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:04,914 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0020501-000
+2025-09-25 17:26:04,915 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:05,067 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0020501-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240020501&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240020501&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:05,068 [INFO] - 
+[3/50] Processando NPJ: 2024/0024240-000 (Notificação base: 24/09/2025)
+2025-09-25 17:26:05,069 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0024240-000
+2025-09-25 17:26:05,069 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:05,224 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0024240-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240024240&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240024240&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:05,225 [INFO] - 
+[4/50] Processando NPJ: 2024/0024280-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:05,225 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0024280-000
+2025-09-25 17:26:05,225 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:05,379 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0024280-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240024280&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240024280&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:05,381 [INFO] - 
+[5/50] Processando NPJ: 2024/0029395-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:05,381 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0029395-000
+2025-09-25 17:26:05,381 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:05,522 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0029395-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240029395&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240029395&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:05,524 [INFO] - 
+[6/50] Processando NPJ: 2024/0029782-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:05,524 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0029782-000
+2025-09-25 17:26:05,524 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:05,679 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0029782-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240029782&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240029782&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:05,680 [INFO] - 
+[7/50] Processando NPJ: 2024/0034483-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:05,680 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0034483-000
+2025-09-25 17:26:05,680 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:05,832 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0034483-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240034483&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240034483&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:05,834 [INFO] - 
+[8/50] Processando NPJ: 2024/0034670-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:05,834 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0034670-000
+2025-09-25 17:26:05,834 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:05,987 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0034670-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240034670&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240034670&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:05,988 [INFO] - 
+[9/50] Processando NPJ: 2024/0037493-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:05,988 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0037493-000
+2025-09-25 17:26:05,988 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:06,135 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0037493-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240037493&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240037493&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:06,137 [INFO] - 
+[10/50] Processando NPJ: 2024/0038610-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:06,137 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0038610-000
+2025-09-25 17:26:06,137 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:06,285 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0038610-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240038610&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240038610&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:06,286 [INFO] - 
+[11/50] Processando NPJ: 2024/0042148-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:06,286 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0042148-000
+2025-09-25 17:26:06,287 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:06,430 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0042148-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240042148&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240042148&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:06,431 [INFO] - 
+[12/50] Processando NPJ: 2024/0044433-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:06,431 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0044433-000
+2025-09-25 17:26:06,431 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:06,633 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0044433-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240044433&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240044433&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:06,635 [INFO] - 
+[13/50] Processando NPJ: 2024/0059627-000 (Notificação base: 2025/0015137064)
+2025-09-25 17:26:06,635 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0059627-000
+2025-09-25 17:26:06,635 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:06,790 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0059627-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240059627&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240059627&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:06,791 [INFO] - 
+[14/50] Processando NPJ: 2024/0062763-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:06,791 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0062763-000
+2025-09-25 17:26:06,791 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:06,930 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0062763-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240062763&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240062763&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:06,932 [INFO] - 
+[15/50] Processando NPJ: 2024/0063953-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:06,932 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0063953-000
+2025-09-25 17:26:06,932 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:07,079 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0063953-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240063953&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240063953&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:07,080 [INFO] - 
+[16/50] Processando NPJ: 2024/0065277-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:07,080 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0065277-000
+2025-09-25 17:26:07,080 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:07,232 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0065277-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240065277&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240065277&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:07,233 [INFO] - 
+[17/50] Processando NPJ: 2024/0065311-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:07,233 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0065311-000
+2025-09-25 17:26:07,234 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:07,390 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0065311-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240065311&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240065311&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:07,392 [INFO] - 
+[18/50] Processando NPJ: 2024/0070641-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:07,392 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0070641-000
+2025-09-25 17:26:07,392 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:07,534 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0070641-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240070641&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240070641&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:07,536 [INFO] - 
+[19/50] Processando NPJ: 2024/0073371-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:07,536 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0073371-000
+2025-09-25 17:26:07,536 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:07,687 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0073371-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240073371&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240073371&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:07,688 [INFO] - 
+[20/50] Processando NPJ: 2024/0077815-000 (Notificação base: 24/09/2025)
+2025-09-25 17:26:07,688 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0077815-000
+2025-09-25 17:26:07,688 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:07,842 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0077815-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240077815&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240077815&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:07,843 [INFO] - 
+[21/50] Processando NPJ: 2024/0087560-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:07,843 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0087560-000
+2025-09-25 17:26:07,843 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:07,991 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0087560-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240087560&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240087560&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:07,992 [INFO] - 
+[22/50] Processando NPJ: 2024/0087775-000 (Notificação base: 2025/0015131731)
+2025-09-25 17:26:07,992 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0087775-000
+2025-09-25 17:26:07,992 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:08,140 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0087775-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240087775&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240087775&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:08,142 [INFO] - 
+[23/50] Processando NPJ: 2024/0087873-000 (Notificação base: 23/09/2025)
+2025-09-25 17:26:08,142 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0087873-000
+2025-09-25 17:26:08,142 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:08,284 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0087873-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240087873&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240087873&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:08,285 [INFO] - 
+[24/50] Processando NPJ: 2024/0094458-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:08,285 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0094458-000
+2025-09-25 17:26:08,285 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:08,429 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0094458-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240094458&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240094458&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:08,431 [INFO] - 
+[25/50] Processando NPJ: 2024/0106544-000 (Notificação base: 2025/0015401755)
+2025-09-25 17:26:08,431 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0106544-000
+2025-09-25 17:26:08,431 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:08,579 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0106544-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240106544&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240106544&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:08,580 [INFO] - 
+[26/50] Processando NPJ: 2024/0110767-000 (Notificação base: 23/09/2025)
+2025-09-25 17:26:08,580 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0110767-000
+2025-09-25 17:26:08,580 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:08,763 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0110767-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240110767&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240110767&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:08,765 [INFO] - 
+[27/50] Processando NPJ: 2024/0110808-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:08,765 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0110808-000
+2025-09-25 17:26:08,765 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:08,916 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0110808-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240110808&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240110808&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:08,918 [INFO] - 
+[28/50] Processando NPJ: 2024/0116502-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:08,918 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0116502-000
+2025-09-25 17:26:08,918 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:09,055 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0116502-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240116502&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240116502&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:09,057 [INFO] - 
+[29/50] Processando NPJ: 2024/0118094-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:09,057 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0118094-000
+2025-09-25 17:26:09,057 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:09,207 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0118094-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240118094&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240118094&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:09,208 [INFO] - 
+[30/50] Processando NPJ: 2024/0133027-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:09,208 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0133027-000
+2025-09-25 17:26:09,208 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:09,344 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0133027-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240133027&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240133027&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:09,346 [INFO] - 
+[31/50] Processando NPJ: 2024/0136804-000 (Notificação base: 2025/0015133678)
+2025-09-25 17:26:09,346 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0136804-000
+2025-09-25 17:26:09,346 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:09,489 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0136804-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240136804&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240136804&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:09,491 [INFO] - 
+[32/50] Processando NPJ: 2024/0140768-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:09,491 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0140768-000
+2025-09-25 17:26:09,491 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:09,630 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0140768-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240140768&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240140768&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:09,631 [INFO] - 
+[33/50] Processando NPJ: 2024/0151189-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:09,631 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0151189-000
+2025-09-25 17:26:09,631 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:09,803 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0151189-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240151189&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240151189&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:09,805 [INFO] - 
+[34/50] Processando NPJ: 2024/0158844-000 (Notificação base: 2025/0015131496)
+2025-09-25 17:26:09,805 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0158844-000
+2025-09-25 17:26:09,805 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:09,958 [ERROR] -   - ERRO CRÍTICO ao processar NPJ 2024/0158844-000: Page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240158844&origem=0&situacao=1
+Call log:
+  - navigating to "https://juridico.bb.com.br/paj/processo/Processo/DetalharProcesso/0?app=processo-consulta.app.html&numeroProcesso=20240158844&origem=0&situacao=1", waiting until "networkidle"
+
+2025-09-25 17:26:09,959 [INFO] - 
+[35/50] Processando NPJ: 2024/0166320-000 (Notificação base: 25/09/2025)
+2025-09-25 17:26:09,959 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0166320-000
+2025-09-25 17:26:09,959 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:26:09,972 [INFO] - Finalizando a automação e fechando o navegador.

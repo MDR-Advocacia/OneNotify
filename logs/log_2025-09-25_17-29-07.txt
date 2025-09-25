@@ -1,0 +1,813 @@
+2025-09-25 17:29:07,372 [INFO] - ============================================================
+2025-09-25 17:29:07,372 [INFO] - INICIANDO NOVA EXECUÇÃO DA RPA
+2025-09-25 17:29:07,372 [INFO] - ============================================================
+2025-09-25 17:29:07,376 [INFO] - 142 notificações com status 'Erro' ou 'Em Processamento' foram resetadas para 'Pendente'.
+2025-09-25 17:29:07,593 [INFO] - 
+FASE 1: LOGIN E CONFIGURAÇÃO DA SESSÃO
+2025-09-25 17:29:24,164 [INFO] - 
+FASE 2: EXTRAÇÃO DE NOVAS NOTIFICAÇÕES E REGISTRO DE CIÊNCIA
+2025-09-25 17:29:24,169 [INFO] - Iniciando módulo de extração e ciência...
+2025-09-25 17:29:24,169 [INFO] - Navegando para a Central de Notificações...
+2025-09-25 17:29:25,465 [INFO] - Acessando a 'Visão do Advogado'...
+2025-09-25 17:29:26,091 [INFO] - --- Processando tarefa: Andamento de publicação em processo de condução terceirizada ---
+2025-09-25 17:29:26,103 [WARNING] - Tarefa 'Andamento de publicação em processo de condução terceirizada' não encontrada. Pulando.
+2025-09-25 17:29:26,103 [INFO] - --- Processando tarefa: Doc. anexado por empresa externa em processo terceirizado ---
+2025-09-25 17:29:26,105 [WARNING] - Tarefa 'Doc. anexado por empresa externa em processo terceirizado' não encontrada. Pulando.
+2025-09-25 17:29:26,105 [INFO] - --- Processando tarefa: Inclusão de Documentos no NPJ ---
+2025-09-25 17:29:26,106 [WARNING] - Tarefa 'Inclusão de Documentos no NPJ' não encontrada. Pulando.
+2025-09-25 17:29:26,106 [INFO] - Extração/ciência concluídas. Salvas: 0, Ciências: 0.
+2025-09-25 17:29:26,107 [INFO] - 
+FASE 3: PROCESSAMENTO DETALHADO EM LOTES
+2025-09-25 17:29:26,107 [INFO] - Total de 389 NPJs pendentes para detalhamento.
+2025-09-25 17:29:26,109 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-25 17:29:26,157 [INFO] - 
+[1/50] Processando NPJ: 2023/0076512-000 (Notificação base: 22/09/2025)
+2025-09-25 17:29:26,157 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0076512-000
+2025-09-25 17:29:26,158 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:29:30,711 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:29:30,731 [INFO] -       - Número do Processo encontrado: 0024652-20.2023.8.03.0001
+2025-09-25 17:29:30,731 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:29:31,767 [INFO] -       - Filtrando documentos para as datas: ['20/09/2025', '21/09/2025', '22/09/2025']
+2025-09-25 17:29:31,783 [INFO] -       - Encontrados 39 documentos para verificação.
+2025-09-25 17:29:31,797 [INFO] -         - Documento encontrado na data permitida '22/09/2025': 00246522020238030001-Intimacao-1758513611607-243639.pdf
+2025-09-25 17:29:32,144 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2023_0076512-000/00246522020238030001Intimacao1758513611607243639.pdf
+2025-09-25 17:29:32,160 [INFO] -         - Documento encontrado na data permitida '21/09/2025': 00246522020238030001-Intimacao-1758442171198-270312.pdf
+2025-09-25 17:29:47,171 [ERROR] -         - ERRO DE PORTAL: GED indisponível para o arquivo '00246522020238030001-Intimacao-1758442171198-270312.pdf'.
+2025-09-25 17:29:47,764 [ERROR] -   - ERRO DE PORTAL (GED) ao processar NPJ 2023/0076512-000. Marcando para nova tentativa.
+2025-09-25 17:29:47,767 [INFO] - 
+[2/50] Processando NPJ: 2023/0080283-000 (Notificação base: 25/09/2025)
+2025-09-25 17:29:47,767 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0080283-000
+2025-09-25 17:29:47,767 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:29:48,649 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:29:48,672 [INFO] -       - Número do Processo encontrado: 0011492-25.2023.8.03.0001
+2025-09-25 17:29:48,672 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:29:49,794 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:29:49,817 [INFO] -       - Encontrados 50 documentos para verificação.
+2025-09-25 17:29:49,832 [INFO] -         - Documento encontrado na data permitida '25/09/2025': 00114922520238030001-Intimacao-1758791455657-282238.pdf
+2025-09-25 17:29:50,213 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2023_0080283-000/00114922520238030001Intimacao1758791455657282238.pdf
+2025-09-25 17:29:50,236 [INFO] -         - Documento encontrado na data permitida '25/09/2025': 00114922520238030001-Intimacao-1758791442196-379017.pdf
+2025-09-25 17:29:50,674 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2023_0080283-000/00114922520238030001Intimacao1758791442196379017.pdf
+2025-09-25 17:29:50,691 [INFO] -         - Documento encontrado na data permitida '25/09/2025': 00114922520238030001-Intimacao-1758774007092-396427.pdf
+2025-09-25 17:29:52,185 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2023_0080283-000/00114922520238030001Intimacao1758774007092396427.pdf
+2025-09-25 17:29:52,261 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:29:52,304 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:29:52,305 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:29:52,305 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:29:52,306 [INFO] - 
+[3/50] Processando NPJ: 2023/0080327-000 (Notificação base: 25/09/2025)
+2025-09-25 17:29:52,306 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0080327-000
+2025-09-25 17:29:52,306 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:29:53,148 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:29:53,170 [INFO] -       - Número do Processo encontrado: 0703824-16.2023.8.01.0001
+2025-09-25 17:29:53,170 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:29:54,325 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:29:54,342 [INFO] -       - Encontrados 21 documentos para verificação.
+2025-09-25 17:29:54,385 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:29:54,414 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:29:54,415 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:29:54,415 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:29:54,416 [INFO] - 
+[4/50] Processando NPJ: 2023/0104082-000 (Notificação base: 25/09/2025)
+2025-09-25 17:29:54,416 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0104082-000
+2025-09-25 17:29:54,416 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:29:55,243 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:29:55,261 [INFO] -       - Número do Processo encontrado: 0600515-81.2023.8.04.7700
+2025-09-25 17:29:55,262 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:29:56,525 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:29:56,545 [INFO] -       - Encontrados 20 documentos para verificação.
+2025-09-25 17:29:56,587 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:29:56,614 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:29:56,615 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:29:56,615 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:29:56,616 [INFO] - 
+[5/50] Processando NPJ: 2023/0107667-000 (Notificação base: 25/09/2025)
+2025-09-25 17:29:56,616 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0107667-000
+2025-09-25 17:29:56,616 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:29:57,441 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:29:57,465 [INFO] -       - Número do Processo encontrado: 7003525-67.2023.8.22.0003
+2025-09-25 17:29:57,465 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:29:58,725 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:29:58,731 [INFO] -       - Encontrados 45 documentos para verificação.
+2025-09-25 17:29:58,784 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:29:58,829 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:29:58,830 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:29:58,830 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:29:58,831 [INFO] - 
+[6/50] Processando NPJ: 2023/0109257-000 (Notificação base: 25/09/2025)
+2025-09-25 17:29:58,831 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0109257-000
+2025-09-25 17:29:58,831 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:29:59,660 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:29:59,678 [INFO] -       - Número do Processo encontrado: 0851917-28.2023.8.14.0301
+2025-09-25 17:29:59,678 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:00,944 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:00,965 [INFO] -       - Encontrados 32 documentos para verificação.
+2025-09-25 17:30:01,020 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:01,046 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:01,047 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:01,047 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:01,048 [INFO] - 
+[7/50] Processando NPJ: 2023/0109303-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:01,048 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0109303-000
+2025-09-25 17:30:01,048 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:01,874 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:01,890 [INFO] -       - Número do Processo encontrado: 0842734-33.2023.8.14.0301
+2025-09-25 17:30:01,890 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:03,179 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:03,202 [INFO] -       - Encontrados 42 documentos para verificação.
+2025-09-25 17:30:03,268 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:03,295 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:03,296 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:03,296 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:03,297 [INFO] - 
+[8/50] Processando NPJ: 2023/0110333-000 (Notificação base: 24/09/2025)
+2025-09-25 17:30:03,297 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0110333-000
+2025-09-25 17:30:03,297 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:04,124 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:04,148 [INFO] -       - Número do Processo encontrado: 0801050-20.2023.8.14.0046
+2025-09-25 17:30:04,148 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:05,409 [INFO] -       - Filtrando documentos para as datas: ['22/09/2025', '23/09/2025', '24/09/2025']
+2025-09-25 17:30:05,430 [INFO] -       - Encontrados 25 documentos para verificação.
+2025-09-25 17:30:05,479 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:05,514 [INFO] -       - Filtrando andamentos para as datas: ['22/09/2025', '23/09/2025', '24/09/2025']
+2025-09-25 17:30:05,515 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:05,515 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:05,516 [INFO] - 
+[9/50] Processando NPJ: 2023/0114953-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:05,516 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0114953-000
+2025-09-25 17:30:05,516 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:06,343 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:06,373 [INFO] -       - Número do Processo encontrado: 7003433-53.2023.8.22.0015
+2025-09-25 17:30:06,373 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:07,514 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:07,535 [INFO] -       - Encontrados 50 documentos para verificação.
+2025-09-25 17:30:07,547 [INFO] -         - Documento encontrado na data permitida '24/09/2025': 70034335320238220015-Intimacao-1758688838085-460482.pdf
+2025-09-25 17:30:08,131 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2023_0114953-000/70034335320238220015Intimacao1758688838085460482.pdf
+2025-09-25 17:30:08,214 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:08,233 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:08,236 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:08,236 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:08,237 [INFO] - 
+[10/50] Processando NPJ: 2023/0115725-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:08,237 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0115725-000
+2025-09-25 17:30:08,237 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:09,058 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:09,072 [INFO] -       - Número do Processo encontrado: 0804313-17.2023.8.14.0028
+2025-09-25 17:30:09,072 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:10,343 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:10,363 [INFO] -       - Encontrados 26 documentos para verificação.
+2025-09-25 17:30:10,410 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:10,446 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:10,447 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:10,447 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:10,448 [INFO] - 
+[11/50] Processando NPJ: 2023/0118046-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:10,448 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0118046-000
+2025-09-25 17:30:10,448 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:11,285 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:11,313 [INFO] -       - Número do Processo encontrado: 0801035-85.2023.8.14.0067
+2025-09-25 17:30:11,313 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:12,453 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:12,473 [INFO] -       - Encontrados 30 documentos para verificação.
+2025-09-25 17:30:12,486 [INFO] -         - Documento encontrado na data permitida '25/09/2025': 08010358520238140067-Intimacao-1758781213765-252776.pdf
+2025-09-25 17:30:13,003 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2023_0118046-000/08010358520238140067Intimacao1758781213765252776.pdf
+2025-09-25 17:30:13,047 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:13,080 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:13,080 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:13,081 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:13,082 [INFO] - 
+[12/50] Processando NPJ: 2023/0121148-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:13,082 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0121148-000
+2025-09-25 17:30:13,082 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:13,901 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:13,919 [INFO] -       - Número do Processo encontrado: 0016192-44.2023.8.03.0001
+2025-09-25 17:30:13,919 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:15,053 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:15,073 [INFO] -       - Encontrados 15 documentos para verificação.
+2025-09-25 17:30:15,108 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:15,132 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:15,133 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:15,133 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:15,134 [INFO] - 
+[13/50] Processando NPJ: 2023/0130949-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:15,134 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0130949-000
+2025-09-25 17:30:15,134 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:15,964 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:15,984 [INFO] -       - Número do Processo encontrado: 0800317-21.2023.8.14.0057
+2025-09-25 17:30:15,984 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:17,124 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:17,145 [INFO] -       - Encontrados 27 documentos para verificação.
+2025-09-25 17:30:17,195 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:17,230 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:17,231 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:17,231 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:17,232 [INFO] - 
+[14/50] Processando NPJ: 2023/0139738-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:17,232 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0139738-000
+2025-09-25 17:30:17,232 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:18,055 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:18,073 [INFO] -       - Número do Processo encontrado: 0809252-68.2023.8.14.0051
+2025-09-25 17:30:18,073 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:19,505 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:19,525 [INFO] -       - Encontrados 46 documentos para verificação.
+2025-09-25 17:30:19,598 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:19,630 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:19,631 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:19,631 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:19,632 [INFO] - 
+[15/50] Processando NPJ: 2023/0152553-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:19,632 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0152553-000
+2025-09-25 17:30:19,632 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:20,464 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:20,485 [INFO] -       - Número do Processo encontrado: 0884807-20.2023.8.14.0301
+2025-09-25 17:30:20,486 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:21,765 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:21,784 [INFO] -       - Encontrados 33 documentos para verificação.
+2025-09-25 17:30:21,838 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:21,868 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:21,869 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:21,869 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:21,870 [INFO] - 
+[16/50] Processando NPJ: 2023/0154667-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:21,870 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0154667-000
+2025-09-25 17:30:21,870 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:22,691 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:22,702 [INFO] -       - Número do Processo encontrado: 0800979-24.2023.8.20.5131
+2025-09-25 17:30:22,702 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:24,103 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:24,125 [INFO] -       - Encontrados 41 documentos para verificação.
+2025-09-25 17:30:24,215 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:24,253 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:24,254 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:24,254 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:24,255 [INFO] - 
+[17/50] Processando NPJ: 2023/0186242-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:24,255 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0186242-000
+2025-09-25 17:30:24,255 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:25,093 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:25,117 [INFO] -       - Número do Processo encontrado: 7004619-14.2023.8.22.0015
+2025-09-25 17:30:25,118 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:26,261 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:26,287 [INFO] -       - Encontrados 50 documentos para verificação.
+2025-09-25 17:30:26,359 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:26,390 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:26,391 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:26,391 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:26,391 [INFO] - 
+[18/50] Processando NPJ: 2023/0201474-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:26,392 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0201474-000
+2025-09-25 17:30:26,392 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:27,223 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:27,243 [INFO] -       - Número do Processo encontrado: 7066655-37.2023.8.22.0001
+2025-09-25 17:30:27,243 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:28,508 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:28,529 [INFO] -       - Encontrados 46 documentos para verificação.
+2025-09-25 17:30:28,599 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:28,626 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:28,626 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:28,626 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:28,627 [INFO] - 
+[19/50] Processando NPJ: 2023/0201980-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:28,627 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0201980-000
+2025-09-25 17:30:28,627 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:29,456 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:29,471 [INFO] -       - Número do Processo encontrado: 0004467-77.2018.8.14.0017
+2025-09-25 17:30:29,471 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:30,737 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:30,756 [INFO] -       - Encontrados 10 documentos para verificação.
+2025-09-25 17:30:30,782 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:30,819 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:30,821 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:30,821 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:30,821 [INFO] - 
+[20/50] Processando NPJ: 2023/0219158-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:30,822 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0219158-000
+2025-09-25 17:30:30,822 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:31,650 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:31,668 [INFO] -       - Número do Processo encontrado: 0608469-92.2023.8.04.0001
+2025-09-25 17:30:31,669 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:32,798 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:32,818 [INFO] -       - Encontrados 22 documentos para verificação.
+2025-09-25 17:30:32,861 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:32,898 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:32,898 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:32,898 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:32,899 [INFO] - 
+[21/50] Processando NPJ: 2023/0226794-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:32,899 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0226794-000
+2025-09-25 17:30:32,899 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:33,747 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:33,758 [INFO] -       - Número do Processo encontrado: 0875601-76.2023.8.20.5001
+2025-09-25 17:30:33,758 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:34,882 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:34,905 [INFO] -       - Encontrados 31 documentos para verificação.
+2025-09-25 17:30:34,956 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:34,982 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:34,983 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:34,983 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:34,984 [INFO] - 
+[22/50] Processando NPJ: 2023/0229209-000 (Notificação base: 24/09/2025)
+2025-09-25 17:30:34,984 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0229209-000
+2025-09-25 17:30:34,984 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:35,814 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:35,832 [INFO] -       - Número do Processo encontrado: 0805634-59.2023.8.14.0005
+2025-09-25 17:30:35,833 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:36,969 [INFO] -       - Filtrando documentos para as datas: ['22/09/2025', '23/09/2025', '24/09/2025']
+2025-09-25 17:30:36,988 [INFO] -       - Encontrados 20 documentos para verificação.
+2025-09-25 17:30:37,001 [INFO] -         - Documento encontrado na data permitida '24/09/2025': 08056345920238140005-Intimacao-1758686412665-834362.pdf
+2025-09-25 17:30:37,487 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2023_0229209-000/08056345920238140005Intimacao1758686412665834362.pdf
+2025-09-25 17:30:37,550 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:37,567 [INFO] -       - Filtrando andamentos para as datas: ['22/09/2025', '23/09/2025', '24/09/2025']
+2025-09-25 17:30:37,568 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:37,568 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:37,569 [INFO] - 
+[23/50] Processando NPJ: 2023/0236746-000 (Notificação base: 2025/0015131951)
+2025-09-25 17:30:37,569 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0236746-000
+2025-09-25 17:30:37,569 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:38,410 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:38,434 [INFO] -       - Número do Processo encontrado: 0800979-02.2023.8.14.0019
+2025-09-25 17:30:38,434 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:39,577 [ERROR] -       - Data de notificação inválida '2025/0015131951'. Não será possível filtrar documentos por data.
+2025-09-25 17:30:39,578 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:39,646 [ERROR] -       - Data de notificação inválida '2025/0015131951'. Não será possível filtrar andamentos por data.
+2025-09-25 17:30:39,647 [INFO] - 
+[24/50] Processando NPJ: 2023/0241006-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:39,647 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0241006-000
+2025-09-25 17:30:39,647 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:40,488 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:40,521 [INFO] -       - Número do Processo encontrado: 0816637-67.2023.8.14.0051
+2025-09-25 17:30:40,522 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:41,668 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:41,688 [INFO] -       - Encontrados 39 documentos para verificação.
+2025-09-25 17:30:41,751 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:41,784 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:41,785 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:41,785 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:41,786 [INFO] - 
+[25/50] Processando NPJ: 2023/0241033-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:41,786 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0241033-000
+2025-09-25 17:30:41,786 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:42,624 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:42,646 [INFO] -       - Número do Processo encontrado: 7001859-04.2023.8.22.0012
+2025-09-25 17:30:42,646 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:43,918 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:43,937 [INFO] -       - Encontrados 34 documentos para verificação.
+2025-09-25 17:30:43,950 [INFO] -         - Documento encontrado na data permitida '23/09/2025': TRANSITO_JULGADO.pdf
+2025-09-25 17:30:45,522 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2023_0241033-000/TRANSITOJULGADO.pdf
+2025-09-25 17:30:45,536 [INFO] -         - Documento encontrado na data permitida '23/09/2025': TRANSITO_JULGADO.pdf
+2025-09-25 17:30:46,452 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2023_0241033-000/TRANSITOJULGADO.pdf
+2025-09-25 17:30:46,465 [INFO] -         - Documento encontrado na data permitida '23/09/2025': DECLARACAO_ENCERRADO_NAO_ARQUIVADO (16).pdf
+2025-09-25 17:30:47,304 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2023_0241033-000/DECLARACAOENCERRADONAOARQUIVADO 16.pdf
+2025-09-25 17:30:47,315 [INFO] -         - Documento encontrado na data permitida '23/09/2025': TRANSITO_JULGADO.pdf
+2025-09-25 17:30:48,505 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2023_0241033-000/TRANSITOJULGADO.pdf
+2025-09-25 17:30:48,552 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:48,571 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:48,572 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:48,572 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:48,573 [INFO] - 
+[26/50] Processando NPJ: 2023/0242811-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:48,573 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0242811-000
+2025-09-25 17:30:48,573 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:49,396 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:49,418 [INFO] -       - Número do Processo encontrado: 0635829-02.2023.8.04.0001
+2025-09-25 17:30:49,418 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:50,703 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:50,722 [INFO] -       - Encontrados 26 documentos para verificação.
+2025-09-25 17:30:50,769 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:50,806 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:50,807 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:50,807 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:50,808 [INFO] - 
+[27/50] Processando NPJ: 2023/0243447-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:50,808 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0243447-000
+2025-09-25 17:30:50,808 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:51,631 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:51,657 [INFO] -       - Número do Processo encontrado: 0037380-93.2023.8.03.0001
+2025-09-25 17:30:51,657 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:52,921 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:52,940 [INFO] -       - Encontrados 25 documentos para verificação.
+2025-09-25 17:30:52,986 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:53,006 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:53,007 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:53,007 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:53,008 [INFO] - 
+[28/50] Processando NPJ: 2023/0244081-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:53,008 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0244081-000
+2025-09-25 17:30:53,008 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:53,847 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:53,858 [INFO] -       - Número do Processo encontrado: 0804662-65.2023.8.20.5100
+2025-09-25 17:30:53,858 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:55,120 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:55,140 [INFO] -       - Encontrados 27 documentos para verificação.
+2025-09-25 17:30:55,190 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:55,225 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:55,226 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:55,226 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:55,227 [INFO] - 
+[29/50] Processando NPJ: 2023/0252582-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:55,227 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0252582-000
+2025-09-25 17:30:55,227 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:56,074 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:56,095 [INFO] -       - Número do Processo encontrado: 0608909-90.2023.8.04.5400
+2025-09-25 17:30:56,096 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:57,227 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:57,248 [INFO] -       - Encontrados 22 documentos para verificação.
+2025-09-25 17:30:57,262 [INFO] -         - Documento encontrado na data permitida '25/09/2025': 06089099020238045400-Intimacao-1758787423832-858594.txt
+2025-09-25 17:30:57,621 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2023_0252582-000/06089099020238045400Intimacao1758787423832858594.txt
+2025-09-25 17:30:57,689 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:30:57,722 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:57,723 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:30:57,723 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:30:57,724 [INFO] - 
+[30/50] Processando NPJ: 2023/0253567-000 (Notificação base: 25/09/2025)
+2025-09-25 17:30:57,724 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0253567-000
+2025-09-25 17:30:57,724 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:30:58,543 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:30:58,565 [INFO] -       - Número do Processo encontrado: 0643660-04.2023.8.04.0001
+2025-09-25 17:30:58,565 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:30:59,822 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:30:59,848 [INFO] -       - Encontrados 20 documentos para verificação.
+2025-09-25 17:30:59,858 [INFO] -         - Documento encontrado na data permitida '25/09/2025': 06436600420238040001-Intimacao-1758787433582-949137.txt
+2025-09-25 17:31:00,277 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2023_0253567-000/06436600420238040001Intimacao1758787433582949137.txt
+2025-09-25 17:31:00,327 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:00,357 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:00,357 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:31:00,357 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:31:00,358 [INFO] - 
+[31/50] Processando NPJ: 2023/0266629-000 (Notificação base: 25/09/2025)
+2025-09-25 17:31:00,358 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0266629-000
+2025-09-25 17:31:00,358 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:01,190 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:01,212 [INFO] -       - Número do Processo encontrado: 7000013-06.2024.8.22.0015
+2025-09-25 17:31:01,212 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:02,261 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:02,279 [INFO] -       - Encontrados 23 documentos para verificação.
+2025-09-25 17:31:02,291 [INFO] -         - Documento encontrado na data permitida '24/09/2025': 70000130620248220015-Intimacao-1758688838565-141545.pdf
+2025-09-25 17:31:02,653 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2023_0266629-000/70000130620248220015Intimacao1758688838565141545.pdf
+2025-09-25 17:31:02,697 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:02,724 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:02,725 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:31:02,725 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:31:02,726 [INFO] - 
+[32/50] Processando NPJ: 2023/0270899-000 (Notificação base: 25/09/2025)
+2025-09-25 17:31:02,726 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0270899-000
+2025-09-25 17:31:02,726 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:03,544 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:03,559 [INFO] -       - Número do Processo encontrado: 0606757-69.2023.8.04.5400
+2025-09-25 17:31:03,559 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:04,821 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:04,839 [INFO] -       - Encontrados 20 documentos para verificação.
+2025-09-25 17:31:04,854 [INFO] -         - Documento encontrado na data permitida '25/09/2025': 06067576920238045400-Intimacao-1758787423997-460206.txt
+2025-09-25 17:31:05,223 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2023_0270899-000/06067576920238045400Intimacao1758787423997460206.txt
+2025-09-25 17:31:05,256 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:05,275 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:05,276 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:31:05,276 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:31:05,276 [INFO] - 
+[33/50] Processando NPJ: 2023/0282316-000 (Notificação base: 2025/0015130429)
+2025-09-25 17:31:05,276 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0282316-000
+2025-09-25 17:31:05,277 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:06,100 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:06,118 [INFO] -       - Número do Processo encontrado: 7003288-05.2024.8.22.0001
+2025-09-25 17:31:06,118 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:07,401 [ERROR] -       - Data de notificação inválida '2025/0015130429'. Não será possível filtrar documentos por data.
+2025-09-25 17:31:07,402 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:07,468 [ERROR] -       - Data de notificação inválida '2025/0015130429'. Não será possível filtrar andamentos por data.
+2025-09-25 17:31:07,469 [INFO] - 
+[34/50] Processando NPJ: 2023/0282404-000 (Notificação base: 25/09/2025)
+2025-09-25 17:31:07,469 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0282404-000
+2025-09-25 17:31:07,469 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:08,306 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:08,327 [INFO] -       - Número do Processo encontrado: 0801987-04.2024.8.20.5001
+2025-09-25 17:31:08,327 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:09,588 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:09,606 [INFO] -       - Encontrados 17 documentos para verificação.
+2025-09-25 17:31:09,642 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:09,677 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:09,679 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:31:09,679 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:31:09,680 [INFO] - 
+[35/50] Processando NPJ: 2023/0287530-000 (Notificação base: 25/09/2025)
+2025-09-25 17:31:09,680 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0287530-000
+2025-09-25 17:31:09,680 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:10,505 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:10,528 [INFO] -       - Número do Processo encontrado: 7073349-22.2023.8.22.0001
+2025-09-25 17:31:10,529 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:11,789 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:11,807 [INFO] -       - Encontrados 9 documentos para verificação.
+2025-09-25 17:31:11,833 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:11,885 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:11,886 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:31:11,886 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:31:11,887 [INFO] - 
+[36/50] Processando NPJ: 2023/0287883-000 (Notificação base: 25/09/2025)
+2025-09-25 17:31:11,887 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0287883-000
+2025-09-25 17:31:11,887 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:12,730 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:12,754 [INFO] -       - Número do Processo encontrado: 0801603-45.2023.8.14.0021
+2025-09-25 17:31:12,755 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:13,893 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:13,907 [INFO] -       - Encontrados 26 documentos para verificação.
+2025-09-25 17:31:13,945 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:13,975 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:13,976 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:31:13,976 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:31:13,977 [INFO] - 
+[37/50] Processando NPJ: 2023/0289826-000 (Notificação base: 25/09/2025)
+2025-09-25 17:31:13,977 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0289826-000
+2025-09-25 17:31:13,977 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:14,800 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:14,817 [INFO] -       - Número do Processo encontrado: 7008890-74.2024.8.22.0001
+2025-09-25 17:31:14,817 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:16,081 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:16,101 [INFO] -       - Encontrados 40 documentos para verificação.
+2025-09-25 17:31:16,114 [INFO] -         - Documento encontrado na data permitida '25/09/2025': 70088907420248220001-Intimacao-1758774024440-650049.pdf
+2025-09-25 17:31:16,494 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2023_0289826-000/70088907420248220001Intimacao1758774024440650049.pdf
+2025-09-25 17:31:16,634 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:16,658 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:16,659 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:31:16,659 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:31:16,660 [INFO] - 
+[38/50] Processando NPJ: 2023/0296140-000 (Notificação base: 25/09/2025)
+2025-09-25 17:31:16,660 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0296140-000
+2025-09-25 17:31:16,660 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:17,481 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:17,506 [INFO] -       - Número do Processo encontrado: 7001763-85.2024.8.22.0001
+2025-09-25 17:31:17,506 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:18,771 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:18,778 [INFO] -       - Encontrados 39 documentos para verificação.
+2025-09-25 17:31:18,822 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:18,858 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:18,859 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:31:18,859 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:31:18,859 [INFO] - 
+[39/50] Processando NPJ: 2023/0296141-000 (Notificação base: 25/09/2025)
+2025-09-25 17:31:18,859 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0296141-000
+2025-09-25 17:31:18,860 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:19,696 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:19,713 [INFO] -       - Número do Processo encontrado: 7004639-13.2024.8.22.0001
+2025-09-25 17:31:19,713 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:20,976 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:20,996 [INFO] -       - Encontrados 35 documentos para verificação.
+2025-09-25 17:31:21,053 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:21,075 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:21,076 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:31:21,076 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:31:21,077 [INFO] - 
+[40/50] Processando NPJ: 2024/0002575-000 (Notificação base: 25/09/2025)
+2025-09-25 17:31:21,077 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0002575-000
+2025-09-25 17:31:21,077 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:21,899 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:21,913 [INFO] -       - Número do Processo encontrado: 0827154-26.2024.8.14.0301
+2025-09-25 17:31:21,913 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:23,308 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:23,327 [INFO] -       - Encontrados 28 documentos para verificação.
+2025-09-25 17:31:23,378 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:23,410 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:23,411 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:31:23,411 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:31:23,412 [INFO] - 
+[41/50] Processando NPJ: 2024/0003731-000 (Notificação base: 25/09/2025)
+2025-09-25 17:31:23,412 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0003731-000
+2025-09-25 17:31:23,412 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:24,286 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:24,303 [INFO] -       - Número do Processo encontrado: 0800170-75.2024.8.20.5106
+2025-09-25 17:31:24,303 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:25,446 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:25,467 [INFO] -       - Encontrados 33 documentos para verificação.
+2025-09-25 17:31:25,479 [INFO] -         - Documento encontrado na data permitida '25/09/2025': 08001707520248205106-Intimacao-1758774029483-52123.pdf
+2025-09-25 17:31:25,835 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2024_0003731-000/08001707520248205106Intimacao175877402948352123.pdf
+2025-09-25 17:31:25,890 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:25,908 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:25,909 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:31:25,909 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:31:25,910 [INFO] - 
+[42/50] Processando NPJ: 2024/0005534-000 (Notificação base: 24/09/2025)
+2025-09-25 17:31:25,910 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0005534-000
+2025-09-25 17:31:25,910 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:26,754 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:26,773 [INFO] -       - Número do Processo encontrado: 0801664-96.2024.8.20.5001
+2025-09-25 17:31:26,773 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:27,861 [INFO] -       - Filtrando documentos para as datas: ['22/09/2025', '23/09/2025', '24/09/2025']
+2025-09-25 17:31:27,881 [INFO] -       - Encontrados 50 documentos para verificação.
+2025-09-25 17:31:27,893 [INFO] -         - Documento encontrado na data permitida '24/09/2025': 08016649620248205001-Citacao-1758700865094-197063.txt
+2025-09-25 17:31:28,211 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2024_0005534-000/08016649620248205001Citacao1758700865094197063.txt
+2025-09-25 17:31:28,224 [INFO] -         - Documento encontrado na data permitida '24/09/2025': 08016649620248205001-Citacao-1758690051770-175505.pdf
+2025-09-25 17:31:28,559 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2024_0005534-000/08016649620248205001Citacao1758690051770175505.pdf
+2025-09-25 17:31:28,631 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:28,659 [INFO] -       - Filtrando andamentos para as datas: ['22/09/2025', '23/09/2025', '24/09/2025']
+2025-09-25 17:31:28,659 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:31:28,660 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:31:28,660 [INFO] - 
+[43/50] Processando NPJ: 2024/0006208-000 (Notificação base: 2025/0015139686)
+2025-09-25 17:31:28,660 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0006208-000
+2025-09-25 17:31:28,660 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:29,484 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:29,497 [INFO] -       - Número do Processo encontrado: 6000694-63.2024.8.03.0001
+2025-09-25 17:31:29,497 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:30,633 [ERROR] -       - Data de notificação inválida '2025/0015139686'. Não será possível filtrar documentos por data.
+2025-09-25 17:31:30,633 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:30,704 [ERROR] -       - Data de notificação inválida '2025/0015139686'. Não será possível filtrar andamentos por data.
+2025-09-25 17:31:30,706 [INFO] - 
+[44/50] Processando NPJ: 2024/0006512-000 (Notificação base: 24/09/2025)
+2025-09-25 17:31:30,706 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0006512-000
+2025-09-25 17:31:30,706 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:31,536 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:31,554 [INFO] -       - Número do Processo encontrado: 0400743-17.2024.8.04.0001
+2025-09-25 17:31:31,554 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:32,648 [INFO] -       - Filtrando documentos para as datas: ['22/09/2025', '23/09/2025', '24/09/2025']
+2025-09-25 17:31:32,668 [INFO] -       - Encontrados 36 documentos para verificação.
+2025-09-25 17:31:32,727 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:32,760 [INFO] -       - Filtrando andamentos para as datas: ['22/09/2025', '23/09/2025', '24/09/2025']
+2025-09-25 17:31:32,760 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:31:32,760 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:31:32,761 [INFO] - 
+[45/50] Processando NPJ: 2024/0007687-000 (Notificação base: 25/09/2025)
+2025-09-25 17:31:32,761 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0007687-000
+2025-09-25 17:31:32,761 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:33,585 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:33,603 [INFO] -       - Número do Processo encontrado: 0800067-33.2024.4.05.8400
+2025-09-25 17:31:33,603 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:34,857 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:34,879 [INFO] -       - Encontrados 50 documentos para verificação.
+2025-09-25 17:31:34,893 [INFO] -         - Documento encontrado na data permitida '25/09/2025': PETICAOINICIAL 397 1.pdf
+2025-09-25 17:31:37,181 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2024_0007687-000/PETICAOINICIAL 397 1.pdf
+2025-09-25 17:31:37,185 [INFO] -         - Documento encontrado na data permitida '25/09/2025': SENTENCA 2.pdf
+2025-09-25 17:31:37,496 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2024_0007687-000/SENTENCA 2.pdf
+2025-09-25 17:31:37,509 [INFO] -         - Documento encontrado na data permitida '25/09/2025': acordao 7.pdf
+2025-09-25 17:31:37,870 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2024_0007687-000/acordao 7.pdf
+2025-09-25 17:31:37,936 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:37,959 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:37,960 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:31:37,960 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:31:37,960 [INFO] - 
+[46/50] Processando NPJ: 2024/0009850-000 (Notificação base: 25/09/2025)
+2025-09-25 17:31:37,960 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0009850-000
+2025-09-25 17:31:37,960 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:38,812 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:38,819 [INFO] -       - Número do Processo encontrado: 0802420-08.2024.8.20.5001
+2025-09-25 17:31:38,819 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:39,943 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:39,964 [INFO] -       - Encontrados 26 documentos para verificação.
+2025-09-25 17:31:40,013 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:40,043 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:40,043 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:31:40,043 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:31:40,044 [INFO] - 
+[47/50] Processando NPJ: 2024/0010113-000 (Notificação base: 25/09/2025)
+2025-09-25 17:31:40,044 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0010113-000
+2025-09-25 17:31:40,044 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:40,870 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:40,885 [INFO] -       - Número do Processo encontrado: 0800344-29.2024.8.14.0005
+2025-09-25 17:31:40,885 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:42,035 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:42,054 [INFO] -       - Encontrados 34 documentos para verificação.
+2025-09-25 17:31:42,151 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:42,176 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:42,177 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:31:42,177 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:31:42,178 [INFO] - 
+[48/50] Processando NPJ: 2024/0010772-000 (Notificação base: 25/09/2025)
+2025-09-25 17:31:42,178 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0010772-000
+2025-09-25 17:31:42,178 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:43,002 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:43,019 [INFO] -       - Número do Processo encontrado: 7007343-96.2024.8.22.0001
+2025-09-25 17:31:43,019 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:44,113 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:44,133 [INFO] -       - Encontrados 39 documentos para verificação.
+2025-09-25 17:31:44,167 [INFO] -         - Documento encontrado na data permitida '25/09/2025': 70073439620248220001-Intimacao-1758774023675-649400.pdf
+2025-09-25 17:31:44,513 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2024_0010772-000/70073439620248220001Intimacao1758774023675649400.pdf
+2025-09-25 17:31:44,570 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:44,592 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:44,593 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:31:44,593 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:31:44,594 [INFO] - 
+[49/50] Processando NPJ: 2024/0010773-000 (Notificação base: 25/09/2025)
+2025-09-25 17:31:44,594 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0010773-000
+2025-09-25 17:31:44,594 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:45,414 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:45,434 [INFO] -       - Número do Processo encontrado: 7000555-24.2024.8.22.0015
+2025-09-25 17:31:45,434 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:46,725 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:46,745 [INFO] -       - Encontrados 38 documentos para verificação.
+2025-09-25 17:31:46,807 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:46,842 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:46,843 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:31:46,843 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:31:46,844 [INFO] - 
+[50/50] Processando NPJ: 2024/0017866-000 (Notificação base: 2025/0015131484)
+2025-09-25 17:31:46,844 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0017866-000
+2025-09-25 17:31:46,844 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:47,662 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:47,678 [INFO] -       - Número do Processo encontrado: 7010774-29.2024.8.22.0005
+2025-09-25 17:31:47,678 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:48,954 [ERROR] -       - Data de notificação inválida '2025/0015131484'. Não será possível filtrar documentos por data.
+2025-09-25 17:31:48,954 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:49,013 [ERROR] -       - Data de notificação inválida '2025/0015131484'. Não será possível filtrar andamentos por data.
+2025-09-25 17:31:49,023 [INFO] - Processamento do lote concluído.
+2025-09-25 17:31:49,024 [INFO] - Lote finalizado. Restam 339 NPJs pendentes.
+2025-09-25 17:31:49,026 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-25 17:31:49,071 [INFO] - 
+[1/50] Processando NPJ: 2024/0017916-000 (Notificação base: 23/09/2025)
+2025-09-25 17:31:49,071 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0017916-000
+2025-09-25 17:31:49,071 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:53,736 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:53,755 [INFO] -       - Número do Processo encontrado: 6002402-51.2024.8.03.0001
+2025-09-25 17:31:53,755 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:54,804 [INFO] -       - Filtrando documentos para as datas: ['21/09/2025', '22/09/2025', '23/09/2025']
+2025-09-25 17:31:54,823 [INFO] -       - Encontrados 34 documentos para verificação.
+2025-09-25 17:31:54,834 [INFO] -         - Documento encontrado na data permitida '23/09/2025': 60024025120248030001-Intimacao-1758625591866-522498.txt
+2025-09-25 17:31:55,273 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2024_0017916-000/60024025120248030001Intimacao1758625591866522498.txt
+2025-09-25 17:31:55,362 [INFO] -         - Documento encontrado na data permitida '23/09/2025': 60024025120248030001-Intimacao-1758618821753-9753.txt
+2025-09-25 17:31:55,793 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2024_0017916-000/60024025120248030001Intimacao17586188217539753.txt
+2025-09-25 17:31:55,820 [INFO] -         - Documento encontrado na data permitida '23/09/2025': 60024025120248030001-Intimacao-1758601231328-27824.pdf
+2025-09-25 17:31:56,159 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2024_0017916-000/60024025120248030001Intimacao175860123132827824.pdf
+2025-09-25 17:31:56,234 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:56,284 [INFO] -       - Filtrando andamentos para as datas: ['21/09/2025', '22/09/2025', '23/09/2025']
+2025-09-25 17:31:56,285 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:31:56,285 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:31:56,286 [INFO] - 
+[2/50] Processando NPJ: 2024/0020501-000 (Notificação base: 25/09/2025)
+2025-09-25 17:31:56,286 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0020501-000
+2025-09-25 17:31:56,286 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:57,117 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:57,145 [INFO] -       - Número do Processo encontrado: 6001246-25.2024.8.03.0002
+2025-09-25 17:31:57,145 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:31:58,288 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:58,309 [INFO] -       - Encontrados 44 documentos para verificação.
+2025-09-25 17:31:58,322 [INFO] -         - Documento encontrado na data permitida '24/09/2025': CÁLCULORONNIEYUESMATRUJILLO.pdf
+2025-09-25 17:31:58,674 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2024_0020501-000/a0601111675b4c09685fd326585137ee.pdf
+2025-09-25 17:31:58,742 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:31:58,759 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:31:58,760 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:31:58,760 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:31:58,760 [INFO] - 
+[3/50] Processando NPJ: 2024/0024240-000 (Notificação base: 24/09/2025)
+2025-09-25 17:31:58,760 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0024240-000
+2025-09-25 17:31:58,760 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:31:59,584 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:31:59,611 [INFO] -       - Número do Processo encontrado: 0811680-15.2024.8.14.0301
+2025-09-25 17:31:59,611 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:32:00,871 [INFO] -       - Filtrando documentos para as datas: ['22/09/2025', '23/09/2025', '24/09/2025']
+2025-09-25 17:32:00,889 [INFO] -       - Encontrados 50 documentos para verificação.
+2025-09-25 17:32:00,900 [INFO] -         - Documento encontrado na data permitida '24/09/2025': 08116801520248140301-Intimacao-1758688838572-691069.pdf
+2025-09-25 17:32:01,315 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2024_0024240-000/08116801520248140301Intimacao1758688838572691069.pdf
+2025-09-25 17:32:01,390 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:32:01,408 [INFO] -       - Filtrando andamentos para as datas: ['22/09/2025', '23/09/2025', '24/09/2025']
+2025-09-25 17:32:01,409 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:32:01,409 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:32:01,410 [INFO] - 
+[4/50] Processando NPJ: 2024/0024280-000 (Notificação base: 25/09/2025)
+2025-09-25 17:32:01,410 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0024280-000
+2025-09-25 17:32:01,410 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:32:02,230 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:32:02,254 [INFO] -       - Número do Processo encontrado: 0812470-96.2024.8.14.0301
+2025-09-25 17:32:02,254 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:32:03,536 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:32:03,556 [INFO] -       - Encontrados 21 documentos para verificação.
+2025-09-25 17:32:03,570 [INFO] -         - Documento encontrado na data permitida '25/09/2025': 08124709620248140301-Intimacao-1758781212475-548610.pdf
+2025-09-25 17:32:03,958 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2024_0024280-000/08124709620248140301Intimacao1758781212475548610.pdf
+2025-09-25 17:32:03,993 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:32:04,027 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:32:04,028 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:32:04,028 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:32:04,029 [INFO] - 
+[5/50] Processando NPJ: 2024/0029395-000 (Notificação base: 25/09/2025)
+2025-09-25 17:32:04,029 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0029395-000
+2025-09-25 17:32:04,029 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:32:04,876 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:32:04,897 [INFO] -       - Número do Processo encontrado: 0801789-58.2024.8.20.5100
+2025-09-25 17:32:04,897 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:32:06,170 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:32:06,190 [INFO] -       - Encontrados 27 documentos para verificação.
+2025-09-25 17:32:06,204 [INFO] -         - Documento encontrado na data permitida '25/09/2025': 08017895820248205100-Intimacao-1758787237251-402128.txt
+2025-09-25 17:32:06,643 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2024_0029395-000/08017895820248205100Intimacao1758787237251402128.txt
+2025-09-25 17:32:06,655 [INFO] -         - Documento encontrado na data permitida '25/09/2025': 08017895820248205100-Intimacao-1758782409097-471446.pdf
+2025-09-25 17:32:06,996 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2024_0029395-000/08017895820248205100Intimacao1758782409097471446.pdf
+2025-09-25 17:32:07,038 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:32:07,060 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:32:07,061 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:32:07,061 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:32:07,062 [INFO] - 
+[6/50] Processando NPJ: 2024/0029782-000 (Notificação base: 25/09/2025)
+2025-09-25 17:32:07,062 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0029782-000
+2025-09-25 17:32:07,062 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:32:07,891 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:32:07,917 [INFO] -       - Número do Processo encontrado: 0804531-16.2024.8.23.0010
+2025-09-25 17:32:07,917 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:32:09,060 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:32:09,079 [INFO] -       - Encontrados 21 documentos para verificação.
+2025-09-25 17:32:09,120 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:32:09,143 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:32:09,144 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:32:09,144 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:32:09,145 [INFO] - 
+[7/50] Processando NPJ: 2024/0034483-000 (Notificação base: 25/09/2025)
+2025-09-25 17:32:09,145 [INFO] -     - Construindo URL de detalhe para o NPJ: 2024/0034483-000
+2025-09-25 17:32:09,145 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:32:09,968 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-25 17:32:09,993 [INFO] -       - Número do Processo encontrado: 7013040-98.2024.8.22.0001
+2025-09-25 17:32:09,993 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:32:11,256 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:32:11,276 [INFO] -       - Encontrados 28 documentos para verificação.
+2025-09-25 17:32:11,289 [INFO] -         - Documento encontrado na data permitida '25/09/2025': PRECATORIA_DISTR.pdf
+2025-09-25 17:32:15,431 [INFO] - Finalizando a automação e fechando o navegador.

@@ -1,0 +1,105 @@
+2025-09-25 17:09:41,775 [INFO] - ============================================================
+2025-09-25 17:09:41,776 [INFO] - INICIANDO NOVA EXECUÇÃO DA RPA
+2025-09-25 17:09:41,776 [INFO] - ============================================================
+2025-09-25 17:09:41,780 [INFO] - 39 notificações com status 'Erro' ou 'Em Processamento' foram resetadas para 'Pendente'.
+2025-09-25 17:09:41,995 [INFO] - 
+FASE 1: LOGIN E CONFIGURAÇÃO DA SESSÃO
+2025-09-25 17:09:58,664 [INFO] - 
+FASE 2: EXTRAÇÃO DE NOVAS NOTIFICAÇÕES E REGISTRO DE CIÊNCIA
+2025-09-25 17:09:58,664 [INFO] - Iniciando módulo de extração e ciência...
+2025-09-25 17:09:58,664 [INFO] - Navegando para a Central de Notificações...
+2025-09-25 17:10:00,024 [INFO] - Acessando a 'Visão do Advogado'...
+2025-09-25 17:10:00,759 [INFO] - --- Processando tarefa: Andamento de publicação em processo de condução terceirizada ---
+2025-09-25 17:10:00,768 [WARNING] - Tarefa 'Andamento de publicação em processo de condução terceirizada' não encontrada. Pulando.
+2025-09-25 17:10:00,769 [INFO] - --- Processando tarefa: Doc. anexado por empresa externa em processo terceirizado ---
+2025-09-25 17:10:00,770 [WARNING] - Tarefa 'Doc. anexado por empresa externa em processo terceirizado' não encontrada. Pulando.
+2025-09-25 17:10:00,770 [INFO] - --- Processando tarefa: Inclusão de Documentos no NPJ ---
+2025-09-25 17:10:00,772 [WARNING] - Tarefa 'Inclusão de Documentos no NPJ' não encontrada. Pulando.
+2025-09-25 17:10:00,772 [INFO] - Extração/ciência concluídas. Salvas: 0, Ciências: 0.
+2025-09-25 17:10:00,772 [INFO] - 
+FASE 3: PROCESSAMENTO DETALHADO EM LOTES
+2025-09-25 17:10:00,772 [INFO] - Total de 391 NPJs pendentes para detalhamento.
+2025-09-25 17:10:00,774 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-25 17:10:00,825 [INFO] - 
+[1/50] Processando NPJ: 2023/0076512-000 (Notificação base: 22/09/2025)
+2025-09-25 17:10:00,825 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0076512-000
+2025-09-25 17:10:00,825 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:10:05,412 [INFO] -       - Número do Processo encontrado: 0024652-20.2023.8.03.0001
+2025-09-25 17:10:05,412 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:10:06,438 [INFO] -       - Filtrando documentos para as datas: ['20/09/2025', '21/09/2025', '22/09/2025']
+2025-09-25 17:10:06,456 [INFO] -       - Encontrados 39 documentos para verificação.
+2025-09-25 17:10:06,470 [INFO] -         - Documento encontrado na data permitida '22/09/2025': 00246522020238030001-Intimacao-1758513611607-243639.pdf
+2025-09-25 17:10:06,815 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2023_0076512-000/00246522020238030001Intimacao1758513611607243639.pdf
+2025-09-25 17:10:06,831 [INFO] -         - Documento encontrado na data permitida '21/09/2025': 00246522020238030001-Intimacao-1758442171198-270312.pdf
+2025-09-25 17:10:21,841 [ERROR] -         - ERRO DE PORTAL: GED indisponível para o arquivo '00246522020238030001-Intimacao-1758442171198-270312.pdf'.
+2025-09-25 17:10:22,431 [ERROR] -   - ERRO DE PORTAL (GED) ao processar NPJ 2023/0076512-000. Marcando para nova tentativa.
+2025-09-25 17:10:22,435 [INFO] - 
+[2/50] Processando NPJ: 2023/0079948-000 (Notificação base: 25/09/2025)
+2025-09-25 17:10:22,435 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0079948-000
+2025-09-25 17:10:22,435 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:10:22,527 [INFO] -       - Número do Processo encontrado: 0024652-20.2023.8.03.0001
+2025-09-25 17:10:22,527 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:10:22,532 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:10:22,536 [INFO] -       - Encontrados 39 documentos para verificação.
+2025-09-25 17:10:22,541 [INFO] -         - Documento encontrado na data permitida '24/09/2025': Sentença 2.pdf
+2025-09-25 17:10:52,563 [WARNING] -         - Timeout ou outra falha no download do arquivo 'Sentença 2.pdf'.
+2025-09-25 17:10:54,568 [WARNING] -       - Erro ao processar uma linha de documento: Locator.inner_text: Timeout 2000ms exceeded.
+Call log:
+  - waiting for locator("div.accordion__item[bb-item-title=\"Documentos\"]").locator("table[ng-table=\"vm.tabelaDocumento\"]").locator("tbody tr").nth(1).locator("td").nth(4)
+
+2025-09-25 17:10:56,574 [WARNING] -       - Erro ao processar uma linha de documento: Locator.inner_text: Timeout 2000ms exceeded.
+Call log:
+  - waiting for locator("div.accordion__item[bb-item-title=\"Documentos\"]").locator("table[ng-table=\"vm.tabelaDocumento\"]").locator("tbody tr").nth(2).locator("td").nth(4)
+
+2025-09-25 17:10:58,578 [WARNING] -       - Erro ao processar uma linha de documento: Locator.inner_text: Timeout 2000ms exceeded.
+Call log:
+  - waiting for locator("div.accordion__item[bb-item-title=\"Documentos\"]").locator("table[ng-table=\"vm.tabelaDocumento\"]").locator("tbody tr").nth(3).locator("td").nth(4)
+
+2025-09-25 17:11:00,583 [WARNING] -       - Erro ao processar uma linha de documento: Locator.inner_text: Timeout 2000ms exceeded.
+Call log:
+  - waiting for locator("div.accordion__item[bb-item-title=\"Documentos\"]").locator("table[ng-table=\"vm.tabelaDocumento\"]").locator("tbody tr").nth(4).locator("td").nth(4)
+
+2025-09-25 17:11:02,587 [WARNING] -       - Erro ao processar uma linha de documento: Locator.inner_text: Timeout 2000ms exceeded.
+Call log:
+  - waiting for locator("div.accordion__item[bb-item-title=\"Documentos\"]").locator("table[ng-table=\"vm.tabelaDocumento\"]").locator("tbody tr").nth(5).locator("td").nth(4)
+
+2025-09-25 17:11:04,592 [WARNING] -       - Erro ao processar uma linha de documento: Locator.inner_text: Timeout 2000ms exceeded.
+Call log:
+  - waiting for locator("div.accordion__item[bb-item-title=\"Documentos\"]").locator("table[ng-table=\"vm.tabelaDocumento\"]").locator("tbody tr").nth(6).locator("td").nth(4)
+
+2025-09-25 17:11:06,597 [WARNING] -       - Erro ao processar uma linha de documento: Locator.inner_text: Timeout 2000ms exceeded.
+Call log:
+  - waiting for locator("div.accordion__item[bb-item-title=\"Documentos\"]").locator("table[ng-table=\"vm.tabelaDocumento\"]").locator("tbody tr").nth(7).locator("td").nth(4)
+
+2025-09-25 17:11:08,601 [WARNING] -       - Erro ao processar uma linha de documento: Locator.inner_text: Timeout 2000ms exceeded.
+Call log:
+  - waiting for locator("div.accordion__item[bb-item-title=\"Documentos\"]").locator("table[ng-table=\"vm.tabelaDocumento\"]").locator("tbody tr").nth(8).locator("td").nth(4)
+
+2025-09-25 17:11:08,829 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:11:08,889 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:11:08,890 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:11:08,890 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:11:08,891 [INFO] - 
+[3/50] Processando NPJ: 2023/0080192-000 (Notificação base: 25/09/2025)
+2025-09-25 17:11:08,891 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0080192-000
+2025-09-25 17:11:08,891 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:11:08,928 [INFO] -       - Número do Processo encontrado: 0024652-20.2023.8.03.0001
+2025-09-25 17:11:08,928 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:11:10,981 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:11:11,004 [INFO] -       - Encontrados 50 documentos para verificação.
+2025-09-25 17:11:11,019 [INFO] -         - Documento encontrado na data permitida '25/09/2025': 70313188420238220001-Intimacao-1758774029748-127057.pdf
+2025-09-25 17:11:11,352 [INFO] -         - Download concluído: /Users/rildonpimentelpereira/GitHub/OneNotify/documentos/2023_0080192-000/70313188420238220001Intimacao1758774029748127057.pdf
+2025-09-25 17:11:11,460 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 17:11:11,484 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:11:11,485 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 17:11:11,485 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 17:11:11,486 [INFO] - 
+[4/50] Processando NPJ: 2023/0080283-000 (Notificação base: 25/09/2025)
+2025-09-25 17:11:11,486 [INFO] -     - Construindo URL de detalhe para o NPJ: 2023/0080283-000
+2025-09-25 17:11:11,486 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 17:11:11,525 [INFO] -       - Número do Processo encontrado: 7031318-84.2023.8.22.0001
+2025-09-25 17:11:11,525 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 17:11:13,462 [INFO] -       - Filtrando documentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 17:11:13,486 [INFO] -       - Encontrados 50 documentos para verificação.
+2025-09-25 17:11:13,499 [INFO] -         - Documento encontrado na data permitida '25/09/2025': 00114922520238030001-Intimacao-1758791455657-282238.pdf
+2025-09-25 17:11:14,880 [INFO] - Finalizando a automação e fechando o navegador.

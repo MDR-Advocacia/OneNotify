@@ -5,13 +5,13 @@ from typing import List, Dict, Any, Optional
 from playwright.sync_api import Page, BrowserContext, Error, TimeoutError
 from datetime import datetime, timedelta
 import database
+from pathlib import Path
 
-# --- FUNÇÕES AUXILIARES DE EXTRAÇÃO (REFEITAS COM BASE NO HTML CORRETO) ---
+# --- FUNÇÕES AUXILIARES DE EXTRAÇÃO (SEM IFRAME) ---
 
 def extrair_numero_processo(page: Page) -> Optional[str]:
     """Extrai o número do processo da nova página de detalhes."""
     try:
-        # Seletor para o "chip" que contém o número do processo (ex: 0020517-64.2004.8.14.0301)
         selector_processo = 'div.chip[bb-title="Processo"] span.chip__desc'
         page.wait_for_selector(selector_processo, timeout=10000)
         
@@ -25,7 +25,7 @@ def extrair_numero_processo(page: Page) -> Optional[str]:
     return None
 
 def extrair_andamentos(page: Page, data_notificacao_recente: str) -> List[Dict[str, str]]:
-    """Clica no menu 'Andamentos', filtra por data e extrai os dados, tratando o modal de publicações."""
+    """Clica no menu 'Andamentos', filtra por data e extrai os dados."""
     andamentos = []
     try:
         logging.info("      - Clicando na aba 'Andamentos'...")
@@ -73,8 +73,7 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str) -> List[Dict[s
                         texto_completo_selector = page.locator(f'{modal_selector} texto-grande-detalhar p')
                         detalhes = texto_completo_selector.inner_text().strip()
                         
-                        # O modal não tem um botão de fechar visível, mas pode responder ao ESC ou a um clique fora
-                        page.locator('div.modal__header').click(force=True) # Clica no header para garantir foco
+                        page.locator('div.modal__header').click(force=True)
                         page.keyboard.press("Escape")
                         page.wait_for_selector(modal_selector, state='hidden', timeout=5000)
                     else:
@@ -95,52 +94,91 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str) -> List[Dict[s
         logging.warning(f"      - Erro inesperado ao extrair andamentos: {e}")
     return andamentos
 
-def baixar_documentos(page: Page) -> List[Dict[str, str]]:
-    """Expande todas as seções de documentos e tenta baixar os arquivos."""
+def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str) -> List[Dict[str, str]]:
+    """Expande as seções de documentos, filtra pela data e baixa os arquivos, tratando o erro 'GED indisponível'."""
     documentos_baixados = []
     try:
         logging.info("      - Procurando e expandindo seções de documentos...")
-        secoes_documentos = page.locator('div.accordion__title:has-text("Documentos")').all()
-        if not secoes_documentos:
+        
+        secao_documentos = page.locator('div.accordion__item[bb-item-title="Documentos"]')
+        secao_documentos.wait_for(state='attached', timeout=10000)
+        
+        if secao_documentos.count() == 0:
             logging.info("      - Nenhuma seção de documentos encontrada na página.")
             return []
-            
-        for secao in secoes_documentos:
-            if secao.is_visible():
-                secao.click()
-                page.wait_for_timeout(1000)
 
-        logging.info("      - Buscando links para download...")
-        links_download = page.locator('a[href*="/paj/rest/processo/v1/processos/documentos"]').all()
+        titulo_secao = secao_documentos.locator('.accordion__title')
+        if titulo_secao.is_visible():
+            if 'mi--keyboard-arrow-down' in (titulo_secao.locator('i').get_attribute('class') or ''):
+                 titulo_secao.click()
+                 page.wait_for_timeout(1000)
+
+        nome_pasta_npj = re.sub(r'[\\/*?:"<>|]', '_', npj)
+        diretorio_download_npj = Path(__file__).resolve().parent / "documentos" / nome_pasta_npj
+        diretorio_download_npj.mkdir(parents=True, exist_ok=True)
         
-        if not links_download:
-            logging.info("      - Nenhum link de download de documento encontrado.")
+        try:
+            data_base = datetime.strptime(data_notificacao_recente, '%d/%m/%Y').date()
+            datas_permitidas = {data_base - timedelta(days=i) for i in range(3)}
+            logging.info(f"      - Filtrando documentos para as datas: {[d.strftime('%d/%m/%Y') for d in sorted(list(datas_permitidas))]}")
+        except (ValueError, TypeError):
+            logging.error(f"      - Data de notificação inválida '{data_notificacao_recente}'. Não será possível filtrar documentos por data.")
             return []
 
-        logging.info(f"      - Encontrados {len(links_download)} link(s) de documento(s).")
-        for i in range(len(links_download)):
-            link_atual = page.locator('a[href*="/paj/rest/processo/v1/processos/documentos"]').nth(i)
-            nome_arquivo = link_atual.locator('xpath=./ancestor::tr/td[1]').inner_text(timeout=5000).strip()
-            
+        tabela_selector = 'table[ng-table="vm.tabelaDocumento"]'
+        tabela_documentos = secao_documentos.locator(tabela_selector)
+        tabela_documentos.wait_for(state='visible', timeout=15000)
+        
+        linhas_documentos = tabela_documentos.locator('tbody tr').all()
+        logging.info(f"      - Encontrados {len(linhas_documentos)} documentos para verificação.")
+
+        for linha in linhas_documentos:
             try:
-                with page.expect_download(timeout=90000) as download_info:
-                    link_atual.click()
-                download = download_info.value
-                caminho_salvo = f"documentos/{download.suggested_filename}"
-                download.save_as(caminho_salvo)
-                documentos_baixados.append({"nome": nome_arquivo, "caminho": caminho_salvo})
-                logging.info(f"        - Download concluído: {caminho_salvo}")
-            except Error as e:
-                logging.warning(f"        - Falha no download do arquivo '{nome_arquivo}': {e}")
+                data_doc_str = linha.locator('td').nth(4).inner_text(timeout=2000).strip()
+                data_doc = datetime.strptime(data_doc_str, '%d/%m/%Y').date()
+
+                if data_doc not in datas_permitidas:
+                    continue
+
+                link_locator = linha.locator('td').nth(1).locator('a')
+                if link_locator.count() > 0:
+                    nome_arquivo = link_locator.inner_text().strip()
+                    logging.info(f"        - Documento encontrado na data permitida '{data_doc_str}': {nome_arquivo}")
+                    
+                    try:
+                        with page.expect_download(timeout=15000) as download_info:
+                            link_locator.click()
+                        
+                        download = download_info.value
+                        caminho_salvo = diretorio_download_npj / download.suggested_filename
+                        download.save_as(caminho_salvo)
+                        
+                        documentos_baixados.append({"nome": nome_arquivo, "caminho": str(caminho_salvo)})
+                        logging.info(f"        - Download concluído: {caminho_salvo}")
+
+                    except Error:
+                        if "GED indisponível" in page.content():
+                            logging.error(f"        - ERRO DE PORTAL: GED indisponível para o arquivo '{nome_arquivo}'.")
+                            page.go_back(wait_until="networkidle")
+                            raise ValueError("GED Indisponível")
+                        else:
+                            logging.warning(f"        - Timeout ou outra falha no download do arquivo '{nome_arquivo}'.")
+            
+            except (Error, IndexError, ValueError) as e:
+                if "GED Indisponível" in str(e):
+                    raise e
+                logging.warning(f"      - Erro ao processar uma linha de documento: {e}")
+                continue
                 
     except Error as e:
         logging.warning(f"      - Ocorreu um erro geral ao processar documentos: {e}")
+    
     return documentos_baixados
 
 # --- FUNÇÃO DE NAVEGAÇÃO DIRETA ---
 
 def navegar_para_detalhes_do_npj(page: Page, npj: str):
-    """Navega diretamente para a página de detalhes do NPJ usando a URL correta."""
+    """Navega diretamente para a página de detalhes do NPJ e garante que o conteúdo esteja sincronizado."""
     logging.info(f"    - Construindo URL de detalhe para o NPJ: {npj}")
     
     match = re.match(r"(\d+)/(\d+)-(\d+)", npj)
@@ -148,11 +186,19 @@ def navegar_para_detalhes_do_npj(page: Page, npj: str):
         raise ValueError(f"Formato de NPJ inválido: {npj}")
     ano, numero, _ = match.groups()
     id_processo_url = f"{ano}{numero.zfill(7)}"
-    url_detalhe = f"https://juridico.bb.com.br/paj/app/paj-cadastro/spas/processo/consulta/processo-consulta.app.html#/editar/{id_processo_url}/0/1"
+    
+    # --- CORREÇÃO: Voltando para a URL original que funciona ---
+    url_final = f"https://juridico.bb.com.br/paj/app/paj-cadastro/spas/processo/consulta/processo-consulta.app.html#/editar/{id_processo_url}/0/1"
     
     logging.info(f"    - Navegando para a URL de detalhe...")
-    page.goto(url_detalhe, wait_until="networkidle", timeout=60000)
-    page.wait_for_selector('comum-resumo-processo', timeout=30000)
+    page.goto(url_final, wait_until="networkidle", timeout=60000)
+    
+    # --- PONTO CRÍTICO DE SINCRONIZAÇÃO ---
+    npj_formatado = f"{ano}/{numero}-000"
+    chip_npj_selector = f'div[bb-title="NPJ"] span.chip__desc:has-text("{npj_formatado}")'
+    page.wait_for_selector(chip_npj_selector, timeout=30000)
+    logging.info("      - Sincronização com a página do NPJ confirmada.")
+    
     if page.locator('text=/processo n(ã|a)o localizado/i').count() > 0:
         raise Error(f"Processo {npj} não foi encontrado no portal (página de erro).")
 
@@ -161,35 +207,46 @@ def navegar_para_detalhes_do_npj(page: Page, npj: str):
 def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any]]) -> Dict[str, int]:
     """Processa um lote de NPJs, navegando para a URL de cada um e extraindo os detalhes."""
     stats = {"sucesso": 0, "falha": 0, "andamentos": 0, "documentos": 0}
+    
+    page = context.new_page()
+
     for i, item in enumerate(lote):
         npj = item.get('NPJ')
         data_notificacao = item.get('data_recente_notificacao')
-        new_page = None
         
         logging.info(f"\n[{i+1}/{len(lote)}] Processando NPJ: {npj} (Notificação base: {data_notificacao})")
         
         try:
-            new_page = context.new_page()
-            navegar_para_detalhes_do_npj(new_page, npj)
-            numero_processo = extrair_numero_processo(new_page)
+            navegar_para_detalhes_do_npj(page, npj)
             
-            # 1. Baixar documentos da tela inicial
-            documentos = baixar_documentos(new_page)
+            numero_processo = extrair_numero_processo(page)
+            documentos = baixar_documentos(page, data_notificacao, npj)
             stats["documentos"] += len(documentos)
-            # 2. Navegar e extrair andamentos
-            andamentos = extrair_andamentos(new_page, data_notificacao)
+            andamentos = extrair_andamentos(page, data_notificacao)
             stats["andamentos"] += len(andamentos)
 
             database.atualizar_notificacoes_de_npj_processado(npj, numero_processo, andamentos, documentos)
             stats["sucesso"] += 1
 
+        except ValueError as e:
+            if "GED Indisponível" in str(e):
+                logging.error(f"  - ERRO DE PORTAL (GED) ao processar NPJ {npj}. Marcando para nova tentativa.")
+                database.marcar_npj_como_erro(npj)
+                stats["falha"] += 1
         except Error as e:
             logging.error(f"  - ERRO CRÍTICO ao processar NPJ {npj}: {e}", exc_info=False)
             database.marcar_npj_como_erro(npj)
             stats["falha"] += 1
-        finally:
-            if new_page and not new_page.is_closed():
-                new_page.close()
+        except Exception as e:
+            logging.critical(f"Ocorreu um erro não relacionado ao Playwright.\n{e}", exc_info=True)
+            database.marcar_npj_como_erro(npj)
+            stats["falha"] += 1
+            if not page.is_closed():
+                page.close()
+            page = context.new_page()
+        
+    if not page.is_closed():
+        page.close()
+        
     logging.info("Processamento do lote concluído.")
     return stats
-

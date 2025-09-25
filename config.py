@@ -24,9 +24,5 @@ TAREFAS_CONFIG = [
         "nome": "Inclusão de Documentos no NPJ",
         "url_path": "inclusao-documentos-npj"
     },
-    {
-        "nome": "Documento anexado em processo terceirizado",
-        "url_path": "documento-anexado-terceirizado"
-    }
 ]
 

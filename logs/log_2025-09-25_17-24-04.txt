@@ -1,0 +1,26 @@
+2025-09-25 17:24:04,625 [INFO] - ============================================================
+2025-09-25 17:24:04,625 [INFO] - INICIANDO NOVA EXECUÇÃO DA RPA
+2025-09-25 17:24:04,625 [INFO] - ============================================================
+2025-09-25 17:24:04,629 [INFO] - 70 notificações com status 'Erro' ou 'Em Processamento' foram resetadas para 'Pendente'.
+2025-09-25 17:24:04,843 [INFO] - 
+FASE 1: LOGIN E CONFIGURAÇÃO DA SESSÃO
+2025-09-25 17:25:11,823 [CRITICAL] - Ocorreu uma falha inesperada na automação.
+Locator.wait_for: Target page, context or browser has been closed
+Call log:
+  - waiting for locator("#aPaginaInicial") to be visible
+    - waiting for" https://juridico.bb.com.br/paj/juridico" navigation to finish...
+    - navigated to "https://loginweb.bb.com.br/sso/XUI/?realm=/paj&goto=https://juridico.bb.com.br/paj/juridico#login"
+
+2025-09-25 17:25:11,824 [INFO] - Finalizando a automação e fechando o navegador.
+2025-09-25 17:25:11,825 [INFO] - 
+--- RESUMO DA EXECUÇÃO ---
+2025-09-25 17:25:11,825 [INFO] - Timestamp: 2025-09-25_17-24-04
+2025-09-25 17:25:11,826 [INFO] - Duracao total: 67.20
+2025-09-25 17:25:11,826 [INFO] - Tempo medio npj: 0
+2025-09-25 17:25:11,826 [INFO] - Notificacoes salvas: 0
+2025-09-25 17:25:11,826 [INFO] - Ciencias registradas: 0
+2025-09-25 17:25:11,826 [INFO] - Andamentos: 0
+2025-09-25 17:25:11,826 [INFO] - Documentos: 0
+2025-09-25 17:25:11,826 [INFO] - Npjs sucesso: 0
+2025-09-25 17:25:11,826 [INFO] - Npjs falha: 0
+2025-09-25 17:25:11,826 [INFO] - ============================================================

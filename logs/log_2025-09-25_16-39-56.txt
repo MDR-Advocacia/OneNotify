@@ -1,0 +1,104 @@
+2025-09-25 16:39:56,335 [INFO] - ============================================================
+2025-09-25 16:39:56,335 [INFO] - INICIANDO NOVA EXECUÇÃO DA RPA
+2025-09-25 16:39:56,335 [INFO] - ============================================================
+2025-09-25 16:39:56,445 [INFO] - 
+FASE 1: LOGIN E CONFIGURAÇÃO DA SESSÃO
+2025-09-25 16:40:48,559 [INFO] - 
+FASE 2: EXTRAÇÃO DE NOVAS NOTIFICAÇÕES E REGISTRO DE CIÊNCIA
+2025-09-25 16:40:48,566 [INFO] - Iniciando módulo de extração e ciência...
+2025-09-25 16:40:48,567 [INFO] - Navegando para a Central de Notificações...
+2025-09-25 16:40:51,085 [INFO] - Acessando a 'Visão do Advogado'...
+2025-09-25 16:40:51,945 [INFO] - --- Processando tarefa: Andamento de publicação em processo de condução terceirizada ---
+2025-09-25 16:40:51,955 [WARNING] - Tarefa 'Andamento de publicação em processo de condução terceirizada' não encontrada. Pulando.
+2025-09-25 16:40:51,956 [INFO] - --- Processando tarefa: Doc. anexado por empresa externa em processo terceirizado ---
+2025-09-25 16:40:51,957 [WARNING] - Tarefa 'Doc. anexado por empresa externa em processo terceirizado' não encontrada. Pulando.
+2025-09-25 16:40:51,957 [INFO] - --- Processando tarefa: Inclusão de Documentos no NPJ ---
+2025-09-25 16:40:51,961 [INFO] - 1 itens encontrados. Abrindo detalhes...
+2025-09-25 16:40:52,288 [INFO] -     - Verificando página 1...
+2025-09-25 16:40:52,331 [INFO] -     - Fim da paginação.
+2025-09-25 16:40:52,331 [INFO] -     - Confirmando a ciência...
+2025-09-25 16:41:02,888 [WARNING] -     - Modal de carregamento final não apareceu, seguindo em frente.
+2025-09-25 16:41:02,896 [INFO] - Processamento da tarefa 'Inclusão de Documentos no NPJ' concluído.
+2025-09-25 16:41:02,900 [INFO] - Tarefa 'Inclusão de Documentos no NPJ' finalizada. 1 novas notificações salvas. 1 ciências registradas.
+2025-09-25 16:41:02,900 [INFO] - Extração/ciência concluídas. Salvas: 1, Ciências: 1.
+2025-09-25 16:41:02,900 [INFO] - 
+FASE 3: PROCESSAMENTO DETALHADO EM LOTES
+2025-09-25 16:41:02,901 [INFO] - Total de 459 NPJs pendentes para detalhamento.
+2025-09-25 16:41:02,906 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-25 16:41:02,906 [INFO] - 
+[1/50] Processando NPJ: 2020/0073431-000 (Notificação base: 25/09/2025)
+2025-09-25 16:41:02,973 [INFO] -     - Construindo URL de detalhe para o NPJ: 2020/0073431-000
+2025-09-25 16:41:02,974 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 16:41:07,953 [INFO] -       - Número do Processo encontrado: 0804781-37.2020.8.20.5001
+2025-09-25 16:41:07,953 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 16:41:11,056 [INFO] -       - Buscando links para download...
+2025-09-25 16:41:11,064 [INFO] -       - Nenhum link de download de documento encontrado.
+2025-09-25 16:41:11,064 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 16:41:11,143 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 16:41:11,145 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 16:41:11,145 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 16:41:11,152 [INFO] - 
+[2/50] Processando NPJ: 2020/0121023-000 (Notificação base: 25/09/2025)
+2025-09-25 16:41:11,194 [INFO] -     - Construindo URL de detalhe para o NPJ: 2020/0121023-000
+2025-09-25 16:41:11,194 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 16:41:15,904 [INFO] -       - Número do Processo encontrado: 7008782-84.2020.8.22.0001
+2025-09-25 16:41:15,904 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 16:41:19,041 [INFO] -       - Buscando links para download...
+2025-09-25 16:41:19,045 [INFO] -       - Nenhum link de download de documento encontrado.
+2025-09-25 16:41:19,045 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 16:41:19,099 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 16:41:19,100 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 16:41:19,100 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 16:41:19,107 [INFO] - 
+[3/50] Processando NPJ: 2020/0137514-000 (Notificação base: 25/09/2025)
+2025-09-25 16:41:19,157 [INFO] -     - Construindo URL de detalhe para o NPJ: 2020/0137514-000
+2025-09-25 16:41:19,157 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 16:41:23,971 [INFO] -       - Número do Processo encontrado: 0801157-71.2020.8.20.5100
+2025-09-25 16:41:23,971 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 16:41:27,089 [INFO] -       - Buscando links para download...
+2025-09-25 16:41:27,096 [INFO] -       - Nenhum link de download de documento encontrado.
+2025-09-25 16:41:27,097 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 16:41:27,182 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 16:41:27,183 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 16:41:27,183 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 16:41:27,191 [INFO] - 
+[4/50] Processando NPJ: 2020/0160157-000 (Notificação base: 25/09/2025)
+2025-09-25 16:41:27,233 [INFO] -     - Construindo URL de detalhe para o NPJ: 2020/0160157-000
+2025-09-25 16:41:27,233 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 16:41:32,214 [INFO] -       - Número do Processo encontrado: 7005594-71.2020.8.22.0005
+2025-09-25 16:41:32,214 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 16:41:35,343 [INFO] -       - Buscando links para download...
+2025-09-25 16:41:35,351 [INFO] -       - Nenhum link de download de documento encontrado.
+2025-09-25 16:41:35,351 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 16:41:35,425 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 16:41:35,426 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 16:41:35,426 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 16:41:35,434 [INFO] - 
+[5/50] Processando NPJ: 2020/0164739-000 (Notificação base: 25/09/2025)
+2025-09-25 16:41:35,477 [INFO] -     - Construindo URL de detalhe para o NPJ: 2020/0164739-000
+2025-09-25 16:41:35,477 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 16:41:40,270 [INFO] -       - Número do Processo encontrado: 7003904-10.2020.8.22.0004
+2025-09-25 16:41:40,270 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 16:41:43,424 [INFO] -       - Buscando links para download...
+2025-09-25 16:41:43,431 [INFO] -       - Nenhum link de download de documento encontrado.
+2025-09-25 16:41:43,431 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 16:41:43,504 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 16:41:43,505 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 16:41:43,505 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 16:41:43,513 [INFO] - 
+[6/50] Processando NPJ: 2020/0165737-000 (Notificação base: 25/09/2025)
+2025-09-25 16:41:43,555 [INFO] -     - Construindo URL de detalhe para o NPJ: 2020/0165737-000
+2025-09-25 16:41:43,555 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 16:41:48,321 [INFO] -       - Número do Processo encontrado: 7000263-44.2021.8.22.0015
+2025-09-25 16:41:48,321 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-25 16:41:51,456 [INFO] -       - Buscando links para download...
+2025-09-25 16:41:51,465 [INFO] -       - Nenhum link de download de documento encontrado.
+2025-09-25 16:41:51,466 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-25 16:41:51,546 [INFO] -       - Filtrando andamentos para as datas: ['23/09/2025', '24/09/2025', '25/09/2025']
+2025-09-25 16:41:51,547 [INFO] -       - Encontradas 0 linhas de andamento para verificação.
+2025-09-25 16:41:51,547 [INFO] -       - 0 andamento(s) capturado(s) dentro do período de datas.
+2025-09-25 16:41:51,555 [INFO] - 
+[7/50] Processando NPJ: 2020/0172094-000 (Notificação base: 19/09/2025)
+2025-09-25 16:41:51,607 [INFO] -     - Construindo URL de detalhe para o NPJ: 2020/0172094-000
+2025-09-25 16:41:51,607 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-25 16:41:53,775 [INFO] - Finalizando a automação e fechando o navegador.
