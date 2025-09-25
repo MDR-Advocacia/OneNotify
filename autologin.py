@@ -3,7 +3,7 @@ import time
 import subprocess
 import sys
 from pathlib import Path
-from playwright.sync_api import Playwright, Browser, BrowserContext, Page
+from playwright.sync_api import Playwright, Browser, BrowserContext, Page, Error
 
 # --- CONFIGURAÇÕES DO MÓDULO ---
 BAT_FILE_NAME = "abrir_chrome.sh" if sys.platform != "win32" else "abrir_chrome.bat"
@@ -16,7 +16,7 @@ def realizar_login_automatico(playwright: Playwright) -> tuple[Browser, BrowserC
     Executa o login de forma 100% automatizada, implementando a lógica robusta de
     capturar a nova aba e aguardar pela sua estabilização.
     """
-    print("--- MÓDULO DE LOGIN AUTOMÁTICO (SOLUÇÃO DEFINITIVA) ---")
+    print("--- MÓDULO DE LOGIN AUTOMÁTICO (SOLUÇÃO DEFINITIVA V2) ---")
     
     popen_args = {"shell": True}
     if sys.platform == "win32":
@@ -33,7 +33,7 @@ def realizar_login_automatico(playwright: Playwright) -> tuple[Browser, BrowserC
             browser = playwright.chromium.connect_over_cdp(CDP_ENDPOINT)
             print("[OK] Conectado com sucesso ao navegador!")
             break 
-        except Exception:
+        except Error:
             if attempt == 24:
                 raise ConnectionError("Falha ao conectar. Verifique se o Chrome está rodando em modo de depuração.")
             continue
@@ -49,29 +49,32 @@ def realizar_login_automatico(playwright: Playwright) -> tuple[Browser, BrowserC
     browser_process_ref = {'process': browser_process}
 
     try:
-        # ETAPA 1: Ativa o "escutador" para capturar a próxima página a ser criada.
-        with context.expect_page(timeout=90000) as new_page_info:
-            print("[INFO] Abrindo extensão e ativando 'escutador' para a nova página...")
-            
-            extension_page = context.new_page()
-            extension_page.goto(EXTENSION_URL)
-
-            search_input = extension_page.get_by_placeholder("Digite ou selecione um sistema pra acessar")
-            search_input.wait_for(state="visible", timeout=15000)
-            search_input.fill("banco do")
-            extension_page.locator('div[role="menuitem"]:not([disabled])', has_text="Banco do Brasil - Intranet").first.click()
-            
-            print("[INFO] Clicando em ACESSAR. O robô agora aguarda a nova página ser criada...")
-            extension_page.get_by_role("button", name="ACESSAR").click()
+        # ETAPA 1: Abrir a extensão
+        print("[INFO] Abrindo a página da extensão...")
+        extension_page = context.new_page()
+        extension_page.goto(EXTENSION_URL)
+        search_input = extension_page.get_by_placeholder("Digite ou selecione um sistema pra acessar")
+        search_input.wait_for(state="visible", timeout=15000)
         
-        # ETAPA 2: A nova página foi capturada, não importa a URL inicial.
+        # ETAPA 2: Preencher e clicar nos itens da extensão
+        search_input.fill("banco do")
+        extension_page.locator('div[role="menuitem"]:not([disabled])', has_text="Banco do Brasil - Intranet").first.click()
+        
+        # ETAPA 3: A MUDANÇA CRÍTICA - Esperar pelo evento de nova página
+        # Isso garante que pegamos a aba do portal, e não eventos intermediários.
+        print("[INFO] Ativando 'escutador' para a página do portal...")
+        with context.expect_page(timeout=90000) as new_page_info:
+            print("[INFO] Clicando em ACESSAR...")
+            extension_page.get_by_role("button", name="ACESSAR").click()
+
+        # ETAPA 4: Capturar a página correta e aguardar
         portal_page = new_page_info.value
-        print(f"[OK] Nova página capturada! URL inicial: {portal_page.url}")
+        print(f"[OK] Nova página do portal capturada! URL: {portal_page.url}")
+        
+        # Garante que a página carregou minimamente antes de procurar elementos
+        portal_page.wait_for_load_state("domcontentloaded", timeout=60000)
 
-        if not extension_page.is_closed():
-            extension_page.close()
-
-        # ETAPA 3: Agora, esperamos pacientemente o elemento de confirmação aparecer NESSA página.
+        # ETAPA 5: Agora sim, esperamos pelo elemento de confirmação na página correta
         print("[INFO] Aguardando o elemento de confirmação ('#aPaginaInicial') na página capturada...")
         portal_page.locator("#aPaginaInicial").wait_for(state="visible", timeout=90000)
         
@@ -80,6 +83,10 @@ def realizar_login_automatico(playwright: Playwright) -> tuple[Browser, BrowserC
 
         print("[SUCESSO] Login 100% automatizado concluído com sucesso!")
         
+        # Fecha a aba da extensão se ela ainda estiver aberta
+        if not extension_page.is_closed():
+            extension_page.close()
+            
         return browser, context, browser_process_ref, portal_page
 
     except Exception as e:
@@ -95,4 +102,3 @@ def realizar_login_automatico(playwright: Playwright) -> tuple[Browser, BrowserC
             else:
                 proc.kill()
         raise
-

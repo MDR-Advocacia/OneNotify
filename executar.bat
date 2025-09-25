@@ -17,7 +17,7 @@ echo %date% %time%: Iniciando execucao da RPA...
 echo Log detalhado em: %LOG_FILE%
 echo.
 
-(
+
     echo Encerrando processos residuais do Chrome...
     taskkill /F /IM chrome.exe /T > nul 2>&1
 
@@ -30,7 +30,7 @@ echo.
     echo Desativando ambiente virtual...
     call deactivate
 
-) >> "%LOG_FILE%" 2>&1
+
 
 echo.
 echo %date% %time%: Execucao da RPA finalizada.

@@ -14,7 +14,6 @@ echo "$(date): Iniciando execução da RPA..."
 echo "Log detalhado em: $LOG_FILE"
 echo ""
 
-{
     echo "Encerrando processos residuais do Chrome..."
     pkill -f "Google Chrome" > /dev/null 2>&1
     sleep 2
@@ -28,7 +27,6 @@ echo ""
     echo "Desativando ambiente virtual..."
     deactivate
 
-} >> "$LOG_FILE" 2>&1
 
 echo ""
 echo "$(date): Execução da RPA finalizada."
