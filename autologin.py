@@ -3,6 +3,7 @@ import time
 import subprocess
 import sys
 from pathlib import Path
+from playwright.sync_api import Playwright, Browser, BrowserContext, Page
 
 # --- CONFIGURAÇÕES DO MÓDULO ---
 BAT_FILE_NAME = "abrir_chrome.sh" if sys.platform != "win32" else "abrir_chrome.bat"
@@ -10,24 +11,22 @@ BAT_FILE_PATH = Path(__file__).resolve().parent / BAT_FILE_NAME
 CDP_ENDPOINT = "http://localhost:9222"
 EXTENSION_URL = "chrome-extension://lnidijeaekolpfeckelhkomndglcglhh/index.html"
 
-def realizar_login_automatico(playwright):
+def realizar_login_automatico(playwright: Playwright) -> tuple[Browser, BrowserContext, dict, Page]:
     """
-    Executa o script de inicialização do Chrome, conecta-se e realiza o login.
-    Funciona tanto em Windows (.bat) quanto em macOS/Linux (.sh).
+    Executa o login de forma 100% automatizada, implementando a lógica robusta de
+    capturar a nova aba e aguardar pela sua estabilização.
     """
-    print("--- MÓDULO DE LOGIN AUTOMÁTICO ---")
+    print("--- MÓDULO DE LOGIN AUTOMÁTICO (SOLUÇÃO DEFINITIVA) ---")
     
-    popen_args = {
-        "shell": True
-    }
+    popen_args = {"shell": True}
     if sys.platform == "win32":
         popen_args['creationflags'] = subprocess.CREATE_NEW_PROCESS_GROUP
 
-    print(f"[>>] Executando o script: {BAT_FILE_PATH}")
+    print(f"[>>] Garantindo que o Chrome está em execução via: {BAT_FILE_PATH}")
     browser_process = subprocess.Popen(str(BAT_FILE_PATH), **popen_args)
     
     browser = None
-    for attempt in range(20): 
+    for attempt in range(25): 
         time.sleep(2)
         print(f"    Tentativa de conexão nº {attempt + 1}...")
         try:
@@ -35,50 +34,65 @@ def realizar_login_automatico(playwright):
             print("[OK] Conectado com sucesso ao navegador!")
             break 
         except Exception:
-            if attempt == 19:
-                print("[ERRO] Falha ao conectar. Verifique se o Chrome está rodando em modo de depuração.")
+            if attempt == 24:
+                raise ConnectionError("Falha ao conectar. Verifique se o Chrome está rodando em modo de depuração.")
             continue
     
     if not browser:
         raise ConnectionError("Não foi possível conectar ao navegador.")
 
     context = browser.contexts[0]
+    for page in context.pages:
+        if not page.is_closed():
+            page.close()
     
-    print(f"[INFO] Navegando para a URL da extensão...")
-    extension_page = context.new_page()
-    extension_page.goto(EXTENSION_URL)
-    extension_page.wait_for_load_state("domcontentloaded")
+    browser_process_ref = {'process': browser_process}
 
-    search_input = extension_page.get_by_placeholder("Digite ou selecione um sistema pra acessar")
-    search_input.wait_for(state="visible", timeout=10000)
-    search_input.fill("banco do")
-
-    login_button = extension_page.locator(
-        'div[role="menuitem"]:not([disabled])', 
-        has_text="Banco do Brasil - Intranet"
-    ).first
-    login_button.click(timeout=10000)
-
-    extension_page.get_by_role("button", name="ACESSAR").click(timeout=5000)
-    
-    print("[OK] Login via extensão confirmado!")
-    time.sleep(5)
-    extension_page.close()
-    
-    print("--- FIM DO MÓDULO DE LOGIN ---")
-    return browser, context, browser_process
-
-if __name__ == "__main__":
-    from playwright.sync_api import sync_playwright
-    browser_process = None
     try:
-        with sync_playwright() as playwright:
-            browser, context, browser_process = realizar_login_automatico(playwright)
-            print("\nLogin realizado (teste de módulo). O navegador permanecerá aberto.")
-            input("Pressione Enter para fechar...")
-    finally:
-        if browser_process:
-            print("Encerrando o processo do navegador...")
-            browser_process.kill() 
-            print("Processo encerrado.")
+        # ETAPA 1: Ativa o "escutador" para capturar a próxima página a ser criada.
+        with context.expect_page(timeout=90000) as new_page_info:
+            print("[INFO] Abrindo extensão e ativando 'escutador' para a nova página...")
+            
+            extension_page = context.new_page()
+            extension_page.goto(EXTENSION_URL)
+
+            search_input = extension_page.get_by_placeholder("Digite ou selecione um sistema pra acessar")
+            search_input.wait_for(state="visible", timeout=15000)
+            search_input.fill("banco do")
+            extension_page.locator('div[role="menuitem"]:not([disabled])', has_text="Banco do Brasil - Intranet").first.click()
+            
+            print("[INFO] Clicando em ACESSAR. O robô agora aguarda a nova página ser criada...")
+            extension_page.get_by_role("button", name="ACESSAR").click()
+        
+        # ETAPA 2: A nova página foi capturada, não importa a URL inicial.
+        portal_page = new_page_info.value
+        print(f"[OK] Nova página capturada! URL inicial: {portal_page.url}")
+
+        if not extension_page.is_closed():
+            extension_page.close()
+
+        # ETAPA 3: Agora, esperamos pacientemente o elemento de confirmação aparecer NESSA página.
+        print("[INFO] Aguardando o elemento de confirmação ('#aPaginaInicial') na página capturada...")
+        portal_page.locator("#aPaginaInicial").wait_for(state="visible", timeout=90000)
+        
+        print("[INFO] Elemento encontrado. Aguardando a página se estabilizar completamente...")
+        portal_page.wait_for_load_state("networkidle", timeout=45000)
+
+        print("[SUCESSO] Login 100% automatizado concluído com sucesso!")
+        
+        return browser, context, browser_process_ref, portal_page
+
+    except Exception as e:
+        print("\n" + "="*60)
+        print("[ERRO CRÍTICO] Falha grave durante o processo de login automatizado.")
+        print(f"Detalhes do erro: {e}")
+        print("="*60 + "\n")
+        
+        proc = browser_process_ref.get('process')
+        if proc and proc.poll() is None:
+            if sys.platform == "win32":
+                subprocess.run(f"TASKKILL /F /PID {proc.pid} /T", shell=True, capture_output=True)
+            else:
+                proc.kill()
+        raise
 

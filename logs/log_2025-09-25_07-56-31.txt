@@ -1,0 +1,94 @@
+Encerrando processos residuais do Chrome...
+Ativando ambiente virtual...
+Executando o script principal da RPA...
+2025-09-25 07:56:33,240 [INFO] - ============================================================
+2025-09-25 07:56:33,240 [INFO] - INICIANDO NOVA EXECUÇÃO DA RPA
+2025-09-25 07:56:33,240 [INFO] - ============================================================
+[OK] Banco de dados 'rpa_refatorado.db' verificado com sucesso.
+2025-09-25 07:56:33,457 [INFO] - FASE 1: LOGIN E CONFIGURAÇÃO DA SESSÃO
+[🌐] Abrindo Google Chrome com depuração remota...
+Usando perfil em: /Users/rildonpimentelpereira/chrome-dev-profile-onenotify
+[✔] Chrome aberto.
+
+DevTools listening on ws://127.0.0.1:9222/devtools/browser/143675cd-5502-42d0-9a8e-5f31567f0055
+--- MÓDULO DE LOGIN AUTOMÁTICO (SOLUÇÃO DEFINITIVA) ---
+[>>] Garantindo que o Chrome está em execução via: /Users/rildonpimentelpereira/GitHub/OneNotify/abrir_chrome.sh
+    Tentativa de conexão nº 1...
+[OK] Conectado com sucesso ao navegador!
+[INFO] Abrindo extensão e ativando 'escutador' para a nova página...
+[INFO] Clicando em ACESSAR. O robô agora aguarda a nova página ser criada...
+[OK] Nova página capturada! URL inicial: chrome-extension://lnidijeaekolpfeckelhkomndglcglhh/index.html
+[INFO] Aguardando o elemento de confirmação ('#aPaginaInicial') na página capturada...
+
+============================================================
+[ERRO CRÍTICO] Falha grave durante o processo de login automatizado.
+Detalhes do erro: Locator.wait_for: Target page, context or browser has been closed
+============================================================
+
+2025-09-25 07:56:36,203 [CRITICAL] - Ocorreu uma falha inesperada na automação.
+Traceback (most recent call last):
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/main.py", line 49, in main
+    browser, context, browser_process_ref, page = realizar_login_automatico(playwright)
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/autologin.py", line 76, in realizar_login_automatico
+    portal_page.locator("#aPaginaInicial").wait_for(state="visible", timeout=90000)
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/venv/lib/python3.9/site-packages/playwright/sync_api/_generated.py", line 17975, in wait_for
+    self._sync(self._impl_obj.wait_for(timeout=timeout, state=state))
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/venv/lib/python3.9/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/venv/lib/python3.9/site-packages/playwright/_impl/_locator.py", line 692, in wait_for
+    await self._frame.wait_for_selector(
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/venv/lib/python3.9/site-packages/playwright/_impl/_frame.py", line 369, in wait_for_selector
+    await self._channel.send(
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/venv/lib/python3.9/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/venv/lib/python3.9/site-packages/playwright/_impl/_connection.py", line 558, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TargetClosedError: Locator.wait_for: Target page, context or browser has been closed
+2025-09-25 07:56:36,203 [INFO] - Finalizando a automação e fechando o navegador.
+2025-09-25 07:56:36,204 [ERROR] - ERRO ao salvar log de execução: table logs_execucao has no column named andamentos
+Traceback (most recent call last):
+  File "/Users/rildonpimentelpereira/GitHub/OneNotify/database.py", line 160, in salvar_log_execucao
+    cursor.execute(query, list(log_data.values()))
+sqlite3.OperationalError: table logs_execucao has no column named andamentos
+2025-09-25 07:56:36,205 [INFO] - 
+============================================================
+RESUMO FINAL DA EXECUÇÃO (25/09/2025 07:56:36)
+============================================================
+- Duração Total: 2.75 segundos
+- Notificações Salvas: 0
+- NPJs com Sucesso: 0
+- NPJs com Falha: 0
+============================================================
+
+Desativando ambiente virtual...
+Trying to load the allocator multiple times. This is *not* supported.
+Created TensorFlow Lite XNNPACK delegate for CPU.
+[88849:3677155:0925/075638.190997:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[88930:3677772:0925/075652.824595:VERBOSE1:chrome/updater/updater.cc:411] Version: 142.0.7416.0, opt, ARM_64, command line: /Users/rildonpimentelpereira/Library/Application Support/Google/GoogleUpdater/142.0.7416.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake-all --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[88930:3677772:0925/075652.824774:VERBOSE1:chrome/updater/updater.cc:414] OS version: 15.6.1, System uptime (seconds): 238270, parent pid: 88849
+[88932:3677776:0925/075652.832465:VERBOSE1:chrome/updater/updater.cc:411] Version: 142.0.7416.0, opt, ARM_64, command line: /Users/rildonpimentelpereira/Library/Application Support/Google/GoogleUpdater/142.0.7416.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --crash-handler --database=/Users/rildonpimentelpereira/Library/Application Support/Google/GoogleUpdater/142.0.7416.0/Crashpad --url=https://clients2.google.com/cr/report --annotation=prod=Update4 --annotation=ver=142.0.7416.0 --handshake-fd=5 --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[88932:3677776:0925/075652.832592:VERBOSE1:chrome/updater/updater.cc:414] OS version: 15.6.1, System uptime (seconds): 238270, parent pid: 1
+[88930:3677772:0925/075652.834366:VERBOSE1:chrome/updater/crash_reporter.cc:120] Crash handler launched and ready.
+[88930:3677772:0925/075652.834832:VERBOSE1:chrome/updater/crash_client.cc:106] Found 0 completed crash reports
+[88930:3677772:0925/075652.834878:VERBOSE1:chrome/updater/crash_client.cc:124] Found 0 pending crash reports
+[88930:3677772:0925/075652.834985:VERBOSE1:chrome/updater/updater.cc:97] Crash reporting initialized.
+[88930:3677784:0925/075652.835182:VERBOSE1:chrome/updater/app/app_wakeall.cc:57] Launching `/Users/rildonpimentelpereira/Library/Application Support/Google/GoogleUpdater/142.0.7416.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake`
+[88933:3677788:0925/075652.839842:VERBOSE1:chrome/updater/updater.cc:411] Version: 142.0.7416.0, opt, ARM_64, command line: /Users/rildonpimentelpereira/Library/Application Support/Google/GoogleUpdater/142.0.7416.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[88933:3677788:0925/075652.839945:VERBOSE1:chrome/updater/updater.cc:414] OS version: 15.6.1, System uptime (seconds): 238270, parent pid: 88930
+[88935:3677792:0925/075652.845915:VERBOSE1:chrome/updater/updater.cc:411] Version: 142.0.7416.0, opt, ARM_64, command line: /Users/rildonpimentelpereira/Library/Application Support/Google/GoogleUpdater/142.0.7416.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --crash-handler --database=/Users/rildonpimentelpereira/Library/Application Support/Google/GoogleUpdater/142.0.7416.0/Crashpad --url=https://clients2.google.com/cr/report --annotation=prod=Update4 --annotation=ver=142.0.7416.0 --handshake-fd=5 --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[88935:3677792:0925/075652.846018:VERBOSE1:chrome/updater/updater.cc:414] OS version: 15.6.1, System uptime (seconds): 238270, parent pid: 1
+[88933:3677788:0925/075652.847419:VERBOSE1:chrome/updater/crash_reporter.cc:120] Crash handler launched and ready.
+[88933:3677788:0925/075652.847797:VERBOSE1:chrome/updater/crash_client.cc:106] Found 0 completed crash reports
+[88933:3677788:0925/075652.847834:VERBOSE1:chrome/updater/crash_client.cc:124] Found 0 pending crash reports
+[88933:3677788:0925/075652.847922:VERBOSE1:chrome/updater/updater.cc:97] Crash reporting initialized.
+[88933:3677788:0925/075652.848031:VERBOSE1:chrome/updater/ipc/update_service_internal_proxy_posix.cc:100] Run
+[88849:3677155:0925/075702.499588:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[88933:3677788:0925/075707.924105:VERBOSE1:chrome/updater/updater.cc:423] UpdaterMain (--wake) returned 0.
+[88930:3677784:0925/075708.082792:VERBOSE1:chrome/updater/app/app_wakeall.cc:67] `/Users/rildonpimentelpereira/Library/Application Support/Google/GoogleUpdater/142.0.7416.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake` exited 0
+[88930:3677772:0925/075708.083795:VERBOSE1:chrome/updater/updater.cc:423] UpdaterMain (--wake-all) returned 0.
+[88935:3677792:0925/075717.935328:VERBOSE1:chrome/updater/updater.cc:423] UpdaterMain (--crash-handler) returned 0.
+[88932:3677776:0925/075717.937208:VERBOSE1:chrome/updater/updater.cc:423] UpdaterMain (--crash-handler) returned 0.
+[88849:3677155:0925/075746.360644:ERROR:google_apis/gcm/engine/connection_factory_impl.cc:483] ConnectionHandler failed with net error: -2
+[88849:3677127:0925/075746.366635:ERROR:content/browser/network_service_instance_impl.cc:595] Network service crashed, restarting service.
+[88849:3677127:0925/075746.370522:ERROR:content/browser/gpu/gpu_process_host.cc:964] GPU process exited unexpectedly: exit_code=15
+[0925/075746.372775:FATAL:third_party/crashpad/crashpad/handler/mac/exception_handler_server.cc:76] Check failed: kr == KERN_SUCCESS. mach_port_request_notification: (os/kern) invalid capability (20)

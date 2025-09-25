@@ -1,9 +1,12 @@
 @echo off
-echo [🌐] Abrindo Google Chrome com depuração remota...
+REM --- ATENÇÃO: Verifique e ajuste este caminho se necessário ---
+set "CHROME_PATH=C:\Program Files\Google\Chrome\Application\chrome.exe"
+set "PROFILE_PATH=%USERPROFILE%\chrome-dev-profile-onenotify"
 
-start "" "C:\Program Files\Google\Chrome\Application\chrome.exe" ^
---remote-debugging-port=9222 ^
---user-data-dir="C:\temp\chrome-perfil"
+echo [🌐] Abrindo Google Chrome com depuracao remota...
+echo Usando perfil em: %PROFILE_PATH%
 
-echo [✔] Chrome aberto. Faça login manual no site do BB Jurídico.
-pause
+start "" "%CHROME_PATH%" --remote-debugging-port=9222 --user-data-dir="%PROFILE_PATH%"
+
+echo [✔] Chrome aberto.
+

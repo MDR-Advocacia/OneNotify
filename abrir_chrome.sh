@@ -10,4 +10,5 @@ echo "Usando perfil em: $PROFILE_PATH"
 
 "$CHROME_PATH" --remote-debugging-port=9222 --user-data-dir="$PROFILE_PATH" &
 
-echo "[✔] Chrome aberto. Faça login manual no site do BB Jurídico, se necessário."
+echo "[✔] Chrome aberto."
+
