@@ -210,3 +210,20 @@ def salvar_log_execucao(log_data: dict):
     except sqlite3.Error as e:
         logging.error(f"ERRO ao salvar log de execução: {e}", exc_info=True)
 
+def atualizar_status_de_notificacoes_por_ids(ids: list[int], novo_status: str) -> int:
+    """Atualiza o status de uma lista de notificações com base em seus IDs."""
+    if not ids:
+        return 0
+    try:
+        with sqlite3.connect(DB_NOME) as conn:
+            cursor = conn.cursor()
+            placeholders = ', '.join(['?'] * len(ids))
+            query = f"UPDATE {TABELA_NOTIFICACOES} SET status = ? WHERE id IN ({placeholders})"
+            
+            # Os parâmetros devem ser o novo_status mais os IDs
+            params = [novo_status] + ids
+            cursor.execute(query, params)
+            return cursor.rowcount
+    except sqlite3.Error as e:
+        logging.error(f"ERRO ao atualizar status em massa para os IDs {ids}: {e}", exc_info=True)
+        return 0
