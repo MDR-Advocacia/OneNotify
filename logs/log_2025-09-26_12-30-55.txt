@@ -1,0 +1,20 @@
+2025-09-26 12:30:55,775 [INFO] - ============================================================
+2025-09-26 12:30:55,775 [INFO] - INICIANDO NOVA EXECUÇÃO DA RPA
+2025-09-26 12:30:55,775 [INFO] - ============================================================
+2025-09-26 12:30:56,298 [INFO] - 
+FASE 1: LOGIN E CONFIGURAÇÃO DA SESSÃO
+2025-09-26 12:30:58,940 [CRITICAL] - Ocorreu uma falha inesperada na automação.
+BrowserContext.new_page: Protocol error (Target.createTarget): Failed to open a new tab
+2025-09-26 12:30:58,941 [INFO] - Finalizando a automação e fechando o navegador.
+2025-09-26 12:30:58,950 [INFO] - 
+--- RESUMO DA EXECUÇÃO ---
+2025-09-26 12:30:58,950 [INFO] - Timestamp: 2025-09-26_12-30-55
+2025-09-26 12:30:58,951 [INFO] - Duracao total: 3.17
+2025-09-26 12:30:58,953 [INFO] - Tempo medio npj: 0
+2025-09-26 12:30:58,954 [INFO] - Notificacoes salvas: 0
+2025-09-26 12:30:58,956 [INFO] - Ciencias registradas: 0
+2025-09-26 12:30:58,956 [INFO] - Andamentos: 0
+2025-09-26 12:30:58,957 [INFO] - Documentos: 0
+2025-09-26 12:30:58,957 [INFO] - Npjs sucesso: 0
+2025-09-26 12:30:58,957 [INFO] - Npjs falha: 0
+2025-09-26 12:30:58,957 [INFO] - ============================================================

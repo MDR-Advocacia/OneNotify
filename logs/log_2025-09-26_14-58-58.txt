@@ -1,0 +1,143 @@
+2025-09-26 14:58:58,324 [INFO] - ============================================================
+2025-09-26 14:58:58,324 [INFO] - INICIANDO NOVA EXECUÇÃO DA RPA
+2025-09-26 14:58:58,325 [INFO] - ============================================================
+2025-09-26 14:58:58,330 [INFO] - 32 notificações com status 'Erro' ou 'Em Processamento' foram resetadas para 'Pendente'.
+2025-09-26 14:58:58,864 [INFO] - 
+FASE 1: LOGIN E CONFIGURAÇÃO DA SESSÃO
+2025-09-26 14:59:38,417 [INFO] - 
+FASE 2: EXTRAÇÃO DE NOVAS NOTIFICAÇÕES E REGISTRO DE CIÊNCIA
+2025-09-26 14:59:38,418 [INFO] - Iniciando módulo de extração e ciência...
+2025-09-26 14:59:38,418 [INFO] - Navegando para a Central de Notificações...
+2025-09-26 14:59:39,536 [INFO] - Acessando a 'Visão do Advogado'...
+2025-09-26 14:59:40,313 [INFO] - --- Processando tarefa: Andamento de publicação em processo de condução terceirizada ---
+2025-09-26 14:59:40,330 [WARNING] - Tarefa 'Andamento de publicação em processo de condução terceirizada' não encontrada. Pulando.
+2025-09-26 14:59:40,331 [INFO] - --- Processando tarefa: Doc. anexado por empresa externa em processo terceirizado ---
+2025-09-26 14:59:40,339 [WARNING] - Tarefa 'Doc. anexado por empresa externa em processo terceirizado' não encontrada. Pulando.
+2025-09-26 14:59:40,339 [INFO] - --- Processando tarefa: Inclusão de Documentos no NPJ ---
+2025-09-26 14:59:40,348 [INFO] - 2 itens encontrados. Abrindo detalhes...
+2025-09-26 14:59:40,765 [INFO] -     - Verificando página 1...
+2025-09-26 14:59:41,157 [INFO] -     - Fim da paginação.
+2025-09-26 14:59:41,157 [INFO] -     - Confirmando a ciência...
+2025-09-26 14:59:51,658 [WARNING] -     - Modal de carregamento final não apareceu, seguindo em frente.
+2025-09-26 14:59:51,675 [INFO] - Processamento da tarefa 'Inclusão de Documentos no NPJ' concluído.
+2025-09-26 14:59:51,695 [INFO] - Tarefa 'Inclusão de Documentos no NPJ' finalizada. 2 novas notificações salvas. 2 ciências registradas.
+2025-09-26 14:59:51,696 [INFO] - Extração/ciência concluídas. Salvas: 2, Ciências: 2.
+2025-09-26 14:59:51,696 [INFO] - 
+FASE 3: PROCESSAMENTO DETALHADO EM LOTES
+2025-09-26 14:59:51,698 [INFO] - Total de 574 NPJs pendentes para detalhamento.
+2025-09-26 14:59:51,711 [INFO] - Iniciando processamento detalhado de 50 NPJ(s).
+2025-09-26 14:59:51,782 [INFO] - 
+[1/50] Processando NPJ: 2022/0049350-000 (Notificação base: 26/09/2025)
+2025-09-26 14:59:51,783 [INFO] -     - Construindo URL de detalhe para o NPJ: 2022/0049350-000
+2025-09-26 14:59:51,783 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-26 14:59:56,358 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-26 14:59:56,393 [INFO] -       - Número do Processo encontrado: 0601215-05.2022.8.04.0001
+2025-09-26 14:59:56,393 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-26 14:59:57,499 [INFO] -       - Filtrando documentos para as datas: ['24/09/2025', '25/09/2025', '26/09/2025']
+2025-09-26 14:59:57,513 [INFO] -       - Encontrados 36 documentos para verificação.
+2025-09-26 14:59:57,686 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-26 14:59:57,836 [INFO] -       - Aguardando carregamento dos andamentos na tabela...
+2025-09-26 14:59:58,211 [INFO] -       - Tabela de andamentos carregada.
+2025-09-26 14:59:58,211 [INFO] -       - Filtrando andamentos para as datas: ['24/09/2025', '25/09/2025', '26/09/2025']
+2025-09-26 14:59:58,216 [INFO] -       - Encontradas 50 linhas de andamento para verificação.
+2025-09-26 14:59:58,220 [INFO] -       - Processando andamento de 26/09/2025 (data válida).
+2025-09-26 14:59:58,228 [INFO] -       - Processando andamento de 26/09/2025 (data válida).
+2025-09-26 14:59:58,236 [WARNING] -         - Andamento de publicação sem botão de detalhar. Capturando texto padrão.
+2025-09-26 14:59:58,453 [INFO] -       - 2 andamento(s) capturado(s) dentro do período de datas.
+2025-09-26 14:59:58,459 [INFO] - 
+[2/50] Processando NPJ: 2022/0052149-000 (Notificação base: 26/09/2025)
+2025-09-26 14:59:58,459 [INFO] -     - Construindo URL de detalhe para o NPJ: 2022/0052149-000
+2025-09-26 14:59:58,460 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-26 14:59:59,339 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-26 14:59:59,364 [INFO] -       - Número do Processo encontrado: 7062903-91.2022.8.22.0001
+2025-09-26 14:59:59,364 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-26 15:00:00,477 [INFO] -       - Filtrando documentos para as datas: ['24/09/2025', '25/09/2025', '26/09/2025']
+2025-09-26 15:00:00,493 [INFO] -       - Encontrados 50 documentos para verificação.
+2025-09-26 15:00:00,725 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-26 15:00:00,810 [INFO] -       - Aguardando carregamento dos andamentos na tabela...
+2025-09-26 15:00:01,119 [INFO] -       - Tabela de andamentos carregada.
+2025-09-26 15:00:01,120 [INFO] -       - Filtrando andamentos para as datas: ['24/09/2025', '25/09/2025', '26/09/2025']
+2025-09-26 15:00:01,125 [INFO] -       - Encontradas 50 linhas de andamento para verificação.
+2025-09-26 15:00:01,130 [INFO] -       - Processando andamento de 26/09/2025 (data válida).
+2025-09-26 15:00:01,145 [WARNING] -         - Andamento de publicação sem botão de detalhar. Capturando texto padrão.
+2025-09-26 15:00:01,370 [INFO] -       - 1 andamento(s) capturado(s) dentro do período de datas.
+2025-09-26 15:00:01,376 [INFO] - 
+[3/50] Processando NPJ: 2022/0102750-000 (Notificação base: 26/09/2025)
+2025-09-26 15:00:01,376 [INFO] -     - Construindo URL de detalhe para o NPJ: 2022/0102750-000
+2025-09-26 15:00:01,376 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-26 15:00:02,243 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-26 15:00:02,272 [INFO] -       - Número do Processo encontrado: 7015647-52.2022.8.22.0002
+2025-09-26 15:00:02,272 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-26 15:00:03,372 [INFO] -       - Filtrando documentos para as datas: ['24/09/2025', '25/09/2025', '26/09/2025']
+2025-09-26 15:00:03,387 [INFO] -       - Encontrados 50 documentos para verificação.
+2025-09-26 15:00:03,622 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-26 15:00:03,704 [INFO] -       - Aguardando carregamento dos andamentos na tabela...
+2025-09-26 15:00:04,008 [INFO] -       - Tabela de andamentos carregada.
+2025-09-26 15:00:04,008 [INFO] -       - Filtrando andamentos para as datas: ['24/09/2025', '25/09/2025', '26/09/2025']
+2025-09-26 15:00:04,016 [INFO] -       - Encontradas 50 linhas de andamento para verificação.
+2025-09-26 15:00:04,021 [INFO] -       - Processando andamento de 26/09/2025 (data válida).
+2025-09-26 15:00:04,031 [INFO] -       - Processando andamento de 26/09/2025 (data válida).
+2025-09-26 15:00:04,039 [WARNING] -         - Andamento de publicação sem botão de detalhar. Capturando texto padrão.
+2025-09-26 15:00:04,258 [INFO] -       - 2 andamento(s) capturado(s) dentro do período de datas.
+2025-09-26 15:00:04,265 [INFO] - 
+[4/50] Processando NPJ: 2022/0111472-000 (Notificação base: 26/09/2025)
+2025-09-26 15:00:04,265 [INFO] -     - Construindo URL de detalhe para o NPJ: 2022/0111472-000
+2025-09-26 15:00:04,265 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-26 15:00:05,141 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-26 15:00:05,158 [INFO] -       - Número do Processo encontrado: 7003371-47.2022.8.22.0015
+2025-09-26 15:00:05,158 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-26 15:00:06,284 [INFO] -       - Filtrando documentos para as datas: ['24/09/2025', '25/09/2025', '26/09/2025']
+2025-09-26 15:00:06,319 [INFO] -       - Encontrados 50 documentos para verificação.
+2025-09-26 15:00:06,336 [INFO] -         - Documento encontrado na data permitida '26/09/2025': 70033714720228220015-Intimacao-1758860524838-874859.pdf
+2025-09-26 15:00:06,804 [INFO] -         - Download concluído: C:\OneNotify\documentos\2022_0111472-000\70033714720228220015Intimacao1758860524838874859.pdf
+2025-09-26 15:00:07,121 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-26 15:00:07,209 [INFO] -       - Aguardando carregamento dos andamentos na tabela...
+2025-09-26 15:00:07,511 [INFO] -       - Tabela de andamentos carregada.
+2025-09-26 15:00:07,511 [INFO] -       - Filtrando andamentos para as datas: ['24/09/2025', '25/09/2025', '26/09/2025']
+2025-09-26 15:00:07,516 [INFO] -       - Encontradas 50 linhas de andamento para verificação.
+2025-09-26 15:00:07,523 [INFO] -       - Processando andamento de 26/09/2025 (data válida).
+2025-09-26 15:00:07,531 [WARNING] -         - Andamento de publicação sem botão de detalhar. Capturando texto padrão.
+2025-09-26 15:00:07,766 [INFO] -       - 1 andamento(s) capturado(s) dentro do período de datas.
+2025-09-26 15:00:07,772 [INFO] - 
+[5/50] Processando NPJ: 2022/0112163-000 (Notificação base: 26/09/2025)
+2025-09-26 15:00:07,773 [INFO] -     - Construindo URL de detalhe para o NPJ: 2022/0112163-000
+2025-09-26 15:00:07,773 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-26 15:00:08,226 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-26 15:00:08,251 [INFO] -       - Número do Processo encontrado: 7003398-30.2022.8.22.0015
+2025-09-26 15:00:08,251 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-26 15:00:09,851 [INFO] -       - Filtrando documentos para as datas: ['24/09/2025', '25/09/2025', '26/09/2025']
+2025-09-26 15:00:09,865 [INFO] -       - Encontrados 50 documentos para verificação.
+2025-09-26 15:00:10,110 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-26 15:00:10,169 [INFO] -       - Aguardando carregamento dos andamentos na tabela...
+2025-09-26 15:00:10,470 [INFO] -       - Tabela de andamentos carregada.
+2025-09-26 15:00:10,470 [INFO] -       - Filtrando andamentos para as datas: ['24/09/2025', '25/09/2025', '26/09/2025']
+2025-09-26 15:00:10,479 [INFO] -       - Encontradas 50 linhas de andamento para verificação.
+2025-09-26 15:00:10,483 [INFO] -       - Processando andamento de 26/09/2025 (data válida).
+2025-09-26 15:00:10,492 [WARNING] -         - Andamento de publicação sem botão de detalhar. Capturando texto padrão.
+2025-09-26 15:00:10,718 [INFO] -       - 1 andamento(s) capturado(s) dentro do período de datas.
+2025-09-26 15:00:10,724 [INFO] - 
+[6/50] Processando NPJ: 2022/0113547-000 (Notificação base: 26/09/2025)
+2025-09-26 15:00:10,724 [INFO] -     - Construindo URL de detalhe para o NPJ: 2022/0113547-000
+2025-09-26 15:00:10,725 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-26 15:00:11,590 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-26 15:00:11,610 [INFO] -       - Número do Processo encontrado: 7016428-74.2022.8.22.0002
+2025-09-26 15:00:11,610 [INFO] -       - Procurando e expandindo seções de documentos...
+2025-09-26 15:00:12,726 [INFO] -       - Filtrando documentos para as datas: ['24/09/2025', '25/09/2025', '26/09/2025']
+2025-09-26 15:00:12,751 [INFO] -       - Encontrados 50 documentos para verificação.
+2025-09-26 15:00:12,994 [INFO] -       - Clicando na aba 'Andamentos'...
+2025-09-26 15:00:13,057 [INFO] -       - Aguardando carregamento dos andamentos na tabela...
+2025-09-26 15:00:13,350 [INFO] -       - Tabela de andamentos carregada.
+2025-09-26 15:00:13,351 [INFO] -       - Filtrando andamentos para as datas: ['24/09/2025', '25/09/2025', '26/09/2025']
+2025-09-26 15:00:13,364 [INFO] -       - Encontradas 50 linhas de andamento para verificação.
+2025-09-26 15:00:13,378 [INFO] -       - Processando andamento de 26/09/2025 (data válida).
+2025-09-26 15:00:13,389 [WARNING] -         - Andamento de publicação sem botão de detalhar. Capturando texto padrão.
+2025-09-26 15:00:13,667 [INFO] -       - 1 andamento(s) capturado(s) dentro do período de datas.
+2025-09-26 15:00:13,673 [INFO] - 
+[7/50] Processando NPJ: 2022/0125448-000 (Notificação base: 26/09/2025)
+2025-09-26 15:00:13,673 [INFO] -     - Construindo URL de detalhe para o NPJ: 2022/0125448-000
+2025-09-26 15:00:13,673 [INFO] -     - Navegando para a URL de detalhe...
+2025-09-26 15:00:14,556 [INFO] -       - Sincronização com a página do NPJ confirmada.
+2025-09-26 15:00:14,583 [INFO] - Finalizando a automação e fechando o navegador.
+2025-09-26 15:00:14,691 [ERROR] - Future exception was never retrieved
+future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed')>
+playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed

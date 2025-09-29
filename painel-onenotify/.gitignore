@@ -1,0 +1,25 @@
+Dependências do Node.js
+Esta é a pasta mais importante a ser ignorada. Ela contém milhares de arquivos
+que são baixados automaticamente com o comando "npm install".
+/node_modules
+
+Arquivos de build de produção
+Quando você gerar a versão final do painel, os arquivos ficarão aqui.
+/build
+
+Logs de depuração
+npm-debug.log*
+yarn-error.log
+yarn-debug.log
+
+Arquivos de ambiente (podem conter senhas ou chaves)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+Arquivos de sistema operacional e de editores
+.DS_Store
+.vscode/
+.idea/

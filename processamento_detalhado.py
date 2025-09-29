@@ -7,10 +7,10 @@ from datetime import datetime, timedelta
 import database
 from pathlib import Path
 
-# --- FUNÇÕES AUXILIARES DE EXTRAÇÃO (SEM IFRAME) ---
+# --- FUNÇÕES AUXILIARES DE EXTRAÇÃO ---
 
 def extrair_numero_processo(page: Page) -> Optional[str]:
-    """Extrai o número do processo da nova página de detalhes."""
+    """Extrai o número do processo da página de detalhes."""
     try:
         selector_processo = 'div.chip[bb-title="Processo"] span.chip__desc'
         page.wait_for_selector(selector_processo, timeout=10000)
@@ -25,7 +25,7 @@ def extrair_numero_processo(page: Page) -> Optional[str]:
     return None
 
 def extrair_andamentos(page: Page, data_notificacao_recente: str) -> List[Dict[str, str]]:
-    """Clica no menu 'Andamentos', filtra por data e extrai os dados."""
+    """Clica no menu 'Andamentos', filtra por data e extrai os dados, tratando o modal de publicações e detalhes expansíveis."""
     andamentos = []
     try:
         logging.info("      - Clicando na aba 'Andamentos'...")
@@ -34,7 +34,15 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str) -> List[Dict[s
         tabela_container_selector = 'lista-andamentos-processo'
         page.wait_for_selector(tabela_container_selector, state='visible', timeout=15000)
 
-        # --- Lógica de Filtro de Data ---
+        primeira_linha_selector = 'tr[ng-repeat-start="item in grupoMes.itens"]'
+        try:
+            logging.info("      - Aguardando carregamento dos andamentos na tabela...")
+            page.wait_for_selector(primeira_linha_selector, timeout=10000)
+            logging.info("      - Tabela de andamentos carregada.")
+        except TimeoutError:
+            logging.info("      - Nenhuma linha de andamento encontrada na tabela após espera.")
+            return []
+
         try:
             data_base = datetime.strptime(data_notificacao_recente, '%d/%m/%Y').date()
             datas_permitidas = { data_base - timedelta(days=i) for i in range(3) } # d-0, d-1, d-2
@@ -43,7 +51,7 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str) -> List[Dict[s
             logging.error(f"      - Data de notificação inválida '{data_notificacao_recente}'. Não será possível filtrar andamentos por data.")
             return []
 
-        linhas = page.locator('tr[ng-repeat-start="item in grupoMes.itens"]').all()
+        linhas = page.locator(primeira_linha_selector).all()
         logging.info(f"      - Encontradas {len(linhas)} linhas de andamento para verificação.")
 
         for linha in linhas:
@@ -56,37 +64,41 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str) -> List[Dict[s
 
                 logging.info(f"      - Processando andamento de {data_andamento_str} (data válida).")
                 descricao = linha.locator('td').nth(1).inner_text().strip()
-                detalhes = ""
+                detalhes = descricao # Por padrão, o detalhe é a própria descrição
 
+                # --- LÓGICA REFINADA: TRATAMENTO ESPECIAL APENAS PARA PUBLICAÇÃO DJ/DO ---
                 if "PUBLICACAO DJ/DO" in descricao.upper():
-                    botao_detalhar = linha.locator('a[ng-click*="openModalDetalharNovaPublicacao"]')
+                    # O botão está na penúltima célula (índice -2)
+                    botao_detalhar = linha.locator('td').nth(-2).locator('a[bb-tooltip="Detalhar publicação"]')
+                    
                     if botao_detalhar.count() > 0:
+                        logging.info("        - Andamento de publicação encontrado. Abrindo modal de detalhes...")
                         botao_detalhar.click()
                         modal_selector = 'div.modal__data'
                         page.wait_for_selector(modal_selector, state='visible', timeout=10000)
                         
                         leia_mais_btn = page.locator(f'{modal_selector} button:has-text("Leia mais")')
                         if leia_mais_btn.count() > 0:
+                            logging.info("        - Botão 'Leia mais' encontrado. Expandindo texto...")
                             leia_mais_btn.click(timeout=5000)
-                            page.wait_for_timeout(500) 
+                            page.wait_for_timeout(500)
 
-                        texto_completo_selector = page.locator(f'{modal_selector} texto-grande-detalhar p')
-                        detalhes = texto_completo_selector.inner_text().strip()
+                        # Extrai o texto completo do atributo 'conteudo-texto' do componente
+                        texto_completo_selector = page.locator(f'{modal_selector} texto-grande-detalhar')
+                        detalhes = texto_completo_selector.get_attribute('conteudo-texto') or ""
                         
-                        page.locator('div.modal__header').click(force=True)
                         page.keyboard.press("Escape")
                         page.wait_for_selector(modal_selector, state='hidden', timeout=5000)
+                        logging.info("        - Modal de publicação fechado com sucesso.")
                     else:
-                        linha.click()
-                        page.wait_for_timeout(500)
-                        detalhes = linha.locator('xpath=./following-sibling::tr[1]//span[contains(@class, "ng-binding")]').first.inner_text().strip()
-                else:
-                    linha.click()
-                    page.wait_for_timeout(500)
-                    detalhes = linha.locator('xpath=./following-sibling::tr[1]//span[contains(@class, "ng-binding")]').first.inner_text().strip()
+                        logging.warning("        - Andamento de publicação sem botão de detalhar. Capturando texto padrão.")
+                        # Se não encontrar o botão, usa a descrição como fallback
+                        detalhes = descricao
+                
+                # Para todos os outros andamentos, o 'detalhes' já é a 'descricao', então não fazemos nada.
 
                 andamentos.append({"data": data_andamento_str, "descricao": descricao, "detalhes": detalhes})
-            except (Error, IndexError) as e:
+            except (Error, IndexError, ValueError) as e:
                 logging.warning(f"      - Erro ao processar uma linha de andamento: {e}")
                 continue
         logging.info(f"      - {len(andamentos)} andamento(s) capturado(s) dentro do período de datas.")
@@ -187,7 +199,6 @@ def navegar_para_detalhes_do_npj(page: Page, npj: str):
     ano, numero, _ = match.groups()
     id_processo_url = f"{ano}{numero.zfill(7)}"
     
-    # --- CORREÇÃO: Voltando para a URL original que funciona ---
     url_final = f"https://juridico.bb.com.br/paj/app/paj-cadastro/spas/processo/consulta/processo-consulta.app.html#/editar/{id_processo_url}/0/1"
     
     logging.info(f"    - Navegando para a URL de detalhe...")
@@ -250,3 +261,8 @@ def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any
         
     logging.info("Processamento do lote concluído.")
     return stats
+
+
+
+
+
