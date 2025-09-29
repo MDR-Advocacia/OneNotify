@@ -68,8 +68,10 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str) -> List[Dict[s
 
                 # --- LÓGICA REFINADA: TRATAMENTO ESPECIAL APENAS PARA PUBLICAÇÃO DJ/DO ---
                 if "PUBLICACAO DJ/DO" in descricao.upper():
-                    # O botão está na penúltima célula (índice -2)
-                    botao_detalhar = linha.locator('td').nth(-2).locator('a[bb-tooltip="Detalhar publicação"]')
+                    # --- ALTERAÇÃO APLICADA AQUI ---
+                    # O seletor agora busca o botão em qualquer lugar da linha,
+                    # sem depender da posição da coluna (célula). Isso o torna mais robusto.
+                    botao_detalhar = linha.locator('a[bb-tooltip="Detalhar publicação"]')
                     
                     if botao_detalhar.count() > 0:
                         logging.info("        - Andamento de publicação encontrado. Abrindo modal de detalhes...")
@@ -261,8 +263,3 @@ def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any
         
     logging.info("Processamento do lote concluído.")
     return stats
-
-
-
-
-
