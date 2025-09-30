@@ -3,11 +3,13 @@ import sqlite3
 import json
 import logging
 from datetime import datetime
-import re
+import os
 from typing import List, Dict
 
 # --- CONFIGURAÇÃO DO BANCO DE DADOS ---
-DB_NOME = "rpa_refatorado.db"
+diretorio_base = os.path.abspath(os.path.join(os.path.dirname(__file__)))
+DB_NOME = os.path.join(diretorio_base, "rpa_refatorado.db")
+
 TABELA_NOTIFICACOES = "notificacoes"
 TABELA_LOGS = "logs_execucao"
 
@@ -28,7 +30,6 @@ def _executar_migracoes(conn):
             cursor.execute(f"ALTER TABLE {TABELA_LOGS} RENAME COLUMN documentos_baixados TO documentos")
 
     except sqlite3.Error as e:
-        # Se a tabela de logs ainda não existe, não há problema
         if "no such table" not in str(e):
             logging.error(f"Falha ao verificar/aplicar migração na tabela de logs: {e}")
 
@@ -49,7 +50,6 @@ def inicializar_banco():
         with sqlite3.connect(DB_NOME) as conn:
             cursor = conn.cursor()
             
-            # Tabela de Notificações
             cursor.execute(f"""
             CREATE TABLE IF NOT EXISTS {TABELA_NOTIFICACOES} (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -70,7 +70,6 @@ def inicializar_banco():
             ON {TABELA_NOTIFICACOES} (NPJ, tipo_notificacao, data_notificacao)
             """)
             
-            # Tabela de Logs (com nomes de coluna simplificados)
             cursor.execute(f"""
             CREATE TABLE IF NOT EXISTS {TABELA_LOGS} (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -86,13 +85,14 @@ def inicializar_banco():
             )
             """)
             
-            # Garante que qualquer DB antigo seja atualizado
             _executar_migracoes(conn)
 
             print(f"[OK] Banco de dados '{DB_NOME}' verificado com sucesso.")
     except sqlite3.Error as e:
         logging.error(f"ERRO ao inicializar o banco de dados: {e}", exc_info=True)
         raise
+
+# ... (outras funções do database.py permanecem iguais) ...
 
 def resetar_notificacoes_em_processamento_ou_erro():
     """Reseta o status de notificações que falharam em uma execução anterior."""
@@ -220,10 +220,85 @@ def atualizar_status_de_notificacoes_por_ids(ids: list[int], novo_status: str) -
             placeholders = ', '.join(['?'] * len(ids))
             query = f"UPDATE {TABELA_NOTIFICACOES} SET status = ? WHERE id IN ({placeholders})"
             
-            # Os parâmetros devem ser o novo_status mais os IDs
             params = [novo_status] + ids
             cursor.execute(query, params)
             return cursor.rowcount
     except sqlite3.Error as e:
         logging.error(f"ERRO ao atualizar status em massa para os IDs {ids}: {e}", exc_info=True)
-        return 0
+        raise e
+
+def corrigir_e_consolidar_datas_por_ids(ids: list[int], nova_data: str) -> dict:
+    """
+    Corrige a data de notificações selecionadas e remove duplicatas que possam surgir.
+    Retorna um dicionário com o número de registros atualizados e deletados.
+    """
+    if not ids:
+        return {'updated': 0, 'deleted': 0}
+
+    conn = None # Garante que a variável conn exista fora do try
+    try:
+        conn = sqlite3.connect(DB_NOME)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        cursor.execute("BEGIN TRANSACTION;")
+
+        placeholders = ', '.join(['?'] * len(ids))
+        
+        # 1. Busca todas as notificações selecionadas para processá-las em memória.
+        query_select = f"SELECT id, NPJ, tipo_notificacao FROM {TABELA_NOTIFICACOES} WHERE id IN ({placeholders})"
+        cursor.execute(query_select, ids)
+        notificacoes_para_processar = [dict(row) for row in cursor.fetchall()]
+
+        # 2. Agrupa as notificações pela chave única (NPJ, tipo_notificacao).
+        grupos_para_consolidar = {}
+        for n in notificacoes_para_processar:
+            chave = (n['NPJ'], n['tipo_notificacao'])
+            if chave not in grupos_para_consolidar:
+                grupos_para_consolidar[chave] = []
+            grupos_para_consolidar[chave].append(n['id'])
+
+        # 3. Para cada grupo, decide quem vive e quem é excluído.
+        ids_para_deletar = []
+        ids_para_atualizar = []
+
+        for grupo_ids in grupos_para_consolidar.values():
+            if not grupo_ids:
+                continue
+            
+            # Mantém o primeiro ID da lista, e marca os outros para exclusão.
+            id_para_manter = grupo_ids[0]
+            ids_para_atualizar.append(id_para_manter)
+            
+            if len(grupo_ids) > 1:
+                ids_para_deletar.extend(grupo_ids[1:])
+        
+        # 4. Executa a atualização da data nos registros que serão mantidos.
+        updated_count = 0
+        if ids_para_atualizar:
+            placeholders_update = ', '.join(['?'] * len(ids_para_atualizar))
+            query_update = f"UPDATE {TABELA_NOTIFICACOES} SET data_notificacao = ? WHERE id IN ({placeholders_update})"
+            cursor.execute(query_update, [nova_data] + ids_para_atualizar)
+            updated_count = cursor.rowcount
+
+        # 5. Executa a exclusão dos registros redundantes.
+        deleted_count = 0
+        if ids_para_deletar:
+            placeholders_delete = ', '.join(['?'] * len(ids_para_deletar))
+            query_delete = f"DELETE FROM {TABELA_NOTIFICACOES} WHERE id IN ({placeholders_delete})"
+            cursor.execute(query_delete, ids_para_deletar)
+            deleted_count = cursor.rowcount
+
+        conn.commit()
+
+        return {'updated': updated_count, 'deleted': deleted_count}
+
+    except sqlite3.Error as e:
+        if conn:
+            conn.rollback()
+        logging.error(f"ERRO ao consolidar datas para os IDs {ids}: {e}", exc_info=True)
+        raise e
+    finally:
+        if conn:
+            conn.close()
+

@@ -14,6 +14,13 @@ const CogIcon = () => (
   </svg>
 );
 
+const DownloadIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block" viewBox="0 0 20 20" fill="currentColor">
+        <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+    </svg>
+);
+
+
 const LogoIcon = () => (
   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-blue-400">
     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor"/>
@@ -35,11 +42,13 @@ function App() {
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
-
-  // --- NOVOS ESTADOS PARA SELEÇÃO E AÇÕES ---
+  
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [isBulkActionsMenuOpen, setIsBulkActionsMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [isDateModalOpen, setIsDateModalOpen] = useState(false);
+  const [newDate, setNewDate] = useState('');
 
   const fetchNotificacoes = () => {
     setIsLoading(true);
@@ -78,7 +87,6 @@ function App() {
     return filteredNotificacoes.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredNotificacoes, currentPage, itemsPerPage]);
 
-  // Limpa a seleção ao mudar filtros ou página
   useEffect(() => {
     setSelectedIds(new Set());
   }, [currentPage, itemsPerPage, statusFilter, searchTerm]);
@@ -90,7 +98,6 @@ function App() {
     setCurrentPage(1);
   };
   
-  // --- LÓGICA DOS CHECKBOXES ---
   const handleSelectOne = (id) => {
     const newSelectedIds = new Set(selectedIds);
     if (newSelectedIds.has(id)) {
@@ -103,22 +110,18 @@ function App() {
 
   const handleSelectAllOnPage = () => {
     const currentPageIds = paginatedNotificacoes.map(n => n.id);
-    if (currentPageIds.every(id => selectedIds.has(id))) {
-      // Desmarcar todos da página
-      const newSelectedIds = new Set(selectedIds);
+    const allSelected = currentPageIds.length > 0 && currentPageIds.every(id => selectedIds.has(id));
+    const newSelectedIds = new Set(selectedIds);
+    if (allSelected) {
       currentPageIds.forEach(id => newSelectedIds.delete(id));
-      setSelectedIds(newSelectedIds);
     } else {
-      // Marcar todos da página
-      const newSelectedIds = new Set(selectedIds);
       currentPageIds.forEach(id => newSelectedIds.add(id));
-      setSelectedIds(newSelectedIds);
     }
+    setSelectedIds(newSelectedIds);
   };
 
   const areAllOnPageSelected = paginatedNotificacoes.length > 0 && paginatedNotificacoes.every(n => selectedIds.has(n.id));
 
-  // --- LÓGICA DAS AÇÕES EM MASSA PARA ITENS SELECIONADOS ---
   const handleBulkAction = async (newStatus) => {
     setIsLoading(true);
     setIsBulkActionsMenuOpen(false);
@@ -135,8 +138,8 @@ function App() {
 
         const result = await response.json();
         alert(`${result.updated_rows} notificações foram atualizadas para "${newStatus}".`);
-        setSelectedIds(new Set()); // Limpa a seleção
-        fetchNotificacoes(); // Re-busca os dados
+        setSelectedIds(new Set());
+        fetchNotificacoes();
     } catch (error) {
         console.error("Erro na ação em massa:", error);
         alert(`Ocorreu um erro: ${error.message}`);
@@ -144,6 +147,62 @@ function App() {
     }
   };
 
+  const handleBulkDateUpdate = async () => {
+    if (!newDate || !/^\d{2}\/\d{2}\/\d{4}$/.test(newDate)) {
+        alert("Por favor, insira uma data válida no formato DD/MM/AAAA.");
+        return;
+    }
+    setIsLoading(true);
+    setIsDateModalOpen(false);
+    try {
+        const response = await fetch('http://localhost:5000/api/notificacoes/bulk-update-date', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ids: Array.from(selectedIds),
+                nova_data: newDate,
+            }),
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result.error || 'Falha ao corrigir as datas.');
+        }
+        
+        let alertMessage = `${result.updated || 0} notificações foram atualizadas para a data ${newDate}.`;
+        if (result.deleted > 0) {
+            alertMessage += `\n${result.deleted} notificações duplicadas foram removidas para manter a consistência.`;
+        }
+        alert(alertMessage);
+        
+        setSelectedIds(new Set());
+        setNewDate('');
+        fetchNotificacoes();
+    } catch (error) {
+        console.error("Erro na correção de data:", error);
+        alert(`Ocorreu um erro: ${error.message}`);
+        setIsLoading(false);
+    }
+  };
+  
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return 'N/A';
+    try {
+      const date = new Date(timestamp);
+      if (isNaN(date.getTime())) {
+        return timestamp;
+      }
+      return date.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (e) {
+      return timestamp;
+    }
+  };
 
   const kpiData = {
     sucesso: latestLog.npjs_sucesso || 0,
@@ -219,7 +278,6 @@ function App() {
                                     <input type="text" placeholder="Buscar por NPJ ou Processo..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="block w-full pl-10 pr-3 py-2 border border-gray-600 rounded-md leading-5 bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
                                 </div>
                                 
-                                {/* --- NOVO BOTÃO DE AÇÕES CONTEXTUAL --- */}
                                 {selectedIds.size > 0 && (
                                     <div className="relative">
                                         <button 
@@ -238,6 +296,10 @@ function App() {
                                                     </button>
                                                     <button onClick={() => handleBulkAction('Arquivado')} className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700" role="menuitem">
                                                         Arquivar
+                                                    </button>
+                                                    <div className="border-t border-gray-700 my-1"></div>
+                                                    <button onClick={() => { setIsDateModalOpen(true); setIsBulkActionsMenuOpen(false); }} className="block w-full text-left px-4 py-2 text-sm text-yellow-400 hover:bg-gray-700" role="menuitem">
+                                                        Corrigir Data...
                                                     </button>
                                                 </div>
                                             </div>
@@ -274,6 +336,7 @@ function App() {
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">NPJ</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Tipo de Notificação</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Data Notificação</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Captura</th>
                                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">Ações</th>
                                     </tr>
                                 </thead>
@@ -293,6 +356,7 @@ function App() {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{n.NPJ}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{n.tipo_notificacao}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{n.data_notificacao}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{formatTimestamp(n.data_criacao)}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-center text-lg space-x-4">
                                                 <button onClick={() => setSelectedNotification(n)} className="text-blue-400 hover:text-blue-300 transition-colors duration-200"><EyeIcon /></button>
                                                 <button onClick={() => alert(`Ações para o NPJ: ${n.NPJ}`)} className="text-gray-400 hover:text-white transition-colors duration-200"><CogIcon /></button>
@@ -325,18 +389,136 @@ function App() {
                 )}
                 {activeTab === 'logs' && (
                      <div className="overflow-x-auto">
-                        {/* A tabela de logs continua aqui */}
+                        <table className="min-w-full divide-y divide-gray-600">
+                           <thead className="bg-gray-750">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Timestamp</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Sucesso</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Falha</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Andamentos</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Documentos</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Duração (s)</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-gray-700 divide-y divide-gray-600">
+                                {logs.map(log => (
+                                    <tr key={log.id} className="hover:bg-gray-600">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{new Date(log.timestamp.replace('_', ' ')).toLocaleString('pt-BR')}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-green-400 font-bold">{log.npjs_sucesso}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-red-400 font-bold">{log.npjs_falha}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{log.andamentos}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{log.documentos}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{log.duracao_total.toFixed(2)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 )}
             </div>
         </div>
       </main>
+      
+      {isDateModalOpen && (
+        <div className="fixed z-20 inset-0 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="fixed inset-0 bg-black opacity-75" onClick={() => setIsDateModalOpen(false)}></div>
+                <div className="relative bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full">
+                    <div className="bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <h3 className="text-lg leading-6 font-medium text-white">Corrigir Data de Notificação</h3>
+                        <div className="mt-4">
+                            <p className="text-sm text-gray-400 mb-2">
+                                A data informada abaixo será aplicada a todos os <strong>{selectedIds.size}</strong> itens selecionados.
+                            </p>
+                            <label htmlFor="newDate" className="block text-sm font-medium text-gray-300">Nova Data (DD/MM/AAAA)</label>
+                            <input
+                                type="text"
+                                id="newDate"
+                                value={newDate}
+                                onChange={(e) => setNewDate(e.target.value)}
+                                placeholder="DD/MM/AAAA"
+                                className="mt-1 block w-full pl-3 pr-3 py-2 border border-gray-600 rounded-md leading-5 bg-gray-900 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            />
+                        </div>
+                    </div>
+                    <div className="bg-gray-800 border-t border-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button onClick={handleBulkDateUpdate} type="button" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 sm:ml-3 sm:w-auto sm:text-sm">
+                            Confirmar Correção
+                        </button>
+                        <button onClick={() => setIsDateModalOpen(false)} type="button" className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-600 shadow-sm px-4 py-2 bg-gray-700 text-base font-medium text-white hover:bg-gray-600 sm:mt-0 sm:w-auto sm:text-sm">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+      )}
 
-      {/* Modal de Detalhes (sem alterações) */}
       {selectedNotification && (
          <div className="fixed z-10 inset-0 overflow-y-auto">
-            {/* O código do modal de detalhes continua o mesmo, então foi omitido por brevidade */}
-         </div>
+            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div className="fixed inset-0 transition-opacity" aria-hidden="true" onClick={() => setSelectedNotification(null)}></div>
+                <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                <div className="inline-block align-bottom bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                    <div className="bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div className="sm:flex sm:items-start">
+                            <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                <h3 className="text-lg leading-6 font-medium text-white" id="modal-title">
+                                    Detalhes da Notificação - NPJ: {selectedNotification.NPJ}
+                                </h3>
+                                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Coluna de Andamentos */}
+                                    <div>
+                                        <h4 className="font-semibold text-gray-300 border-b border-gray-700 pb-2 mb-2">Andamentos Capturados</h4>
+                                        <div className="max-h-64 overflow-y-auto pr-2">
+                                            {selectedNotification.andamentos && Array.isArray(selectedNotification.andamentos) && selectedNotification.andamentos.length > 0 ? (
+                                                <ul className="space-y-3">
+                                                    {selectedNotification.andamentos.map((andamento, index) => (
+                                                        <li key={index} className="text-sm text-gray-300">
+                                                            <p className="font-semibold text-blue-400">{andamento.data}: <span className="text-gray-300 font-normal">{andamento.descricao}</span></p>
+                                                            <p className="pl-4 text-xs text-gray-400 whitespace-pre-wrap border-l-2 border-gray-700 ml-2 mt-1">{andamento.detalhes}</p>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            ) : <p className="text-sm text-gray-500 italic mt-2">Nenhum andamento capturado.</p>}
+                                        </div>
+                                    </div>
+                                    {/* Coluna de Documentos */}
+                                     <div>
+                                        <h4 className="font-semibold text-gray-300 border-b border-gray-700 pb-2 mb-2">Documentos Baixados</h4>
+                                        <div className="max-h-64 overflow-y-auto pr-2">
+                                            {selectedNotification.documentos && Array.isArray(selectedNotification.documentos) && selectedNotification.documentos.length > 0 ? (
+                                                <ul className="space-y-2">
+                                                    {selectedNotification.documentos.map((doc, index) => (
+                                                        <li key={index} className="text-sm text-gray-300 flex items-center justify-between bg-gray-900 p-2 rounded-md">
+                                                            <span>{doc.nome}</span>
+                                                            <a 
+                                                                href={`http://localhost:5000/download-documento?path=${encodeURIComponent(doc.caminho)}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-blue-400 hover:text-blue-300 transition-colors duration-200"
+                                                                title="Baixar Documento"
+                                                            >
+                                                                <DownloadIcon />
+                                                            </a>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            ) : <p className="text-sm text-gray-500 italic mt-2">Nenhum documento baixado.</p>}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-gray-800 border-t border-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button onClick={() => setSelectedNotification(null)} type="button" className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-600 shadow-sm px-4 py-2 bg-gray-700 text-base font-medium text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                            Fechar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
       )}
     </div>
   );
