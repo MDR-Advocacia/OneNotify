@@ -4,7 +4,7 @@ import json
 import logging
 from datetime import datetime
 import os
-from typing import List, Dict
+from typing import List, Dict, Any
 
 # --- CONFIGURAÇÃO DO BANCO DE DADOS ---
 diretorio_base = os.path.abspath(os.path.join(os.path.dirname(__file__)))
@@ -12,20 +12,28 @@ DB_NOME = os.path.join(diretorio_base, "rpa_refatorado.db")
 
 TABELA_NOTIFICACOES = "notificacoes"
 TABELA_LOGS = "logs_execucao"
+TABELA_USUARIOS = "usuarios"
+
+
+def _coluna_existe(cursor, tabela: str, coluna: str) -> bool:
+    """Verifica se uma coluna já existe em uma tabela."""
+    try:
+        cursor.execute(f"PRAGMA table_info({tabela})")
+        colunas_existentes = [desc[1] for desc in cursor.fetchall()]
+        return coluna in colunas_existentes
+    except sqlite3.Error:
+        return False
 
 def _executar_migracoes(conn):
     """Aplica migrações de schema no banco de dados para garantir compatibilidade."""
     cursor = conn.cursor()
     
-    # --- Migração para a tabela de logs ---
     try:
-        colunas_logs = [desc[1] for desc in cursor.execute(f"PRAGMA table_info({TABELA_LOGS})").fetchall()]
-
-        if 'andamentos_capturados' in colunas_logs:
+        if _coluna_existe(cursor, TABELA_LOGS, 'andamentos_capturados'):
             logging.info(f"Aplicando migração: Renomeando coluna 'andamentos_capturados' para 'andamentos'...")
             cursor.execute(f"ALTER TABLE {TABELA_LOGS} RENAME COLUMN andamentos_capturados TO andamentos")
         
-        if 'documentos_baixados' in colunas_logs:
+        if _coluna_existe(cursor, TABELA_LOGS, 'documentos_baixados'):
             logging.info(f"Aplicando migração: Renomeando coluna 'documentos_baixados' para 'documentos'...")
             cursor.execute(f"ALTER TABLE {TABELA_LOGS} RENAME COLUMN documentos_baixados TO documentos")
 
@@ -33,12 +41,14 @@ def _executar_migracoes(conn):
         if "no such table" not in str(e):
             logging.error(f"Falha ao verificar/aplicar migração na tabela de logs: {e}")
 
-    # --- Migração para a tabela de notificações ---
     try:
-        colunas_notificacoes = [desc[1] for desc in cursor.execute(f"PRAGMA table_info({TABELA_NOTIFICACOES})").fetchall()]
-        if 'id_processo_portal' not in colunas_notificacoes:
+        if not _coluna_existe(cursor, TABELA_NOTIFICACOES, 'id_processo_portal'):
             logging.info(f"Aplicando migração: Adicionando 'id_processo_portal' à tabela '{TABELA_NOTIFICACOES}'...")
             cursor.execute(f"ALTER TABLE {TABELA_NOTIFICACOES} ADD COLUMN id_processo_portal TEXT")
+        
+        if not _coluna_existe(cursor, TABELA_NOTIFICACOES, 'usuario_responsavel_id'):
+            logging.info(f"Aplicando migração: Adicionando 'usuario_responsavel_id' à tabela '{TABELA_NOTIFICACOES}'...")
+            cursor.execute(f"ALTER TABLE {TABELA_NOTIFICACOES} ADD COLUMN usuario_responsavel_id INTEGER REFERENCES {TABELA_USUARIOS}(id)")
 
     except sqlite3.Error as e:
         if "no such table" not in str(e):
@@ -84,6 +94,17 @@ def inicializar_banco():
                 npjs_falha INTEGER
             )
             """)
+
+            cursor.execute(f"""
+            CREATE TABLE IF NOT EXISTS {TABELA_USUARIOS} (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nome_completo TEXT NOT NULL,
+                login TEXT NOT NULL UNIQUE,
+                senha TEXT NOT NULL,
+                perfil TEXT NOT NULL CHECK(perfil IN ('admin', 'usuario')) DEFAULT 'usuario',
+                ativo INTEGER NOT NULL CHECK(ativo IN (0, 1)) DEFAULT 1
+            )
+            """)
             
             _executar_migracoes(conn)
 
@@ -92,10 +113,7 @@ def inicializar_banco():
         logging.error(f"ERRO ao inicializar o banco de dados: {e}", exc_info=True)
         raise
 
-# ... (outras funções do database.py permanecem iguais) ...
-
 def resetar_notificacoes_em_processamento_ou_erro():
-    """Reseta o status de notificações que falharam em uma execução anterior."""
     try:
         with sqlite3.connect(DB_NOME) as conn:
             cursor = conn.cursor()
@@ -108,7 +126,6 @@ def resetar_notificacoes_em_processamento_ou_erro():
         logging.error(f"ERRO ao resetar status de notificações: {e}", exc_info=True)
 
 def salvar_notificacoes(lista_notificacoes: list[dict]) -> int:
-    """Salva uma lista de notificações no banco, ignorando duplicatas."""
     salvas_com_sucesso = 0
     for notificacao in lista_notificacoes:
         try:
@@ -125,7 +142,6 @@ def salvar_notificacoes(lista_notificacoes: list[dict]) -> int:
     return salvas_com_sucesso
 
 def obter_npjs_pendentes_por_lote(tamanho_lote: int) -> List[Dict]:
-    """Obtém um lote de NPJs únicos com status 'Pendente' e os marca como 'Em Processamento'."""
     try:
         with sqlite3.connect(DB_NOME) as conn:
             conn.row_factory = sqlite3.Row
@@ -157,7 +173,6 @@ def obter_npjs_pendentes_por_lote(tamanho_lote: int) -> List[Dict]:
         return []
 
 def contar_pendentes() -> int:
-    """Conta quantos NPJs únicos ainda estão pendentes."""
     try:
         with sqlite3.connect(DB_NOME) as conn:
             cursor = conn.cursor()
@@ -168,7 +183,6 @@ def contar_pendentes() -> int:
         return 0
 
 def atualizar_notificacoes_de_npj_processado(npj: str, numero_processo: str, andamentos: list[dict], documentos: list[dict]):
-    """Atualiza todas as notificações de um NPJ como 'Processado', salvando os dados extraídos."""
     try:
         with sqlite3.connect(DB_NOME) as conn:
             cursor = conn.cursor()
@@ -187,7 +201,6 @@ def atualizar_notificacoes_de_npj_processado(npj: str, numero_processo: str, and
         logging.error(f"ERRO ao atualizar NPJ {npj} como processado: {e}", exc_info=True)
 
 def marcar_npj_como_erro(npj: str):
-    """Marca todas as notificações de um NPJ como 'Erro'."""
     try:
         with sqlite3.connect(DB_NOME) as conn:
             cursor = conn.cursor()
@@ -199,7 +212,6 @@ def marcar_npj_como_erro(npj: str):
         logging.error(f"ERRO ao marcar NPJ {npj} como erro: {e}", exc_info=True)
 
 def salvar_log_execucao(log_data: dict):
-    """Salva um registro de log no banco de dados."""
     try:
         with sqlite3.connect(DB_NOME) as conn:
             cursor = conn.cursor()
@@ -211,7 +223,6 @@ def salvar_log_execucao(log_data: dict):
         logging.error(f"ERRO ao salvar log de execução: {e}", exc_info=True)
 
 def atualizar_status_de_notificacoes_por_ids(ids: list[int], novo_status: str) -> int:
-    """Atualiza o status de uma lista de notificações com base em seus IDs."""
     if not ids:
         return 0
     try:
@@ -228,14 +239,10 @@ def atualizar_status_de_notificacoes_por_ids(ids: list[int], novo_status: str) -
         raise e
 
 def corrigir_e_consolidar_datas_por_ids(ids: list[int], nova_data: str) -> dict:
-    """
-    Corrige a data de notificações selecionadas e remove duplicatas que possam surgir.
-    Retorna um dicionário com o número de registros atualizados e deletados.
-    """
     if not ids:
         return {'updated': 0, 'deleted': 0}
 
-    conn = None # Garante que a variável conn exista fora do try
+    conn = None 
     try:
         conn = sqlite3.connect(DB_NOME)
         conn.row_factory = sqlite3.Row
@@ -245,12 +252,10 @@ def corrigir_e_consolidar_datas_por_ids(ids: list[int], nova_data: str) -> dict:
 
         placeholders = ', '.join(['?'] * len(ids))
         
-        # 1. Busca todas as notificações selecionadas para processá-las em memória.
         query_select = f"SELECT id, NPJ, tipo_notificacao FROM {TABELA_NOTIFICACOES} WHERE id IN ({placeholders})"
         cursor.execute(query_select, ids)
         notificacoes_para_processar = [dict(row) for row in cursor.fetchall()]
 
-        # 2. Agrupa as notificações pela chave única (NPJ, tipo_notificacao).
         grupos_para_consolidar = {}
         for n in notificacoes_para_processar:
             chave = (n['NPJ'], n['tipo_notificacao'])
@@ -258,7 +263,6 @@ def corrigir_e_consolidar_datas_por_ids(ids: list[int], nova_data: str) -> dict:
                 grupos_para_consolidar[chave] = []
             grupos_para_consolidar[chave].append(n['id'])
 
-        # 3. Para cada grupo, decide quem vive e quem é excluído.
         ids_para_deletar = []
         ids_para_atualizar = []
 
@@ -266,14 +270,12 @@ def corrigir_e_consolidar_datas_por_ids(ids: list[int], nova_data: str) -> dict:
             if not grupo_ids:
                 continue
             
-            # Mantém o primeiro ID da lista, e marca os outros para exclusão.
             id_para_manter = grupo_ids[0]
             ids_para_atualizar.append(id_para_manter)
             
             if len(grupo_ids) > 1:
                 ids_para_deletar.extend(grupo_ids[1:])
         
-        # 4. Executa a atualização da data nos registros que serão mantidos.
         updated_count = 0
         if ids_para_atualizar:
             placeholders_update = ', '.join(['?'] * len(ids_para_atualizar))
@@ -281,7 +283,6 @@ def corrigir_e_consolidar_datas_por_ids(ids: list[int], nova_data: str) -> dict:
             cursor.execute(query_update, [nova_data] + ids_para_atualizar)
             updated_count = cursor.rowcount
 
-        # 5. Executa a exclusão dos registros redundantes.
         deleted_count = 0
         if ids_para_deletar:
             placeholders_delete = ', '.join(['?'] * len(ids_para_deletar))
@@ -301,4 +302,93 @@ def corrigir_e_consolidar_datas_por_ids(ids: list[int], nova_data: str) -> dict:
     finally:
         if conn:
             conn.close()
+
+def criar_usuario(nome_completo: str, login: str, hash_senha: str, perfil: str = 'usuario'):
+    sql = f"INSERT INTO {TABELA_USUARIOS} (nome_completo, login, senha, perfil) VALUES (?, ?, ?, ?)"
+    try:
+        with sqlite3.connect(DB_NOME) as conn:
+            cursor = conn.cursor()
+            cursor.execute(sql, (nome_completo, login, hash_senha, perfil))
+            conn.commit()
+            return cursor.lastrowid
+    except sqlite3.IntegrityError:
+        logging.error(f"Erro: O login '{login}' já existe.")
+        return None
+    except sqlite3.Error as e:
+        logging.error(f"Erro ao criar usuário: {e}")
+        return None
+
+def listar_usuarios():
+    sql = f"SELECT id, nome_completo, login, perfil, ativo FROM {TABELA_USUARIOS} ORDER BY nome_completo"
+    try:
+        with sqlite3.connect(DB_NOME) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute(sql)
+            return [dict(row) for row in cursor.fetchall()]
+    except sqlite3.Error as e:
+        logging.error(f"Erro ao listar usuários: {e}")
+        return []
+
+def obter_notificacoes_para_distribuir() -> List[Dict[str, Any]]:
+    sql = f"SELECT id, NPJ FROM {TABELA_NOTIFICACOES} WHERE status = 'Processado' AND usuario_responsavel_id IS NULL"
+    try:
+        with sqlite3.connect(DB_NOME) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute(sql)
+            return [dict(row) for row in cursor.fetchall()]
+    except sqlite3.Error as e:
+        logging.error(f"Erro ao obter notificações para distribuir: {e}")
+        return []
+
+def obter_usuarios_ativos_para_distribuicao() -> List[Dict[str, Any]]:
+    sql = f"SELECT id, nome_completo FROM {TABELA_USUARIOS} WHERE perfil = 'usuario' AND ativo = 1 ORDER BY id"
+    try:
+        with sqlite3.connect(DB_NOME) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute(sql)
+            return [dict(row) for row in cursor.fetchall()]
+    except sqlite3.Error as e:
+        logging.error(f"Erro ao obter usuários ativos: {e}")
+        return []
+
+def atribuir_notificacao_a_usuario(id_notificacao: int, id_usuario: int):
+    sql = f"UPDATE {TABELA_NOTIFICACOES} SET usuario_responsavel_id = ? WHERE id = ?"
+    try:
+        with sqlite3.connect(DB_NOME) as conn:
+            cursor = conn.cursor()
+            cursor.execute(sql, (id_usuario, id_notificacao))
+            conn.commit()
+    except sqlite3.Error as e:
+        logging.error(f"Erro ao atribuir notificação {id_notificacao} ao usuário {id_usuario}: {e}")
+
+# --- NOVAS FUNÇÕES PARA O SERVIDOR WEB ---
+def validar_usuario(login: str, hash_senha: str) -> Dict[str, Any] or None:
+    """Busca um usuário ativo pelo login e hash da senha."""
+    sql = f"SELECT id, nome_completo, login, perfil FROM {TABELA_USUARIOS} WHERE login = ? AND senha = ? AND ativo = 1"
+    try:
+        with sqlite3.connect(DB_NOME) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute(sql, (login, hash_senha))
+            user_data = cursor.fetchone()
+            return dict(user_data) if user_data else None
+    except sqlite3.Error as e:
+        logging.error(f"Erro ao validar usuário: {e}")
+        return None
+
+def obter_notificacoes_por_usuario(id_usuario: int) -> List[Dict[str, Any]]:
+    """Obtém todas as notificações atribuídas a um usuário específico."""
+    sql = f"SELECT * FROM {TABELA_NOTIFICACOES} WHERE usuario_responsavel_id = ? ORDER BY data_criacao DESC"
+    try:
+        with sqlite3.connect(DB_NOME) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute(sql, (id_usuario,))
+            return [dict(row) for row in cursor.fetchall()]
+    except sqlite3.Error as e:
+        logging.error(f"Erro ao obter notificações para o usuário {id_usuario}: {e}")
+        return []
 
