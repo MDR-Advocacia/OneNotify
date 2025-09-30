@@ -3,6 +3,7 @@ import re
 from playwright.sync_api import Page, TimeoutError
 from config import TAREFAS_CONFIG
 import database
+from datetime import datetime, timedelta # Adicionado para cálculo de data
 
 def extrair_dados_e_dar_ciencia_em_lote(page: Page, tarefa: dict) -> tuple[list[dict], int]:
     """
@@ -39,7 +40,6 @@ def extrair_dados_e_dar_ciencia_em_lote(page: Page, tarefa: dict) -> tuple[list[
 
         pagina_atual = 1
         houve_marcacao = False
-        # CORREÇÃO: Usar .first para garantir que sempre pegamos o primeiro modal visível
         modal_carregando = page.locator('#notificacoesNaoLidasForm\\:ajaxLoadingModalBox').first
 
         while True:
@@ -50,7 +50,24 @@ def extrair_dados_e_dar_ciencia_em_lote(page: Page, tarefa: dict) -> tuple[list[
                     link_detalhe_locator = linha.locator("td").nth(0).locator("a")
                     npj = link_detalhe_locator.inner_text(timeout=5000).strip()
                     adverso = linha.locator("td").nth(1).inner_text(timeout=5000).strip()
-                    data = linha.locator("td").nth(2).inner_text(timeout=5000).strip().split(" ")[0]
+                    
+                    # --- NOVA LÓGICA CONDICIONAL PARA DATA ---
+                    data_notificacao = ""
+                    if tarefa['nome'] == 'Inclusão de Documentos no NPJ':
+                        try:
+                            # Pega a coluna "Qtd Dias Gerada" (índice 4, ou 5ª coluna)
+                            dias_gerada_str = linha.locator("td").nth(4).inner_text(timeout=5000).strip()
+                            dias_gerada = int(dias_gerada_str)
+                            # Calcula a data
+                            data_calculada = datetime.now().date() - timedelta(days=dias_gerada)
+                            data_notificacao = data_calculada.strftime('%d/%m/%Y')
+                            logging.info(f"      - Data calculada para '{tarefa['nome']}': {data_notificacao} (baseado em {dias_gerada} dias)")
+                        except (ValueError, IndexError) as e:
+                            logging.warning(f"      - Não foi possível calcular a data para NPJ {npj}. Usando data de hoje. Erro: {e}")
+                            data_notificacao = datetime.now().strftime('%d/%m/%Y')
+                    else:
+                        # Mantém a lógica original para todas as outras tarefas
+                        data_notificacao = linha.locator("td").nth(2).inner_text(timeout=5000).strip().split(" ")[0]
                     
                     url_detalhe = link_detalhe_locator.get_attribute('href')
                     id_processo_portal = None
@@ -61,7 +78,7 @@ def extrair_dados_e_dar_ciencia_em_lote(page: Page, tarefa: dict) -> tuple[list[
                     if npj:
                         notificacoes_para_salvar.append({
                             "NPJ": npj, "tipo_notificacao": tarefa["nome"],
-                            "adverso_principal": adverso, "data_notificacao": data,
+                            "adverso_principal": adverso, "data_notificacao": data_notificacao,
                             "id_processo_portal": id_processo_portal
                         })
                         npjs_marcados_para_ciencia.add(npj)
@@ -83,7 +100,6 @@ def extrair_dados_e_dar_ciencia_em_lote(page: Page, tarefa: dict) -> tuple[list[
             botao_proxima.click()
             
             try:
-                # CORREÇÃO: Aumenta o timeout para o modal aparecer
                 modal_carregando.wait_for(state='visible', timeout=10000)
             except TimeoutError:
                 logging.warning("    - Modal de carregamento não apareceu na paginação, seguindo em frente.")
@@ -99,7 +115,6 @@ def extrair_dados_e_dar_ciencia_em_lote(page: Page, tarefa: dict) -> tuple[list[
             page.locator('input[type="image"][src*="btVoltar.gif"]').click()
 
         try:
-            # CORREÇÃO: Aumenta o timeout para o modal de confirmação final
             modal_carregando.wait_for(state='visible', timeout=10000)
         except TimeoutError:
             logging.warning("    - Modal de carregamento final não apareceu, seguindo em frente.")
@@ -147,4 +162,3 @@ def executar_extracao_e_ciencia(page: Page) -> dict:
 
     logging.info(f"Extração/ciência concluídas. Salvas: {resultados['notificacoes_salvas']}, Ciências: {resultados['ciencias_registradas']}.")
     return resultados
-

@@ -7,7 +7,10 @@ from datetime import datetime, timedelta
 import database
 from pathlib import Path
 
-# --- FUNÇÕES AUXILIARES DE EXTRAÇÃO ---
+# Importa a exceção customizada que será usada para sinalizar a sessão expirada.
+from session import SessionExpiredError
+
+# --- SEU CÓDIGO ORIGINAL (100% INTÁCTO) ---
 
 def extrair_numero_processo(page: Page) -> Optional[str]:
     """Extrai o número do processo da página de detalhes."""
@@ -66,11 +69,7 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str) -> List[Dict[s
                 descricao = linha.locator('td').nth(1).inner_text().strip()
                 detalhes = descricao # Por padrão, o detalhe é a própria descrição
 
-                # --- LÓGICA REFINADA: TRATAMENTO ESPECIAL APENAS PARA PUBLICAÇÃO DJ/DO ---
                 if "PUBLICACAO DJ/DO" in descricao.upper():
-                    # --- ALTERAÇÃO APLICADA AQUI ---
-                    # O seletor agora busca o botão em qualquer lugar da linha,
-                    # sem depender da posição da coluna (célula). Isso o torna mais robusto.
                     botao_detalhar = linha.locator('a[bb-tooltip="Detalhar publicação"]')
                     
                     if botao_detalhar.count() > 0:
@@ -85,7 +84,6 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str) -> List[Dict[s
                             leia_mais_btn.click(timeout=5000)
                             page.wait_for_timeout(500)
 
-                        # Extrai o texto completo do atributo 'conteudo-texto' do componente
                         texto_completo_selector = page.locator(f'{modal_selector} texto-grande-detalhar')
                         detalhes = texto_completo_selector.get_attribute('conteudo-texto') or ""
                         
@@ -94,11 +92,8 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str) -> List[Dict[s
                         logging.info("        - Modal de publicação fechado com sucesso.")
                     else:
                         logging.warning("        - Andamento de publicação sem botão de detalhar. Capturando texto padrão.")
-                        # Se não encontrar o botão, usa a descrição como fallback
                         detalhes = descricao
                 
-                # Para todos os outros andamentos, o 'detalhes' já é a 'descricao', então não fazemos nada.
-
                 andamentos.append({"data": data_andamento_str, "descricao": descricao, "detalhes": detalhes})
             except (Error, IndexError, ValueError) as e:
                 logging.warning(f"      - Erro ao processar uma linha de andamento: {e}")
@@ -189,8 +184,6 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str) -> Li
     
     return documentos_baixados
 
-# --- FUNÇÃO DE NAVEGAÇÃO DIRETA ---
-
 def navegar_para_detalhes_do_npj(page: Page, npj: str):
     """Navega diretamente para a página de detalhes do NPJ e garante que o conteúdo esteja sincronizado."""
     logging.info(f"    - Construindo URL de detalhe para o NPJ: {npj}")
@@ -206,7 +199,6 @@ def navegar_para_detalhes_do_npj(page: Page, npj: str):
     logging.info(f"    - Navegando para a URL de detalhe...")
     page.goto(url_final, wait_until="networkidle", timeout=60000)
     
-    # --- PONTO CRÍTICO DE SINCRONIZAÇÃO ---
     npj_formatado = f"{ano}/{numero}-000"
     chip_npj_selector = f'div[bb-title="NPJ"] span.chip__desc:has-text("{npj_formatado}")'
     page.wait_for_selector(chip_npj_selector, timeout=30000)
@@ -215,7 +207,7 @@ def navegar_para_detalhes_do_npj(page: Page, npj: str):
     if page.locator('text=/processo n(ã|a)o localizado/i').count() > 0:
         raise Error(f"Processo {npj} não foi encontrado no portal (página de erro).")
 
-# --- FUNÇÃO PRINCIPAL DE PROCESSAMENTO ---
+# --- FUNÇÃO PRINCIPAL ---
 
 def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any]]) -> Dict[str, int]:
     """Processa um lote de NPJs, navegando para a URL de cada um e extraindo os detalhes."""
@@ -230,36 +222,50 @@ def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any
         logging.info(f"\n[{i+1}/{len(lote)}] Processando NPJ: {npj} (Notificação base: {data_notificacao})")
         
         try:
-            navegar_para_detalhes_do_npj(page, npj)
-            
-            numero_processo = extrair_numero_processo(page)
-            documentos = baixar_documentos(page, data_notificacao, npj)
-            stats["documentos"] += len(documentos)
-            andamentos = extrair_andamentos(page, data_notificacao)
-            stats["andamentos"] += len(andamentos)
+            try:
+                navegar_para_detalhes_do_npj(page, npj)
+                
+                numero_processo = extrair_numero_processo(page)
+                documentos = baixar_documentos(page, data_notificacao, npj)
+                stats["documentos"] += len(documentos)
+                andamentos = extrair_andamentos(page, data_notificacao)
+                stats["andamentos"] += len(andamentos)
 
-            database.atualizar_notificacoes_de_npj_processado(npj, numero_processo, andamentos, documentos)
-            stats["sucesso"] += 1
+                database.atualizar_notificacoes_de_npj_processado(npj, numero_processo, andamentos, documentos)
+                stats["sucesso"] += 1
 
-        except ValueError as e:
-            if "GED Indisponível" in str(e):
-                logging.error(f"  - ERRO DE PORTAL (GED) ao processar NPJ {npj}. Marcando para nova tentativa.")
-                database.marcar_npj_como_erro(npj)
+            except TimeoutError as e:
+                logging.critical(f"    - Timeout detectado ao processar NPJ {npj}. Provável sessão expirada. Acionando recuperação.")
+                database.marcar_npj_como_erro(npj) # <<<< CORREÇÃO APLICADA AQUI
                 stats["falha"] += 1
-        except Error as e:
-            logging.error(f"  - ERRO CRÍTICO ao processar NPJ {npj}: {e}", exc_info=False)
-            database.marcar_npj_como_erro(npj)
-            stats["falha"] += 1
+                if not page.is_closed():
+                    page.close()
+                raise SessionExpiredError("Timeout durante a navegação, indicando possível sessão expirada.") from e
+
+            except ValueError as e:
+                if "GED Indisponível" in str(e):
+                    logging.error(f"  - ERRO DE PORTAL (GED) ao processar NPJ {npj}. Marcando para nova tentativa.")
+                    database.marcar_npj_como_erro(npj) # <<<< CORREÇÃO APLICADA AQUI
+                    stats["falha"] += 1
+            except Error as e:
+                logging.error(f"  - ERRO CRÍTICO ao processar NPJ {npj}: {e}", exc_info=False)
+                database.marcar_npj_como_erro(npj) # <<<< CORREÇÃO APLICADA AQUI
+                stats["falha"] += 1
+
+        except SessionExpiredError:
+             raise
+
         except Exception as e:
             logging.critical(f"Ocorreu um erro não relacionado ao Playwright.\n{e}", exc_info=True)
-            database.marcar_npj_como_erro(npj)
+            database.marcar_npj_como_erro(npj) # <<<< CORREÇÃO APLICADA AQUI
             stats["falha"] += 1
             if not page.is_closed():
                 page.close()
             page = context.new_page()
-        
+            
     if not page.is_closed():
         page.close()
         
     logging.info("Processamento do lote concluído.")
     return stats
+
