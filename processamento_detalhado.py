@@ -10,8 +10,6 @@ from pathlib import Path
 # Importa a exceção customizada que será usada para sinalizar a sessão expirada.
 from session import SessionExpiredError
 
-# --- SEU CÓDIGO ORIGINAL (100% INTÁCTO) ---
-
 def extrair_numero_processo(page: Page) -> Optional[str]:
     """Extrai o número do processo da página de detalhes."""
     try:
@@ -207,10 +205,8 @@ def navegar_para_detalhes_do_npj(page: Page, npj: str):
     if page.locator('text=/processo n(ã|a)o localizado/i').count() > 0:
         raise Error(f"Processo {npj} não foi encontrado no portal (página de erro).")
 
-# --- FUNÇÃO PRINCIPAL ---
-
 def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any]]) -> Dict[str, int]:
-    """Processa um lote de NPJs, navegando para a URL de cada um e extraindo os detalhes."""
+    """Processa um lote de grupos (NPJ, data), navegando para a URL de cada um e extraindo os detalhes."""
     stats = {"sucesso": 0, "falha": 0, "andamentos": 0, "documentos": 0}
     
     page = context.new_page()
@@ -231,12 +227,12 @@ def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any
                 andamentos = extrair_andamentos(page, data_notificacao)
                 stats["andamentos"] += len(andamentos)
 
-                database.atualizar_notificacoes_de_npj_processado(npj, numero_processo, andamentos, documentos)
+                database.atualizar_notificacoes_de_npj_processado(npj, data_notificacao, numero_processo, andamentos, documentos)
                 stats["sucesso"] += 1
 
             except TimeoutError as e:
                 logging.critical(f"    - Timeout detectado ao processar NPJ {npj}. Provável sessão expirada. Acionando recuperação.")
-                database.marcar_npj_como_erro(npj) # <<<< CORREÇÃO APLICADA AQUI
+                database.marcar_npj_como_erro(npj, data_notificacao)
                 stats["falha"] += 1
                 if not page.is_closed():
                     page.close()
@@ -245,11 +241,11 @@ def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any
             except ValueError as e:
                 if "GED Indisponível" in str(e):
                     logging.error(f"  - ERRO DE PORTAL (GED) ao processar NPJ {npj}. Marcando para nova tentativa.")
-                    database.marcar_npj_como_erro(npj) # <<<< CORREÇÃO APLICADA AQUI
+                    database.marcar_npj_como_erro(npj, data_notificacao)
                     stats["falha"] += 1
             except Error as e:
                 logging.error(f"  - ERRO CRÍTICO ao processar NPJ {npj}: {e}", exc_info=False)
-                database.marcar_npj_como_erro(npj) # <<<< CORREÇÃO APLICADA AQUI
+                database.marcar_npj_como_erro(npj, data_notificacao)
                 stats["falha"] += 1
 
         except SessionExpiredError:
@@ -257,7 +253,7 @@ def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any
 
         except Exception as e:
             logging.critical(f"Ocorreu um erro não relacionado ao Playwright.\n{e}", exc_info=True)
-            database.marcar_npj_como_erro(npj) # <<<< CORREÇÃO APLICADA AQUI
+            database.marcar_npj_como_erro(npj, data_notificacao)
             stats["falha"] += 1
             if not page.is_closed():
                 page.close()
@@ -268,4 +264,3 @@ def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any
         
     logging.info("Processamento do lote concluído.")
     return stats
-

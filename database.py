@@ -92,8 +92,6 @@ def inicializar_banco():
         logging.error(f"ERRO ao inicializar o banco de dados: {e}", exc_info=True)
         raise
 
-# ... (outras funções do database.py permanecem iguais) ...
-
 def resetar_notificacoes_em_processamento_ou_erro():
     """Reseta o status de notificações que falharam em uma execução anterior."""
     try:
@@ -125,50 +123,76 @@ def salvar_notificacoes(lista_notificacoes: list[dict]) -> int:
     return salvas_com_sucesso
 
 def obter_npjs_pendentes_por_lote(tamanho_lote: int) -> List[Dict]:
-    """Obtém um lote de NPJs únicos com status 'Pendente' e os marca como 'Em Processamento'."""
+    """
+    Obtém um lote de grupos (NPJ, data_notificacao) únicos com status 'Pendente'
+    e marca as notificações correspondentes como 'Em Processamento'.
+    """
     try:
         with sqlite3.connect(DB_NOME) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
 
-            cursor.execute(f"SELECT DISTINCT NPJ FROM {TABELA_NOTIFICACOES} WHERE status = 'Pendente' LIMIT {tamanho_lote}")
-            npjs_pendentes = [row['NPJ'] for row in cursor.fetchall()]
+            # Passo 1: Obter os grupos únicos para processar, ordenando pela data mais antiga primeiro.
+            query_select = f"""
+                SELECT DISTINCT NPJ, data_notificacao
+                FROM {TABELA_NOTIFICACOES}
+                WHERE status = 'Pendente'
+                ORDER BY
+                    SUBSTR(data_notificacao, 7, 4),
+                    SUBSTR(data_notificacao, 4, 2),
+                    SUBSTR(data_notificacao, 1, 2)
+                LIMIT {tamanho_lote}
+            """
+            cursor.execute(query_select)
+            lote_para_processar_raw = [dict(row) for row in cursor.fetchall()]
 
-            if not npjs_pendentes:
+            if not lote_para_processar_raw:
                 return []
 
-            placeholders = ', '.join(['?'] * len(npjs_pendentes))
-            cursor.execute(f"UPDATE {TABELA_NOTIFICACOES} SET status = 'Em Processamento' WHERE NPJ IN ({placeholders})", npjs_pendentes)
+            # Passo 2: Marcar as notificações correspondentes a esses grupos como 'Em Processamento'.
+            update_conditions = []
+            params = []
+            for item in lote_para_processar_raw:
+                update_conditions.append("(NPJ = ? AND data_notificacao = ?)")
+                params.extend([item['NPJ'], item['data_notificacao']])
+
+            where_clause = " OR ".join(update_conditions)
             
-            query = f"""
-                SELECT
-                    NPJ,
-                    MAX(data_notificacao) as data_recente_notificacao
-                FROM {TABELA_NOTIFICACOES}
-                WHERE NPJ IN ({placeholders})
-                GROUP BY NPJ
+            query_update = f"""
+                UPDATE {TABELA_NOTIFICACOES}
+                SET status = 'Em Processamento'
+                WHERE status = 'Pendente' AND ({where_clause})
             """
-            cursor.execute(query, npjs_pendentes)
-            lote_para_processar = [dict(row) for row in cursor.fetchall()]
-            return lote_para_processar
+            cursor.execute(query_update, params)
             
+            # Renomeia a chave para manter compatibilidade com o módulo de processamento
+            lote_para_processar = [
+                {'NPJ': item['NPJ'], 'data_recente_notificacao': item['data_notificacao']}
+                for item in lote_para_processar_raw
+            ]
+            
+            return lote_para_processar
+
     except sqlite3.Error as e:
-        logging.error(f"ERRO ao obter lote de NPJs pendentes: {e}", exc_info=True)
+        logging.error(f"ERRO ao obter lote de grupos pendentes: {e}", exc_info=True)
         return []
 
 def contar_pendentes() -> int:
-    """Conta quantos NPJs únicos ainda estão pendentes."""
+    """Conta quantos grupos únicos de (NPJ, data_notificacao) ainda estão pendentes."""
     try:
         with sqlite3.connect(DB_NOME) as conn:
             cursor = conn.cursor()
-            cursor.execute(f"SELECT COUNT(DISTINCT NPJ) FROM {TABELA_NOTIFICACOES} WHERE status = 'Pendente'")
+            cursor.execute(f"SELECT COUNT(*) FROM (SELECT DISTINCT NPJ, data_notificacao FROM {TABELA_NOTIFICACOES} WHERE status = 'Pendente')")
             return cursor.fetchone()[0]
     except sqlite3.Error as e:
-        logging.error(f"ERRO ao contar NPJs pendentes: {e}", exc_info=True)
+        logging.error(f"ERRO ao contar grupos pendentes: {e}", exc_info=True)
         return 0
 
-def atualizar_notificacoes_de_npj_processado(npj: str, numero_processo: str, andamentos: list[dict], documentos: list[dict]):
-    """Atualiza todas as notificações de um NPJ como 'Processado', salvando os dados extraídos."""
+def atualizar_notificacoes_de_npj_processado(npj: str, data_notificacao: str, numero_processo: str, andamentos: list[dict], documentos: list[dict]):
+    """
+    Atualiza as notificações de um grupo (NPJ, data) como 'Processado',
+    salvando os dados extraídos.
+    """
     try:
         with sqlite3.connect(DB_NOME) as conn:
             cursor = conn.cursor()
@@ -179,24 +203,24 @@ def atualizar_notificacoes_de_npj_processado(npj: str, numero_processo: str, and
                     numero_processo = ?,
                     andamentos = ?,
                     documentos = ?
-                WHERE NPJ = ? AND status = 'Em Processamento'
+                WHERE NPJ = ? AND data_notificacao = ? AND status = 'Em Processamento'
                 """,
-                (numero_processo, json.dumps(andamentos), json.dumps(documentos), npj)
+                (numero_processo, json.dumps(andamentos), json.dumps(documentos), npj, data_notificacao)
             )
     except sqlite3.Error as e:
-        logging.error(f"ERRO ao atualizar NPJ {npj} como processado: {e}", exc_info=True)
+        logging.error(f"ERRO ao atualizar NPJ {npj} data {data_notificacao} como processado: {e}", exc_info=True)
 
-def marcar_npj_como_erro(npj: str):
-    """Marca todas as notificações de um NPJ como 'Erro'."""
+def marcar_npj_como_erro(npj: str, data_notificacao: str):
+    """Marca as notificações de um grupo (NPJ, data) como 'Erro'."""
     try:
         with sqlite3.connect(DB_NOME) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                f"UPDATE {TABELA_NOTIFICACOES} SET status = 'Erro' WHERE NPJ = ? AND status = 'Em Processamento'",
-                (npj,)
+                f"UPDATE {TABELA_NOTIFICACOES} SET status = 'Erro' WHERE NPJ = ? AND data_notificacao = ? AND status = 'Em Processamento'",
+                (npj, data_notificacao)
             )
     except sqlite3.Error as e:
-        logging.error(f"ERRO ao marcar NPJ {npj} como erro: {e}", exc_info=True)
+        logging.error(f"ERRO ao marcar NPJ {npj} data {data_notificacao} como erro: {e}", exc_info=True)
 
 def salvar_log_execucao(log_data: dict):
     """Salva um registro de log no banco de dados."""
