@@ -12,33 +12,27 @@ DB_NOME = os.path.join(diretorio_base, "rpa_refatorado.db")
 
 TABELA_NOTIFICACOES = "notificacoes"
 TABELA_LOGS = "logs_execucao"
+TABELA_USUARIOS = "usuarios" # Adicionado para o futuro painel
 
 def _executar_migracoes(conn):
     """Aplica migrações de schema no banco de dados para garantir compatibilidade."""
     cursor = conn.cursor()
     
-    # --- Migração para a tabela de logs ---
-    try:
-        colunas_logs = [desc[1] for desc in cursor.execute(f"PRAGMA table_info({TABELA_LOGS})").fetchall()]
-
-        if 'andamentos_capturados' in colunas_logs:
-            logging.info(f"Aplicando migração: Renomeando coluna 'andamentos_capturados' para 'andamentos'...")
-            cursor.execute(f"ALTER TABLE {TABELA_LOGS} RENAME COLUMN andamentos_capturados TO andamentos")
-        
-        if 'documentos_baixados' in colunas_logs:
-            logging.info(f"Aplicando migração: Renomeando coluna 'documentos_baixados' para 'documentos'...")
-            cursor.execute(f"ALTER TABLE {TABELA_LOGS} RENAME COLUMN documentos_baixados TO documentos")
-
-    except sqlite3.Error as e:
-        if "no such table" not in str(e):
-            logging.error(f"Falha ao verificar/aplicar migração na tabela de logs: {e}")
-
-    # --- Migração para a tabela de notificações ---
     try:
         colunas_notificacoes = [desc[1] for desc in cursor.execute(f"PRAGMA table_info({TABELA_NOTIFICACOES})").fetchall()]
+
         if 'id_processo_portal' not in colunas_notificacoes:
             logging.info(f"Aplicando migração: Adicionando 'id_processo_portal' à tabela '{TABELA_NOTIFICACOES}'...")
             cursor.execute(f"ALTER TABLE {TABELA_NOTIFICACOES} ADD COLUMN id_processo_portal TEXT")
+        
+        # --- NOVAS MIGRAÇÕES PARA AUDITORIA ---
+        if 'data_processamento' not in colunas_notificacoes:
+            logging.info(f"Aplicando migração: Adicionando 'data_processamento' à tabela '{TABELA_NOTIFICACOES}'...")
+            cursor.execute(f"ALTER TABLE {TABELA_NOTIFICACOES} ADD COLUMN data_processamento TEXT")
+
+        if 'detalhes_erro' not in colunas_notificacoes:
+            logging.info(f"Aplicando migração: Adicionando 'detalhes_erro' à tabela '{TABELA_NOTIFICACOES}'...")
+            cursor.execute(f"ALTER TABLE {TABELA_NOTIFICACOES} ADD COLUMN detalhes_erro TEXT")
 
     except sqlite3.Error as e:
         if "no such table" not in str(e):
@@ -62,7 +56,9 @@ def inicializar_banco():
                 numero_processo TEXT,
                 andamentos TEXT,
                 documentos TEXT,
-                id_processo_portal TEXT
+                id_processo_portal TEXT,
+                data_processamento TEXT,
+                detalhes_erro TEXT
             )
             """)
             cursor.execute(f"""
@@ -75,7 +71,6 @@ def inicializar_banco():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp TEXT,
                 duracao_total REAL,
-                tempo_medio_npj REAL,
                 notificacoes_salvas INTEGER,
                 ciencias_registradas INTEGER,
                 andamentos INTEGER,
@@ -93,17 +88,36 @@ def inicializar_banco():
         raise
 
 def resetar_notificacoes_em_processamento_ou_erro():
-    """Reseta o status de notificações que falharam em uma execução anterior."""
+    """Reseta o status de notificações que falharam ou foram interrompidas em uma execução anterior."""
+    try:
+        with sqlite3.connect(DB_NOME) as conn:
+            cursor = conn.cursor()
+            # Limpa os detalhes de erro antigos ao resetar
+            cursor.execute(
+                f"""UPDATE {TABELA_NOTIFICACOES} 
+                   SET status = 'Pendente', detalhes_erro = NULL, data_processamento = NULL
+                   WHERE status IN ('Em Processamento', 'Erro', 'Erro - Data Inválida')"""
+            )
+            if cursor.rowcount > 0:
+                logging.info(f"{cursor.rowcount} notificações com status de erro ou em processamento foram resetadas para 'Pendente'.")
+    except sqlite3.Error as e:
+        logging.error(f"ERRO ao resetar status de notificações: {e}", exc_info=True)
+
+def validar_e_marcar_notificacoes_sem_data():
+    """Identifica notificações pendentes sem data e as marca com um erro específico."""
     try:
         with sqlite3.connect(DB_NOME) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                f"UPDATE {TABELA_NOTIFICACOES} SET status = 'Pendente' WHERE status IN ('Em Processamento', 'Erro')"
+                f"""UPDATE {TABELA_NOTIFICACOES} 
+                   SET status = 'Erro - Data Inválida', detalhes_erro = 'A notificação foi capturada sem uma data válida.'
+                   WHERE status = 'Pendente' AND (data_notificacao IS NULL OR data_notificacao = '')"""
             )
             if cursor.rowcount > 0:
-                logging.info(f"{cursor.rowcount} notificações com status 'Erro' ou 'Em Processamento' foram resetadas para 'Pendente'.")
+                logging.warning(f"{cursor.rowcount} notificações pendentes sem data foram marcadas como 'Erro - Data Inválida'.")
     except sqlite3.Error as e:
-        logging.error(f"ERRO ao resetar status de notificações: {e}", exc_info=True)
+        logging.error(f"ERRO ao validar notificações sem data: {e}", exc_info=True)
+
 
 def salvar_notificacoes(lista_notificacoes: list[dict]) -> int:
     """Salva uma lista de notificações no banco, ignorando duplicatas."""
@@ -123,104 +137,85 @@ def salvar_notificacoes(lista_notificacoes: list[dict]) -> int:
     return salvas_com_sucesso
 
 def obter_npjs_pendentes_por_lote(tamanho_lote: int) -> List[Dict]:
-    """
-    Obtém um lote de grupos (NPJ, data_notificacao) únicos com status 'Pendente'
-    e marca as notificações correspondentes como 'Em Processamento'.
-    """
+    """Obtém um lote de grupos (NPJ, data) pendentes e os marca como 'Em Processamento'."""
     try:
         with sqlite3.connect(DB_NOME) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
 
-            # Passo 1: Obter os grupos únicos para processar, ordenando pela data mais antiga primeiro.
-            query_select = f"""
-                SELECT DISTINCT NPJ, data_notificacao
-                FROM {TABELA_NOTIFICACOES}
+            # Busca grupos únicos de (NPJ, data) que tenham pelo menos uma notificação pendente
+            query_grupos = f"""
+                SELECT DISTINCT NPJ, data_notificacao 
+                FROM {TABELA_NOTIFICACOES} 
                 WHERE status = 'Pendente'
-                ORDER BY
-                    SUBSTR(data_notificacao, 7, 4),
-                    SUBSTR(data_notificacao, 4, 2),
-                    SUBSTR(data_notificacao, 1, 2)
                 LIMIT {tamanho_lote}
             """
-            cursor.execute(query_select)
-            lote_para_processar_raw = [dict(row) for row in cursor.fetchall()]
+            cursor.execute(query_grupos)
+            grupos_pendentes = [dict(row) for row in cursor.fetchall()]
 
-            if not lote_para_processar_raw:
+            if not grupos_pendentes:
                 return []
-
-            # Passo 2: Marcar as notificações correspondentes a esses grupos como 'Em Processamento'.
-            update_conditions = []
-            params = []
-            for item in lote_para_processar_raw:
-                update_conditions.append("(NPJ = ? AND data_notificacao = ?)")
-                params.extend([item['NPJ'], item['data_notificacao']])
-
-            where_clause = " OR ".join(update_conditions)
             
-            query_update = f"""
-                UPDATE {TABELA_NOTIFICACOES}
-                SET status = 'Em Processamento'
-                WHERE status = 'Pendente' AND ({where_clause})
-            """
-            cursor.execute(query_update, params)
+            # Marca todos os itens desses grupos como 'Em Processamento'
+            for grupo in grupos_pendentes:
+                cursor.execute(
+                    f"UPDATE {TABELA_NOTIFICACOES} SET status = 'Em Processamento' WHERE NPJ = ? AND data_notificacao = ? AND status = 'Pendente'",
+                    (grupo['NPJ'], grupo['data_notificacao'])
+                )
             
-            # Renomeia a chave para manter compatibilidade com o módulo de processamento
-            lote_para_processar = [
-                {'NPJ': item['NPJ'], 'data_recente_notificacao': item['data_notificacao']}
-                for item in lote_para_processar_raw
-            ]
+            return grupos_pendentes
             
-            return lote_para_processar
-
     except sqlite3.Error as e:
-        logging.error(f"ERRO ao obter lote de grupos pendentes: {e}", exc_info=True)
+        logging.error(f"ERRO ao obter lote de NPJs pendentes: {e}", exc_info=True)
         return []
 
 def contar_pendentes() -> int:
-    """Conta quantos grupos únicos de (NPJ, data_notificacao) ainda estão pendentes."""
+    """Conta quantos grupos únicos de (NPJ, data) ainda estão pendentes."""
     try:
         with sqlite3.connect(DB_NOME) as conn:
             cursor = conn.cursor()
-            cursor.execute(f"SELECT COUNT(*) FROM (SELECT DISTINCT NPJ, data_notificacao FROM {TABELA_NOTIFICACOES} WHERE status = 'Pendente')")
+            cursor.execute(f"SELECT COUNT(DISTINCT NPJ || '-' || data_notificacao) FROM {TABELA_NOTIFICACOES} WHERE status = 'Pendente'")
             return cursor.fetchone()[0]
     except sqlite3.Error as e:
-        logging.error(f"ERRO ao contar grupos pendentes: {e}", exc_info=True)
+        logging.error(f"ERRO ao contar NPJs pendentes: {e}", exc_info=True)
         return 0
 
 def atualizar_notificacoes_de_npj_processado(npj: str, data_notificacao: str, numero_processo: str, andamentos: list[dict], documentos: list[dict]):
-    """
-    Atualiza as notificações de um grupo (NPJ, data) como 'Processado',
-    salvando os dados extraídos.
-    """
+    """Atualiza as notificações de um grupo (NPJ, data) como 'Processado', salvando os dados extraídos."""
     try:
         with sqlite3.connect(DB_NOME) as conn:
             cursor = conn.cursor()
+            timestamp_atual = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
             cursor.execute(
                 f"""
                 UPDATE {TABELA_NOTIFICACOES}
                 SET status = 'Processado',
                     numero_processo = ?,
                     andamentos = ?,
-                    documentos = ?
+                    documentos = ?,
+                    data_processamento = ?,
+                    detalhes_erro = NULL
                 WHERE NPJ = ? AND data_notificacao = ? AND status = 'Em Processamento'
                 """,
-                (numero_processo, json.dumps(andamentos), json.dumps(documentos), npj, data_notificacao)
+                (numero_processo, json.dumps(andamentos), json.dumps(documentos), timestamp_atual, npj, data_notificacao)
             )
     except sqlite3.Error as e:
-        logging.error(f"ERRO ao atualizar NPJ {npj} data {data_notificacao} como processado: {e}", exc_info=True)
+        logging.error(f"ERRO ao atualizar NPJ {npj} ({data_notificacao}) como processado: {e}", exc_info=True)
 
-def marcar_npj_como_erro(npj: str, data_notificacao: str):
-    """Marca as notificações de um grupo (NPJ, data) como 'Erro'."""
+def marcar_npj_como_erro(npj: str, data_notificacao: str, detalhes_erro: str):
+    """Marca as notificações de um grupo (NPJ, data) como 'Erro', salvando o motivo."""
     try:
         with sqlite3.connect(DB_NOME) as conn:
             cursor = conn.cursor()
+            timestamp_atual = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
             cursor.execute(
-                f"UPDATE {TABELA_NOTIFICACOES} SET status = 'Erro' WHERE NPJ = ? AND data_notificacao = ? AND status = 'Em Processamento'",
-                (npj, data_notificacao)
+                f"""UPDATE {TABELA_NOTIFICACOES} 
+                   SET status = 'Erro', detalhes_erro = ?, data_processamento = ?
+                   WHERE NPJ = ? AND data_notificacao = ? AND status = 'Em Processamento'""",
+                (detalhes_erro, timestamp_atual, npj, data_notificacao)
             )
     except sqlite3.Error as e:
-        logging.error(f"ERRO ao marcar NPJ {npj} data {data_notificacao} como erro: {e}", exc_info=True)
+        logging.error(f"ERRO ao marcar NPJ {npj} ({data_notificacao}) como erro: {e}", exc_info=True)
 
 def salvar_log_execucao(log_data: dict):
     """Salva um registro de log no banco de dados."""
@@ -233,96 +228,4 @@ def salvar_log_execucao(log_data: dict):
             cursor.execute(query, list(log_data.values()))
     except sqlite3.Error as e:
         logging.error(f"ERRO ao salvar log de execução: {e}", exc_info=True)
-
-def atualizar_status_de_notificacoes_por_ids(ids: list[int], novo_status: str) -> int:
-    """Atualiza o status de uma lista de notificações com base em seus IDs."""
-    if not ids:
-        return 0
-    try:
-        with sqlite3.connect(DB_NOME) as conn:
-            cursor = conn.cursor()
-            placeholders = ', '.join(['?'] * len(ids))
-            query = f"UPDATE {TABELA_NOTIFICACOES} SET status = ? WHERE id IN ({placeholders})"
-            
-            params = [novo_status] + ids
-            cursor.execute(query, params)
-            return cursor.rowcount
-    except sqlite3.Error as e:
-        logging.error(f"ERRO ao atualizar status em massa para os IDs {ids}: {e}", exc_info=True)
-        raise e
-
-def corrigir_e_consolidar_datas_por_ids(ids: list[int], nova_data: str) -> dict:
-    """
-    Corrige a data de notificações selecionadas e remove duplicatas que possam surgir.
-    Retorna um dicionário com o número de registros atualizados e deletados.
-    """
-    if not ids:
-        return {'updated': 0, 'deleted': 0}
-
-    conn = None # Garante que a variável conn exista fora do try
-    try:
-        conn = sqlite3.connect(DB_NOME)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-
-        cursor.execute("BEGIN TRANSACTION;")
-
-        placeholders = ', '.join(['?'] * len(ids))
-        
-        # 1. Busca todas as notificações selecionadas para processá-las em memória.
-        query_select = f"SELECT id, NPJ, tipo_notificacao FROM {TABELA_NOTIFICACOES} WHERE id IN ({placeholders})"
-        cursor.execute(query_select, ids)
-        notificacoes_para_processar = [dict(row) for row in cursor.fetchall()]
-
-        # 2. Agrupa as notificações pela chave única (NPJ, tipo_notificacao).
-        grupos_para_consolidar = {}
-        for n in notificacoes_para_processar:
-            chave = (n['NPJ'], n['tipo_notificacao'])
-            if chave not in grupos_para_consolidar:
-                grupos_para_consolidar[chave] = []
-            grupos_para_consolidar[chave].append(n['id'])
-
-        # 3. Para cada grupo, decide quem vive e quem é excluído.
-        ids_para_deletar = []
-        ids_para_atualizar = []
-
-        for grupo_ids in grupos_para_consolidar.values():
-            if not grupo_ids:
-                continue
-            
-            # Mantém o primeiro ID da lista, e marca os outros para exclusão.
-            id_para_manter = grupo_ids[0]
-            ids_para_atualizar.append(id_para_manter)
-            
-            if len(grupo_ids) > 1:
-                ids_para_deletar.extend(grupo_ids[1:])
-        
-        # 4. Executa a atualização da data nos registros que serão mantidos.
-        updated_count = 0
-        if ids_para_atualizar:
-            placeholders_update = ', '.join(['?'] * len(ids_para_atualizar))
-            query_update = f"UPDATE {TABELA_NOTIFICACOES} SET data_notificacao = ? WHERE id IN ({placeholders_update})"
-            cursor.execute(query_update, [nova_data] + ids_para_atualizar)
-            updated_count = cursor.rowcount
-
-        # 5. Executa a exclusão dos registros redundantes.
-        deleted_count = 0
-        if ids_para_deletar:
-            placeholders_delete = ', '.join(['?'] * len(ids_para_deletar))
-            query_delete = f"DELETE FROM {TABELA_NOTIFICACOES} WHERE id IN ({placeholders_delete})"
-            cursor.execute(query_delete, ids_para_deletar)
-            deleted_count = cursor.rowcount
-
-        conn.commit()
-
-        return {'updated': updated_count, 'deleted': deleted_count}
-
-    except sqlite3.Error as e:
-        if conn:
-            conn.rollback()
-        logging.error(f"ERRO ao consolidar datas para os IDs {ids}: {e}", exc_info=True)
-        raise e
-    finally:
-        if conn:
-            conn.close()
 

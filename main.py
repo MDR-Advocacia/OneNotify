@@ -45,7 +45,10 @@ def main():
 
     try:
         database.inicializar_banco()
+        # Garante que a fila de trabalho esteja pronta para uma nova execução
         database.resetar_notificacoes_em_processamento_ou_erro()
+        # Isola notificações com dados inválidos para não quebrar o loop
+        database.validar_e_marcar_notificacoes_sem_data()
 
         with sync_playwright() as playwright:
             logging.info("\nFASE 1: LOGIN E CONFIGURAÇÃO DA SESSÃO")
@@ -57,18 +60,24 @@ def main():
             
             logging.info("\nFASE 3: PROCESSAMENTO DETALHADO EM LOTES")
             
-            while database.contar_pendentes() > 0:
+            # Adiciona logging de diagnóstico antes do loop
+            pendentes_antes_loop = database.contar_pendentes()
+            logging.info(f"[DIAGNÓSTICO] Verificação antes do loop: {pendentes_antes_loop} grupos pendentes.")
+
+            while pendentes_antes_loop > 0:
                 try:
                     page, browser, context, browser_process_ref, session_start_time = refresh_session_if_needed(
                         playwright, page, browser, context, browser_process_ref, session_start_time
                     )
-
+                    
+                    logging.info("[DIAGNÓSTICO] Dentro do loop: Buscando novo lote...")
                     lote_para_processar = database.obter_npjs_pendentes_por_lote(TAMANHO_LOTE)
+                    
                     if not lote_para_processar:
-                        logging.info("Não há mais lotes para processar.")
+                        logging.warning("[DIAGNÓSTICO] CONDIÇÃO DE PARADA ATINGIDA: Não há mais lotes para processar, apesar da contagem ser > 0. Encerrando loop.")
                         break
                     
-                    logging.info(f"Iniciando processamento detalhado de {len(lote_para_processar)} NPJ(s).")
+                    logging.info(f"Iniciando processamento detalhado de {len(lote_para_processar)} grupo(s) de NPJ/Data.")
                     stats_lote = processar_detalhes_de_lote(context, lote_para_processar)
 
                     stats_processamento["sucesso"] += stats_lote["sucesso"]
@@ -76,18 +85,20 @@ def main():
                     stats_processamento["andamentos"] += stats_lote["andamentos"]
                     stats_processamento["documentos"] += stats_lote["documentos"]
                     
-                    pendentes_restantes = database.contar_pendentes()
-                    logging.info(f"Lote finalizado. Restam {pendentes_restantes} NPJs pendentes.")
+                    # Atualiza a variável de controle do loop
+                    pendentes_antes_loop = database.contar_pendentes()
+                    logging.info(f"Lote finalizado. Restam {pendentes_antes_loop} grupos pendentes.")
 
                 except SessionExpiredError:
                     logging.warning("Exceção de sessão capturada no loop principal. Forçando renovação imediata.")
+                    # Força a verificação e renovação na próxima iteração
                     session_start_time = 0 
                     continue
     
     except Error as e:
-        logging.critical(f"Ocorreu uma falha inesperada na automação.\n{e}")
+        logging.critical(f"Ocorreu uma falha inesperada na automação (Playwright).\n{e}", exc_info=True)
     except Exception as e:
-        logging.critical(f"Ocorreu uma falha inesperada na automação.\n{e}", exc_info=True)
+        logging.critical(f"Ocorreu uma falha geral inesperada na automação.\n{e}", exc_info=True)
     finally:
         end_time = time.time()
         duracao_total = end_time - start_time
@@ -105,10 +116,9 @@ def main():
                     proc.kill()
         
         total_processado = stats_processamento["sucesso"] + stats_processamento["falha"]
-        tempo_medio = (duracao_total / total_processado) if total_processado > 0 else 0
         
         resumo = {
-            "timestamp": timestamp_log, "duracao_total": duracao_total, "tempo_medio_npj": tempo_medio,
+            "timestamp": timestamp_log, "duracao_total": duracao_total,
             "notificacoes_salvas": stats_extracao["notificacoes_salvas"], "ciencias_registradas": stats_extracao["ciencias_registradas"],
             "andamentos": stats_processamento["andamentos"], "documentos": stats_processamento["documentos"],
             "npjs_sucesso": stats_processamento["sucesso"], "npjs_falha": stats_processamento["falha"]
