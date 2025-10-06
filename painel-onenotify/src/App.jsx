@@ -1,266 +1,495 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 
-// --- ÍCONES (SVG como componentes React) ---
-const IconBox = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>);
-const IconClock = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>);
-const IconCheckCircle = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>);
-const IconAlertTriangle = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>);
-const IconRefresh = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>);
-const IconChevronDown = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>;
-const IconChevronUp = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>;
-const IconSearch = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>;
-const IconEye = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>;
-const IconMoreVertical = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>;
-const IconDownload = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>);
-const IconRewind = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon></svg>);
+const API_URL = 'http://localhost:5001/api';
 
+// --- Ícones ---
+const EyeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" /></svg>;
+const DotsVerticalIcon = ({ onClick }) => <svg onClick={onClick} xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 cursor-pointer text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg>;
+const DownloadIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 inline-block" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>;
+const ChevronDownIcon = ({ isOpen }) => <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>;
+const SortIcon = ({ direction }) => {
+    if (!direction) return <svg className="h-4 w-4 inline-block text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>;
+    if (direction === 'ascending') return <svg className="h-4 w-4 inline-block text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>;
+    return <svg className="h-4 w-4 inline-block text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>;
+};
+const SunIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>;
+const MoonIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>;
 
-// --- COMPONENTES DA UI ---
+// --- Helper Functions ---
+const abbreviateTipo = (tipo) => {
+    switch (tipo) {
+        case 'Andamento de publicação em processo de condução terceirizada': return 'Andamento de Publicação';
+        case 'Inclusão de Documentos no NPJ': return 'Inclusão de Doc NPJ';
+        case 'Doc. anexado por empresa externa em processo terceirizado': return 'Doc Anexado Terceirizada';
+        default: return tipo;
+    }
+};
 
-const StatCard = ({ title, value, icon, colorClass }) => ( <div className="bg-gray-800 p-6 rounded-lg shadow-lg flex items-center space-x-4"> <div className={`p-3 rounded-full ${colorClass}`}>{icon}</div> <div> <p className="text-sm text-gray-400 font-medium">{title}</p> <p className="text-2xl font-bold text-white">{value}</p> </div> </div> );
-const DateCorrectionModal = ({ isOpen, onClose, onSubmit, selectedCount }) => { const [novaData, setNovaData] = useState(''); if (!isOpen) return null; const handleSubmit = (e) => { e.preventDefault(); if (novaData) onSubmit(novaData); }; return ( <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50"> <div className="bg-gray-800 rounded-lg p-8 shadow-2xl w-full max-w-md"> <h2 className="text-xl font-bold text-white mb-4">Corrigir Data da Notificação</h2> <p className="text-gray-400 mb-6">Você selecionou {selectedCount} notificação(ões). A nova data será aplicada a todas.</p> <form onSubmit={handleSubmit}> <input type="text" placeholder="DD/MM/AAAA" value={novaData} onChange={(e) => setNovaData(e.target.value)} className="w-full bg-gray-700 text-white p-3 rounded-md border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none" /> <div className="mt-6 flex justify-end space-x-4"> <button type="button" onClick={onClose} className="px-4 py-2 rounded-md bg-gray-600 text-white hover:bg-gray-500 transition">Cancelar</button> <button type="submit" className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-500 transition font-semibold">Confirmar Correção</button> </div> </form> </div> </div> ); };
-const Pagination = ({ currentPage, totalPages, onPageChange, itemsPerPage, onItemsPerPageChange }) => { if (totalPages <= 1) return null; return ( <div className="flex justify-center items-center space-x-4 p-4"> <select value={itemsPerPage} onChange={e => onItemsPerPageChange(Number(e.target.value))} className="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2"> <option value="10">10 / página</option> <option value="25">25 / página</option> <option value="50">50 / página</option> <option value="100">100 / página</option> </select> <button onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1} className="px-4 py-2 bg-gray-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-500 transition">Anterior</button> <span className="text-gray-400">Página {currentPage} de {totalPages}</span> <button onClick={() => onPageChange(currentPage + 1)} disabled={currentPage === totalPages} className="px-4 py-2 bg-gray-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-500 transition">Próxima</button> </div> ); };
+// --- Componentes Reutilizáveis ---
+const StatsCard = ({ title, value, color }) => (
+  <div className={`p-4 rounded-lg shadow-md border-l-4 ${color} bg-white dark:bg-gray-800`}>
+    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</h3>
+    <p className="text-3xl font-bold text-gray-800 dark:text-gray-100">{value || 0}</p>
+  </div>
+);
 
-const DetailsModal = ({ isOpen, onClose, details, onDownload }) => {
-    const [expandedIndex, setExpandedIndex] = useState(null);
-    if (!isOpen) return null;
+const StatusTab = ({ status, label, activeStatus, setActiveStatus, count }) => (
+  <button
+    onClick={() => setActiveStatus(status)}
+    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${activeStatus === status ? 'bg-blue-600 text-white shadow' : 'bg-white text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}`}>
+    {label} <span className={`text-xs rounded-full px-2 py-0.5 ml-1 ${activeStatus === status ? 'bg-blue-400 text-white' : 'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200'}`}>{count || 0}</span>
+  </button>
+);
 
-    const toggleAndamento = (index) => {
-        setExpandedIndex(prevIndex => (prevIndex === index ? null : index));
-    };
-
+const Paginacao = ({ currentPage, totalPages, onPageChange, itemsPerPage, onItemsPerPageChange, totalItems }) => {
+    if (totalPages <= 1) return null;
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50" onClick={onClose}>
-            <div className="bg-gray-800 rounded-lg p-8 shadow-2xl w-full max-w-4xl h-[75vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                <h2 className="text-xl font-bold text-white mb-6 flex-shrink-0">Detalhes do Processamento</h2>
-                {details.loading && <p className="text-center text-gray-400">Carregando detalhes...</p>}
-                {details.error && <p className="text-center text-red-400">{details.error}</p>}
-                {!details.loading && !details.error && (
-                    <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-6 overflow-hidden">
-                        <section className="flex flex-col overflow-hidden">
-                            <h3 className="text-lg font-semibold text-blue-400 mb-3 flex-shrink-0">Andamentos Capturados</h3>
-                            <ul className="space-y-2 text-sm overflow-y-auto pr-3">
-                                {details.andamentos?.length > 0 ? details.andamentos.map((a, i) => (
-                                    <li key={i}>
-                                        <button onClick={() => toggleAndamento(i)} className="w-full text-left bg-gray-700 p-3 rounded-md flex justify-between items-center hover:bg-gray-600 transition">
-                                            <span className="font-semibold text-gray-300 truncate">{a.data} - {a.descricao}</span>
-                                            <IconChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${expandedIndex === i ? 'rotate-180' : ''}`} />
-                                        </button>
-                                        {expandedIndex === i && (
-                                            <div className="bg-gray-900/50 p-3 mt-1 rounded-b-md">
-                                                <p className="text-gray-400 whitespace-pre-wrap">{a.detalhes}</p>
-                                            </div>
-                                        )}
-                                    </li>
-                                )) : <p className="text-gray-500">Nenhum andamento capturado.</p>}
-                            </ul>
-                        </section>
-                        <section className="flex flex-col overflow-hidden">
-                            <h3 className="text-lg font-semibold text-green-400 mb-3 flex-shrink-0">Documentos Baixados</h3>
-                            <ul className="space-y-2 text-sm overflow-y-auto pr-3">
-                                {details.documentos?.length > 0 ? details.documentos.map((d, i) => (
-                                    <li key={i}>
-                                        <button onClick={() => onDownload(d.caminho)} className="w-full text-left bg-gray-700 p-3 rounded-md flex justify-between items-center hover:bg-gray-600 transition">
-                                            <span className="text-gray-300 truncate">{d.nome}</span>
-                                            <IconDownload className="w-5 h-5 text-gray-400" />
-                                        </button>
-                                    </li>
-                                )) : <p className="text-gray-500">Nenhum documento baixado.</p>}
-                            </ul>
-                        </section>
-                    </div>
-                )}
+        <div className="flex flex-col sm:flex-row justify-between items-center mt-4 text-sm text-gray-600 dark:text-gray-400 gap-4">
+            <div className="flex items-center gap-2">
+                <span>Itens por página:</span>
+                <select value={itemsPerPage} onChange={e => onItemsPerPageChange(Number(e.target.value))} className="border rounded-md p-1 bg-white dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value={10}>10</option><option value={25}>25</option><option value={50}>50</option><option value={100}>100</option>
+                </select>
+            </div>
+            <span>Página {currentPage} de {totalPages} ({totalItems} itens)</span>
+            <div>
+                <button onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1} className="px-3 py-1 border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 disabled:opacity-50">Anterior</button>
+                <button onClick={() => onPageChange(currentPage + 1)} disabled={currentPage === totalPages} className="px-3 py-1 border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 ml-2 disabled:opacity-50">Próxima</button>
             </div>
         </div>
     );
 };
 
-// --- COMPONENTE PRINCIPAL ---
+const ModalDetalhes = ({ isOpen, onClose, item }) => {
+    const [activeAndamento, setActiveAndamento] = useState(null);
+    const [detalhes, setDetalhes] = useState(null);
+    const [loading, setLoading] = useState(false);
 
-function App() {
-    // Estados da Aplicação
-    const [notificacoes, setNotificacoes] = useState([]);
-    const [stats, setStats] = useState({});
-    const [statusFiltro, setStatusFiltro] = useState('Pendente');
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [selectedIds, setSelectedIds] = useState(new Set());
-    const [isDateModalOpen, setIsDateModalOpen] = useState(false);
-    
-    // Estados para novas funcionalidades
-    const [filtroBusca, setFiltroBusca] = useState('');
-    const [sortConfig, setSortConfig] = useState({ key: 'data_notificacao', direction: 'descending' });
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
-    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-    const [detailsData, setDetailsData] = useState({ andamentos: [], documentos: [], loading: false });
-    const [activeActionMenu, setActiveActionMenu] = useState(null);
-    const [isBulkMenuOpen, setIsBulkMenuOpen] = useState(false);
-    const actionMenuRef = useRef(null);
-    const bulkMenuRef = useRef(null);
-    const API_URL = 'http://localhost:5001/api';
-
-    // Funções de busca de dados
-    const fetchStats = useCallback(async () => { try { const res = await fetch(`${API_URL}/dashboard-stats`); if(res.ok) setStats(await res.json()); } catch (err) { console.error("Erro em fetchStats:", err.message); } }, []);
-    const fetchNotificacoes = useCallback(async () => { setLoading(true); setError(null); try { const res = await fetch(`${API_URL}/notificacoes?status=${statusFiltro}`); if(!res.ok) throw new Error(`HTTP error! status: ${res.status}`); setNotificacoes(await res.json()); } catch (err) { setError(err.message); setNotificacoes([]); } finally { setLoading(false); } }, [statusFiltro]);
-    useEffect(() => { fetchStats(); fetchNotificacoes(); }, [fetchStats, fetchNotificacoes]);
-    
-    // Lógica de manipulação de dados (Filtro, Ordenação, Paginação)
-    const processedNotificacoes = useMemo(() => { let items = [...notificacoes]; if (filtroBusca) { items = items.filter(n => n.NPJ.toLowerCase().includes(filtroBusca.toLowerCase())); } if (sortConfig.key) { items.sort((a, b) => { let aValue = a[sortConfig.key] || '', bValue = b[sortConfig.key] || ''; if (sortConfig.key === 'data_notificacao') { const parseDate = (dateStr) => { const [day, month, year] = dateStr.split('/'); return new Date(`${year}-${month}-${day}`); }; aValue = parseDate(aValue); bValue = parseDate(bValue); } if (aValue < bValue) return sortConfig.direction === 'ascending' ? -1 : 1; if (aValue > bValue) return sortConfig.direction === 'ascending' ? 1 : -1; return 0; }); } return items; }, [notificacoes, filtroBusca, sortConfig]);
-    const totalPages = Math.ceil(processedNotificacoes.length / itemsPerPage);
-    const currentTableData = processedNotificacoes.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
-    // Handlers
-    const refreshData = () => { fetchStats(); fetchNotificacoes(); setSelectedIds(new Set()); };
-    const handleAction = async (action, payload, successMsg) => { try { const response = await fetch(`${API_URL}/${action}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), }); const result = await response.json(); if (!response.ok) throw new Error(result.message || 'Erro desconhecido'); alert(successMsg || result.message); refreshData(); } catch (err) { alert(`Erro: ${err.message}`); } };
-    const handleUpdateStatus = (ids, novoStatus) => handleAction('atualizar-status', { ids, novo_status: novoStatus });
-    const handleDateCorrection = (ids, novaData) => { handleAction('corrigir-data', { ids, nova_data: novaData }); setIsDateModalOpen(false); };
-    const requestSort = (key) => { let direction = 'ascending'; if (sortConfig.key === key && sortConfig.direction === 'ascending') { direction = 'descending'; } else if (sortConfig.key === key && sortConfig.direction === 'descending') { direction = 'ascending'; } setSortConfig({ key, direction }); };
-    
-    const handleViewDetails = async (npj, data) => { setIsDetailsModalOpen(true); setDetailsData({ andamentos: [], documentos: [], loading: true }); try { const response = await fetch(`${API_URL}/notificacao-detalhes?npj=${encodeURIComponent(npj)}&data=${encodeURIComponent(data)}`); if(!response.ok) throw new Error('Falha ao buscar dados do servidor.'); const details = await response.json(); setDetailsData({ ...details, loading: false }); } catch (error) { console.error("Failed to fetch details", error); setDetailsData({ andamentos: [], documentos: [], loading: false, error: "Falha ao carregar detalhes." }); } };
-    const handleDownload = (caminho) => { window.open(`${API_URL}/download-documento?caminho=${encodeURIComponent(caminho)}`, '_blank'); };
-
-    // Handlers de Seleção
-    const handleCheckboxChange = (grupo_ids, isChecked) => { setSelectedIds(prev => { const newSet = new Set(prev); if (isChecked) { grupo_ids.forEach(id => newSet.add(id)); } else { grupo_ids.forEach(id => newSet.delete(id)); } return newSet; }); };
-    const handleSelectAllChange = (e) => { const isChecked = e.target.checked; const pageIds = currentTableData.flatMap(n => n.ids); setSelectedIds(prev => { const newSet = new Set(prev); if (isChecked) { pageIds.forEach(id => newSet.add(id)); } else { pageIds.forEach(id => newSet.delete(id)); } return newSet; }); };
-    
-    const pageSelectedIds = currentTableData.flatMap(n => n.ids);
-    const isAllOnPageSelected = pageSelectedIds.length > 0 && pageSelectedIds.every(id => selectedIds.has(id));
-    const isSomeOnPageSelected = pageSelectedIds.some(id => selectedIds.has(id));
+    const { NPJ: npj, data_notificacao } = item || {};
 
     useEffect(() => {
-        const handleClickOutside = (event) => { if (actionMenuRef.current && !actionMenuRef.current.contains(event.target)) setActiveActionMenu(null); if (bulkMenuRef.current && !bulkMenuRef.current.contains(event.target)) setIsBulkMenuOpen(false); };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
-    
-    const SortableHeader = ({ label, columnKey, widthClass }) => { const isSorted = sortConfig.key === columnKey; return ( <th className={`p-4 text-sm font-semibold text-gray-300 cursor-pointer select-none ${widthClass}`} onClick={() => requestSort(columnKey)}> <div className="flex items-center space-x-1"> <span>{label}</span> {isSorted && (sortConfig.direction === 'ascending' ? <IconChevronUp className="w-4 h-4" /> : <IconChevronDown className="w-4 h-4" />)} </div> </th> ); };
-    const StatusTab = ({ status, label }) => ( <button onClick={() => { setStatusFiltro(status); setSelectedIds(new Set()); }} className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors duration-200 ${statusFiltro === status ? 'bg-gray-800 border-b-2 border-blue-500 text-white' : 'text-gray-400 hover:bg-gray-700/50'}`}> {label} </button> );
+        if (isOpen && npj && data_notificacao) {
+            setLoading(true);
+            setActiveAndamento(null);
+            const fetchDetalhes = async () => {
+                try {
+                    const url = `${API_URL}/detalhes?npj=${encodeURIComponent(npj)}&data=${encodeURIComponent(data_notificacao)}`;
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error('Falha ao buscar detalhes');
+                    const data = await res.json();
+                    setDetalhes(data);
+                } catch (err) {
+                    console.error("Erro ao buscar detalhes:", err);
+                    alert("Erro ao buscar detalhes.");
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchDetalhes();
+        }
+    }, [isOpen, npj, data_notificacao]);
 
-    useEffect(() => { setCurrentPage(1); }, [statusFiltro, filtroBusca, itemsPerPage]);
+    if (!isOpen || !item) return null;
+
+    const handleDownload = async (path) => {
+        try {
+            const response = await fetch(`${API_URL}/download?path=${encodeURIComponent(path)}`);
+            if (!response.ok) throw new Error('Falha no download');
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = path.split(/[\\/]/).pop();
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } catch (error) {
+            console.error("Erro no download:", error);
+            alert("Não foi possível baixar o arquivo.");
+        }
+    };
 
     return (
-        <div className="bg-gray-900 min-h-screen text-gray-200 font-sans p-4 sm:p-6 lg:p-8">
-            <DateCorrectionModal isOpen={isDateModalOpen} onClose={() => setIsDateModalOpen(false)} onSubmit={(novaData) => handleDateCorrection(Array.from(selectedIds), novaData)} selectedCount={selectedIds.size} />
-            <DetailsModal isOpen={isDetailsModalOpen} onClose={() => setIsDetailsModalOpen(false)} details={detailsData} onDownload={handleDownload} />
-
-            <div className="max-w-7xl mx-auto">
-                <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-                    <div>
-                        <h1 className="text-3xl font-bold text-white">Painel OneNotify</h1>
-                        <p className="text-gray-400 mt-1">Visão geral e gerenciamento das notificações da RPA.</p>
-                    </div>
-                    <button onClick={refreshData} className="mt-4 sm:mt-0 flex items-center space-x-2 px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors shadow-md">
-                        <IconRefresh className="w-5 h-5" />
-                        <span>Atualizar</span>
-                    </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4" onClick={onClose}>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                <header className="p-4 border-b dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
+                    <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Detalhes do Processamento</h2>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">NPJ: {npj} | Data: {data_notificacao}</p>
+                    {item.responsavel && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Responsável: {item.responsavel}</p>}
+                    {item.status === 'Processado' && <p className="text-xs text-green-600 dark:text-green-400 mt-1">Processado em: {item.data_processamento}</p>}
+                    {item.status && item.status.startsWith('Erro') && <p className="text-xs text-red-600 dark:text-red-400 mt-1">Falha em: {item.data_processamento} | Motivo: {item.detalhes_erro}</p>}
                 </header>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <StatCard title="Pendentes" value={stats.pendente ?? 0} icon={<IconClock className="w-6 h-6 text-white" />} colorClass="bg-yellow-500/80" />
-                    <StatCard title="Em Processamento" value={stats.em_processamento ?? 0} icon={<IconBox className="w-6 h-6 text-white" />} colorClass="bg-blue-500/80" />
-                    <StatCard title="Processados" value={stats.processado ?? 0} icon={<IconCheckCircle className="w-6 h-6 text-white" />} colorClass="bg-green-500/80" />
-                    <StatCard title="Com Erro" value={stats.erro ?? 0} icon={<IconAlertTriangle className="w-6 h-6 text-white" />} colorClass="bg-red-500/80" />
-                </div>
-                
-                <main className="bg-gray-800 rounded-lg shadow-2xl">
-                    <div className="px-6 pt-4 border-b border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <div className="flex items-center space-x-1">
-                           <StatusTab status="Pendente" label="Pendentes" />
-                           <StatusTab status="Em Processamento" label="Em Processamento" />
-                           <StatusTab status="Processado" label="Processados" />
-                           <StatusTab status="Erro" label="Com Erro" />
-                           <StatusTab status="Arquivado" label="Arquivados" />
-                        </div>
-                        <div className="flex items-center gap-4">
-                           <div className="relative" ref={bulkMenuRef}>
-                                <button onClick={() => setIsBulkMenuOpen(prev => !prev)} disabled={selectedIds.size === 0} className="px-4 py-2 bg-blue-600 text-white rounded-md flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-500 transition">
-                                    Ações em Lote ({selectedIds.size}) <IconChevronDown className={`w-4 h-4 transition-transform ${isBulkMenuOpen ? 'rotate-180' : ''}`} />
-                                </button>
-                                {isBulkMenuOpen && (
-                                    <div className="absolute right-0 mt-2 w-56 bg-gray-700 rounded-md shadow-lg z-10 border border-gray-600">
-                                        {statusFiltro !== 'Pendente' && <button onClick={() => { handleUpdateStatus(Array.from(selectedIds), 'Pendente'); setIsBulkMenuOpen(false); }} className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-600">Marcar como Pendente</button>}
-                                        {statusFiltro !== 'Arquivado' && <button onClick={() => { setIsDateModalOpen(true); setIsBulkMenuOpen(false); }} className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-600">Corrigir Data</button>}
-                                        {statusFiltro !== 'Arquivado' && <button onClick={() => { handleUpdateStatus(Array.from(selectedIds), 'Arquivado'); setIsBulkMenuOpen(false); }} className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-600">Arquivar</button>}
-                                    </div>
-                                )}
-                           </div>
-                           <div className="relative w-full sm:w-64">
-                                <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                <input type="text" placeholder="Buscar por NPJ..." value={filtroBusca} onChange={e => setFiltroBusca(e.target.value)} className="w-full bg-gray-700 text-white pl-10 pr-4 py-2 rounded-md border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                <main className="p-4 flex-grow overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {loading ? <p className="text-center col-span-2 dark:text-gray-300">Carregando detalhes...</p> :
+                        <>
+                            <div className="flex flex-col">
+                                <h3 className="font-bold mb-2 text-gray-700 dark:text-gray-200">Andamentos Capturados</h3>
+                                <div className="border rounded-md p-2 overflow-y-auto flex-grow h-96 dark:border-gray-700">
+                                    {detalhes?.andamentos?.length > 0 ? (
+                                        detalhes.andamentos.map((andamento, index) => (
+                                            <div key={index} className="border-b last:border-b-0 dark:border-gray-700">
+                                                <button onClick={() => setActiveAndamento(activeAndamento === index ? null : index)} className="w-full text-left p-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex justify-between items-center">
+                                                    <span className="font-medium text-sm text-gray-800 dark:text-gray-200">{andamento.data} - {andamento.descricao}</span>
+                                                    <ChevronDownIcon isOpen={activeAndamento === index} />
+                                                </button>
+                                                {activeAndamento === index && (
+                                                    <div className="p-3 bg-gray-50 dark:bg-gray-900 text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{andamento.detalhes}</div>
+                                                )}
+                                            </div>
+                                        ))
+                                    ) : <p className="text-sm text-gray-500 dark:text-gray-400 p-2">Nenhum andamento capturado.</p>}
+                                </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left table-fixed">
-                            <thead className="bg-gray-700/50">
-                                <tr>
-                                    <th className="p-4 w-12 text-center">
-                                        <input type="checkbox" ref={el => el && (el.indeterminate = isSomeOnPageSelected && !isAllOnPageSelected)} checked={isAllOnPageSelected} onChange={handleSelectAllChange} className="form-checkbox h-5 w-5 bg-gray-600 border-gray-500 rounded text-blue-500 focus:ring-blue-500" />
-                                    </th>
-                                    <SortableHeader label="Data" columnKey="data_notificacao" widthClass="w-[12%]" />
-                                    <SortableHeader label="NPJ" columnKey="NPJ" widthClass="w-[18%]" />
-                                    <SortableHeader label="Nº Processo" columnKey="numero_processo" widthClass="w-[20%]" />
-                                    <th className="p-4 text-sm font-semibold text-gray-300 w-[35%]">Tipos de Notificação</th>
-                                    <th className="p-4 text-sm font-semibold text-gray-300 text-center w-[10%]">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {loading && <tr><td colSpan="6" className="text-center p-8">Carregando dados...</td></tr>}
-                                {error && <tr><td colSpan="6" className="text-center p-8 text-red-400">Erro ao carregar notificações: {error}</td></tr>}
-                                {!loading && !error && currentTableData.length === 0 && ( <tr><td colSpan="6" className="text-center p-8 text-gray-500">{filtroBusca ? 'Nenhum resultado encontrado.' : 'Nenhuma notificação para este status.'}</td></tr> )}
-                                {!loading && !error && currentTableData.map((n) => {
-                                  const isRowSelected = n.ids.every(id => selectedIds.has(id));
-                                  return (
-                                    <tr key={n.NPJ + n.data_notificacao} className={`border-b border-gray-700 transition-colors ${isRowSelected ? 'bg-blue-900/40' : 'hover:bg-gray-700/50'}`}>
-                                        <td className="p-4 text-center">
-                                            <input type="checkbox" checked={isRowSelected} onChange={(e) => handleCheckboxChange(n.ids, e.target.checked)} className="form-checkbox h-5 w-5 bg-gray-600 border-gray-500 rounded text-blue-500 focus:ring-blue-500"/>
-                                        </td>
-                                        <td className="p-4 font-mono text-sm whitespace-nowrap">{n.data_notificacao}</td>
-                                        <td className="p-4 font-mono text-sm whitespace-nowrap">{n.NPJ}</td>
-                                        <td className="p-4 font-mono text-sm text-gray-400 whitespace-nowrap truncate">{n.numero_processo || <span className="text-gray-500">-</span>}</td>
-                                        <td className="p-4 text-sm">
-                                            <div className="flex flex-wrap gap-1">
-                                                {n.tipos_notificacao.split('; ').map((tipo, index) => (
-                                                    <span key={index} className="bg-gray-600 text-gray-300 text-xs font-medium px-2 py-0.5 rounded-full">{tipo}</span>
-                                                ))}
-                                            </div>
-                                        </td>
-                                        <td className="p-4">
-                                            <div className="flex items-center justify-center space-x-3">
-                                                <button onClick={() => handleViewDetails(n.NPJ, n.data_notificacao)} className="text-gray-400 hover:text-blue-400" title="Ver Detalhes"><IconEye className="w-5 h-5"/></button>
-                                                <div className="relative" ref={activeActionMenu === n.NPJ + n.data_notificacao ? actionMenuRef : null}>
-                                                    <button onClick={() => setActiveActionMenu(n.NPJ + n.data_notificacao)} className="text-gray-400 hover:text-blue-400" title="Mais Ações"><IconMoreVertical className="w-5 h-5"/></button>
-                                                    {activeActionMenu === n.NPJ + n.data_notificacao && (
-                                                        <div className="absolute right-0 mt-2 w-48 bg-gray-700 rounded-md shadow-lg z-10 border border-gray-600">
-                                                            {n.status !== 'Pendente' && <button onClick={() => {handleUpdateStatus(n.ids, 'Pendente'); setActiveActionMenu(null);}} className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-600">Marcar como Pendente</button>}
-                                                            {n.status !== 'Arquivado' && <button onClick={() => {setIsDateModalOpen(true); setSelectedIds(new Set(n.ids)); setActiveActionMenu(null);}} className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-600">Corrigir Data</button>}
-                                                            {n.status !== 'Arquivado' && <button onClick={() => {handleUpdateStatus(n.ids, 'Arquivado'); setActiveActionMenu(null);}} className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-600">Arquivar</button>}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                  );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                    <Pagination 
-                        currentPage={currentPage} 
-                        totalPages={totalPages} 
-                        onPageChange={setCurrentPage}
-                        itemsPerPage={itemsPerPage}
-                        onItemsPerPageChange={(value) => {
-                            setItemsPerPage(value);
-                            setCurrentPage(1);
-                        }}
-                    />
+                            <div className="flex flex-col">
+                                <h3 className="font-bold mb-2 text-gray-700 dark:text-gray-200">Documentos Baixados</h3>
+                                <div className="border rounded-md p-2 overflow-y-auto flex-grow h-96 dark:border-gray-700">
+                                   {detalhes?.documentos?.length > 0 ? (
+                                        detalhes.documentos.map((doc, index) => (
+                                            <button key={index} onClick={() => handleDownload(doc.caminho)} className="w-full text-left p-2 border-b last:border-b-0 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center text-sm text-blue-600 dark:text-blue-400">
+                                                <DownloadIcon /> {doc.nome}
+                                            </button>
+                                        ))
+                                   ) : <p className="text-sm text-gray-500 dark:text-gray-400 p-2">Nenhum documento baixado.</p>}
+                                </div>
+                            </div>
+                        </>
+                    }
                 </main>
+                <footer className="p-3 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-right sticky bottom-0">
+                    <button onClick={onClose} className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">Fechar</button>
+                </footer>
             </div>
         </div>
     );
+};
+
+
+// --- Componente Principal ---
+function App() {
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+  useEffect(() => {
+    const root = window.document.documentElement;
+    root.classList.remove(theme === 'light' ? 'dark' : 'light');
+    root.classList.add(theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
+
+  const [stats, setStats] = useState({ pendente: 0, processado: 0, erro: 0, erro_data_invalida: 0, arquivado: 0 });
+  const [notificacoes, setNotificacoes] = useState([]);
+  const [statusFiltro, setStatusFiltro] = useState('Pendente');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [filtroBusca, setFiltroBusca] = useState('');
+  const [sortConfig, setSortConfig] = useState({ key: 'data_notificacao', direction: 'descending' });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [modalDetalhes, setModalDetalhes] = useState({ isOpen: false, item: null });
+  const [showUserManagement, setShowUserManagement] = useState(false);
+  const [listaUsuarios, setListaUsuarios] = useState([]);
+  const [responsavelFiltro, setResponsavelFiltro] = useState('Todos');
+  const [activeActionMenu, setActiveActionMenu] = useState(null);
+  const menuRef = useRef(null);
+
+  const fetchAllData = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    setSelectedIds([]);
+    try {
+      const [statsRes, usersRes] = await Promise.all([ fetch(`${API_URL}/stats`), fetch(`${API_URL}/usuarios`) ]);
+      if (!statsRes.ok || !usersRes.ok) throw new Error('Falha ao carregar dados iniciais');
+      
+      const statsData = await statsRes.json();
+      const usersData = await usersRes.json();
+      setStats(statsData);
+      setListaUsuarios(usersData);
+      
+      let url = `${API_URL}/notificacoes?status=${statusFiltro}`;
+      if(responsavelFiltro !== 'Todos') url += `&responsavel=${encodeURIComponent(responsavelFiltro)}`;
+      
+      const notificacoesRes = await fetch(url);
+      if (!notificacoesRes.ok) throw new Error('Falha ao carregar notificações');
+      
+      const notificacoesData = await notificacoesRes.json();
+      setNotificacoes(notificacoesData);
+    } catch (err) { setError(err.message); } 
+    finally { setLoading(false); }
+  }, [statusFiltro, responsavelFiltro]);
+
+  useEffect(() => { fetchAllData(); }, [fetchAllData]);
+  
+  const sortedItems = useMemo(() => {
+    let sortableItems = [...notificacoes];
+    if (sortConfig.key) {
+        sortableItems.sort((a, b) => {
+            let aValue = a[sortConfig.key] || '';
+            let bValue = b[sortConfig.key] || '';
+            if (sortConfig.key === 'data_notificacao') {
+                aValue = aValue.split('/').reverse().join('');
+                bValue = bValue.split('/').reverse().join('');
+            }
+            if (aValue < bValue) return sortConfig.direction === 'ascending' ? -1 : 1;
+            if (aValue > bValue) return sortConfig.direction === 'ascending' ? 1 : -1;
+            return 0;
+        });
+    }
+    return sortableItems;
+  }, [notificacoes, sortConfig]);
+
+  const filteredItems = useMemo(() => sortedItems.filter(item =>
+        (item.NPJ?.toLowerCase() || '').includes(filtroBusca.toLowerCase()) ||
+        (item.adverso_principal?.toLowerCase() || '').includes(filtroBusca.toLowerCase())
+    ), [sortedItems, filtroBusca]);
+
+  const currentTableData = useMemo(() => {
+    const firstPageIndex = (currentPage - 1) * itemsPerPage;
+    return filteredItems.slice(firstPageIndex, firstPageIndex + itemsPerPage);
+  }, [filteredItems, currentPage, itemsPerPage]);
+
+  const requestSort = (key) => {
+    let direction = 'ascending';
+    if (sortConfig.key === key && sortConfig.direction === 'ascending') direction = 'descending';
+    setSortConfig({ key, direction });
+  };
+
+  const handleStatusChange = (newStatus) => {
+    setStatusFiltro(newStatus);
+    setCurrentPage(1);
+    setFiltroBusca('');
+    setResponsavelFiltro('Todos');
+  };
+
+  const handleAction = async (ids, action) => {
+    if (!ids || ids.length === 0) return alert("Nenhuma notificação selecionada.");
+    const flatIds = ids.flatMap(idStr => idStr.split(';'));
+    try {
+      const response = await fetch(`${API_URL}/acoes/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: flatIds, novo_status: action }),
+      });
+      if (!response.ok) throw new Error("Falha ao executar ação.");
+      fetchAllData(); 
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+  
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      const allIdsOnPage = currentTableData.map(item => item.ids);
+      setSelectedIds(allIdsOnPage);
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectOne = (e, ids) => {
+    if (e.target.checked) {
+      setSelectedIds(prev => [...prev, ids]);
+    } else {
+      setSelectedIds(prev => prev.filter(id => id !== ids));
+    }
+  };
+
+  const allOnPageSelected = useMemo(() => 
+    currentTableData.length > 0 && currentTableData.every(item => selectedIds.includes(item.ids)),
+    [currentTableData, selectedIds]
+  );
+  
+  const someOnPageSelected = useMemo(() => 
+    currentTableData.some(item => selectedIds.includes(item.ids)),
+    [currentTableData, selectedIds]
+  );
+
+  const masterCheckboxRef = useRef(null);
+  useEffect(() => {
+    if (masterCheckboxRef.current) {
+      masterCheckboxRef.current.indeterminate = someOnPageSelected && !allOnPageSelected;
+    }
+  }, [someOnPageSelected, allOnPageSelected]);
+
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setActiveActionMenu(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen p-4 sm:p-6 lg:p-8 font-sans">
+      <header className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">OneNotify Dashboard</h1>
+        <div className="flex items-center gap-4">
+            <button onClick={toggleTheme} className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                {theme === 'light' ? <MoonIcon /> : <SunIcon />}
+            </button>
+            <button onClick={() => setShowUserManagement(!showUserManagement)} className="bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm">
+                {showUserManagement ? 'Ver Notificações' : 'Gerenciar Responsáveis'}
+            </button>
+        </div>
+      </header>
+
+      {showUserManagement ? ( <UserManagement users={listaUsuarios} onUserChange={fetchAllData} /> ) : (
+        <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                <StatsCard title="Pendentes" value={stats.pendente} color="border-yellow-400" />
+                <StatsCard title="Processados" value={stats.processado} color="border-green-400" />
+                <StatsCard title="Com Erro" value={stats.erro} color="border-red-400" />
+                <StatsCard title="Erro de Dados" value={stats.erro_data_invalida} color="border-orange-400" />
+                <StatsCard title="Arquivados" value={stats.arquivado} color="border-gray-400" />
+            </div>
+            <div className="flex flex-wrap gap-2 mb-4">
+                <StatusTab status="Pendente" label="Pendentes" activeStatus={statusFiltro} setActiveStatus={handleStatusChange} count={stats.pendente} />
+                <StatusTab status="Processado" label="Processados" activeStatus={statusFiltro} setActiveStatus={handleStatusChange} count={stats.processado} />
+                <StatusTab status="Erro" label="Erro" activeStatus={statusFiltro} setActiveStatus={handleStatusChange} count={stats.erro + (stats.erro_data_invalida || 0)} />
+                <StatusTab status="Arquivado" label="Arquivados" activeStatus={statusFiltro} setActiveStatus={handleStatusChange} count={stats.arquivado} />
+            </div>
+            
+            <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md">
+                <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+                    <div className="flex items-center gap-2 md:gap-4 flex-wrap">
+                      <input type="text" placeholder="Buscar por NPJ ou Adverso..." value={filtroBusca} onChange={e => setFiltroBusca(e.target.value)} className="border rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border-gray-300 dark:border-gray-600" />
+                      <select value={responsavelFiltro} onChange={e => setResponsavelFiltro(e.target.value)} className="border rounded-md py-2 px-3 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
+                        <option value="Todos">Todos os Responsáveis</option>
+                        <option value="Sem Responsável">Sem Responsável</option>
+                        {listaUsuarios.map(user => <option key={user.id} value={user.nome}>{user.nome}</option>)}
+                      </select>
+                    </div>
+                    <div className="relative" ref={menuRef}>
+                        <button onClick={() => setActiveActionMenu(activeActionMenu === 'batch' ? null : 'batch')} disabled={selectedIds.length === 0} className="bg-blue-500 text-white font-bold py-2 px-4 rounded-md text-sm disabled:bg-gray-400 dark:disabled:bg-gray-600">
+                            Ações em Lote ({selectedIds.length})
+                        </button>
+                        {activeActionMenu === 'batch' && (
+                             <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg z-20">
+                                {statusFiltro !== 'Pendente' && <button onClick={() => handleAction(selectedIds, 'Pendente')} className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">Marcar como Pendente</button>}
+                                {statusFiltro !== 'Arquivado' && <button onClick={() => handleAction(selectedIds, 'Arquivado')} className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">Arquivar</button>}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-fixed">
+                        <thead className="bg-gray-50 dark:bg-gray-700">
+                           <tr>
+                                <th className="p-4 w-12 text-left">
+                                    <input type="checkbox" ref={masterCheckboxRef} checked={allOnPageSelected} onChange={handleSelectAll} className="rounded" />
+                                </th>
+                                <th className="w-[10%] px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer" onClick={() => requestSort('data_notificacao')}>Data <SortIcon direction={sortConfig.key === 'data_notificacao' ? sortConfig.direction : null}/></th>
+                                <th className="w-[25%] px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer" onClick={() => requestSort('NPJ')}>NPJ <SortIcon direction={sortConfig.key === 'NPJ' ? sortConfig.direction : null}/></th>
+                                <th className="w-[15%] px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nº Processo</th>
+                                <th className="w-[25%] px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tipos de Notificação</th>
+                                <th className="w-[15%] px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer" onClick={() => requestSort('responsavel')}>Responsável <SortIcon direction={sortConfig.key === 'responsavel' ? sortConfig.direction : null}/></th>
+                                <th className="w-[5%] px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            {loading ? <tr><td colSpan="7" className="text-center p-4 dark:text-gray-300">Carregando...</td></tr> :
+                             error ? <tr><td colSpan="7" className="text-center p-4 text-red-500">{error}</td></tr> :
+                             currentTableData.map(item => (
+                                <tr key={item.NPJ + item.data_notificacao} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td className="p-4">
+                                        <input type="checkbox" checked={selectedIds.includes(item.ids)} onChange={(e) => handleSelectOne(e, item.ids)} className="rounded" />
+                                    </td>
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{item.data_notificacao}</td>
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{item.NPJ}</td>
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300 truncate">{item.numero_processo || '-'}</td>
+                                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                                        <div className="flex flex-wrap gap-1">
+                                            {item.tipos_notificacao.split('; ').map(tipo => (
+                                                <span key={tipo} className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-0.5 rounded-full">{abbreviateTipo(tipo)}</span>
+                                            ))}
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{item.responsavel || '-'}</td>
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-center">
+                                        <button onClick={() => setModalDetalhes({ isOpen: true, item })} className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200"><EyeIcon /></button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                <Paginacao
+                    currentPage={currentPage} totalPages={Math.ceil(filteredItems.length / itemsPerPage)}
+                    onPageChange={setCurrentPage} itemsPerPage={itemsPerPage}
+                    onItemsPerPageChange={(value) => { setItemsPerPage(value); setCurrentPage(1); }}
+                    totalItems={filteredItems.length}
+                />
+            </div>
+        </>
+      )}
+
+      <ModalDetalhes 
+        isOpen={modalDetalhes.isOpen} 
+        onClose={() => setModalDetalhes({ isOpen: false, item: null })}
+        item={modalDetalhes.item}
+      />
+    </div>
+  );
 }
 
+// --- Gerenciador de Usuários ---
+const UserManagement = ({ users, onUserChange }) => {
+    const [newUserName, setNewUserName] = useState('');
+    const [error, setError] = useState('');
+
+    const handleAddUser = async (e) => {
+        e.preventDefault();
+        setError('');
+        if (!newUserName.trim()) { setError('O nome não pode ser vazio.'); return; }
+        try {
+            const response = await fetch(`${API_URL}/usuarios`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome: newUserName }),
+            });
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error || 'Falha ao adicionar usuário');
+            }
+            setNewUserName('');
+            onUserChange();
+        } catch (err) { setError(err.message); }
+    };
+    
+    const handleDeleteUser = async (userId) => {
+        if(window.confirm('Tem certeza que deseja remover este usuário?')) {
+            try {
+                const response = await fetch(`${API_URL}/usuarios/${userId}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Falha ao remover usuário');
+                onUserChange();
+            } catch (err) { setError(err.message); }
+        }
+    };
+
+    return (
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md max-w-2xl mx-auto">
+            <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Gerenciar Responsáveis</h2>
+            {error && <p className="text-red-500 mb-4">{error}</p>}
+            <form onSubmit={handleAddUser} className="flex items-center gap-2 mb-6">
+                <input type="text" value={newUserName} onChange={e => setNewUserName(e.target.value)} placeholder="Nome do novo responsável" className="border rounded-md py-2 px-3 flex-grow focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border-gray-300 dark:border-gray-600" />
+                <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md">Adicionar</button>
+            </form>
+            <div className="space-y-2">
+                {users.map(user => (
+                    <div key={user.id} className="flex justify-between items-center p-3 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                        <span className="font-medium text-gray-700 dark:text-gray-200">{user.nome}</span>
+                        <button onClick={() => handleDeleteUser(user.id)} className="text-red-500 hover:text-red-700 font-semibold text-sm">Remover</button>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
 export default App;
+

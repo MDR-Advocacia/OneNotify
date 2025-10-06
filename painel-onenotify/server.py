@@ -1,183 +1,215 @@
+# arquivo: server.py
+import os
 import sqlite3
 import json
-import os
-from flask import Flask, jsonify, request, send_from_directory
+import click
+from flask import Flask, jsonify, request, g, send_from_directory
+from flask.cli import with_appcontext
 from flask_cors import CORS
 
-# --- CONFIGURAÇÃO ---
-app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+# --- Configuração do App ---
+app = Flask(__name__, static_folder='build', static_url_path='/')
+CORS(app, origins="http://localhost:3000", supports_credentials=True)
 
-# Define o caminho base para o diretório de documentos de forma segura
-# O servidor está em 'painel-onenotify', então subimos um nível para a raiz do projeto
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-DB_NOME = os.path.join(BASE_DIR, "rpa_refatorado.db")
-DOCUMENTOS_DIR = os.path.join(BASE_DIR, "documentos")
+# --- Configuração do Banco de Dados ---
+DATABASE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'rpa_refatorado.db'))
 
-# --- FUNÇÕES AUXILIARES ---
-def get_db_connection():
-    conn = sqlite3.connect(DB_NOME)
-    conn.row_factory = sqlite3.Row
-    return conn
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect(DATABASE)
+        db.row_factory = sqlite3.Row
+    return db
 
-# --- ROTAS DA API ---
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
 
-@app.route('/api/dashboard-stats', methods=['GET'])
-def get_dashboard_stats():
-    # ... (código existente inalterado) ...
+# --- Comandos CLI ---
+def init_db():
+    db = get_db()
+    cursor = db.cursor()
+    # Verifica e adiciona colunas à tabela de notificações se não existirem
+    cursor.execute("PRAGMA table_info(notificacoes)")
+    cols = [col['name'] for col in cursor.fetchall()]
+    if 'responsavel' not in cols:
+        db.execute('ALTER TABLE notificacoes ADD COLUMN responsavel TEXT')
+    if 'data_processamento' not in cols:
+        db.execute('ALTER TABLE notificacoes ADD COLUMN data_processamento TEXT')
+    if 'detalhes_erro' not in cols:
+        db.execute('ALTER TABLE notificacoes ADD COLUMN detalhes_erro TEXT')
+    
+    # Cria a tabela de usuários se não existir
+    db.execute('''
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT NOT NULL UNIQUE
+        )
+    ''')
+    db.commit()
+
+@click.command('init-db')
+@with_appcontext
+def init_db_command():
+    init_db()
+    click.echo('Banco de dados verificado e atualizado.')
+
+app.cli.add_command(init_db_command)
+
+@click.command('add-user')
+@click.argument('nome')
+@with_appcontext
+def add_user_command(nome):
+    db = get_db()
     try:
-        conn = get_db_connection()
-        stats = conn.execute("SELECT status, COUNT(*) as count FROM notificacoes GROUP BY status").fetchall()
-        conn.close()
-        
-        stats_dict = {s['status'].lower().replace(' ', '_'): s['count'] for s in stats}
-        return jsonify(stats_dict)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        db.execute("INSERT INTO usuarios (nome) VALUES (?)", (nome,))
+        db.commit()
+        click.echo(f"Usuário '{nome}' adicionado com sucesso.")
+    except sqlite3.IntegrityError:
+        click.echo(f"Erro: Usuário '{nome}' já existe.")
 
-@app.route('/api/notificacoes', methods=['GET'])
+app.cli.add_command(add_user_command)
+
+# --- Rotas da API ---
+
+@app.route('/api/stats')
+def get_stats():
+    db = get_db()
+    stats = {}
+    statuses = {'pendente': 'Pendente', 'processado': 'Processado', 'arquivado': 'Arquivado'}
+    for key, status_val in statuses.items():
+        count = db.execute(
+            "SELECT COUNT(DISTINCT NPJ || data_notificacao) FROM notificacoes WHERE status = ?", (status_val,)
+        ).fetchone()[0]
+        stats[key] = count
+    
+    # Soma os dois tipos de erro
+    erro_count = db.execute(
+        "SELECT COUNT(DISTINCT NPJ || data_notificacao) FROM notificacoes WHERE status LIKE 'Erro%'"
+    ).fetchone()[0]
+    stats['erro'] = erro_count
+    
+    return jsonify(stats)
+
+@app.route('/api/notificacoes')
 def get_notificacoes():
-    status = request.args.get('status', 'Pendente')
-    # ... (código existente inalterado) ...
-    try:
-        conn = get_db_connection()
-        query = """
-            SELECT 
-                NPJ, 
-                data_notificacao,
-                MAX(numero_processo) as numero_processo,
-                GROUP_CONCAT(id, ',') as ids_string,
-                GROUP_CONCAT(tipo_notificacao, '; ') as tipos_notificacao
-            FROM notificacoes
-            WHERE status = ?
-            GROUP BY NPJ, data_notificacao
-            ORDER BY data_notificacao DESC
-        """
-        notificacoes = conn.execute(query, (status,)).fetchall()
-        conn.close()
-        
-        # Processa os IDs para serem uma lista de inteiros
-        result = []
-        for n in notificacoes:
-            n_dict = dict(n)
-            n_dict['ids'] = [int(id_str) for id_str in n_dict['ids_string'].split(',')]
-            n_dict['status'] = status # Adiciona o status ao objeto
-            del n_dict['ids_string']
-            result.append(n_dict)
+    status_filter = request.args.get('status', 'Pendente')
+    responsavel_filter = request.args.get('responsavel')
+    db = get_db()
+    
+    params = []
+    
+    if status_filter == 'Erro':
+        query_status = "WHERE status LIKE 'Erro%'"
+    else:
+        query_status = "WHERE status = ?"
+        params.append(status_filter)
 
-        return jsonify(result)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    query = f"""
+        SELECT
+            NPJ, data_notificacao, MAX(adverso_principal) as adverso_principal,
+            MAX(numero_processo) as numero_processo, GROUP_CONCAT(id, ';') as ids,
+            GROUP_CONCAT(tipo_notificacao, '; ') as tipos_notificacao, MAX(responsavel) as responsavel,
+            MAX(data_processamento) as data_processamento, MAX(detalhes_erro) as detalhes_erro,
+            status
+        FROM notificacoes {query_status}
+    """
+    
+    if responsavel_filter and responsavel_filter != 'Todos':
+        query += " AND responsavel = ?"
+        params.append(responsavel_filter)
+    elif responsavel_filter == 'Sem Responsável':
+        query += " AND (responsavel IS NULL OR responsavel = '')"
 
-@app.route('/api/notificacao-detalhes', methods=['GET'])
-def get_notificacao_detalhes():
+    query += " GROUP BY NPJ, data_notificacao ORDER BY data_notificacao DESC, NPJ"
+
+    notificacoes_raw = db.execute(query, params).fetchall()
+    notificacoes = [dict(row) for row in notificacoes_raw]
+    return jsonify(notificacoes)
+
+@app.route('/api/detalhes')
+def get_detalhes():
     npj = request.args.get('npj')
     data = request.args.get('data')
-    # ... (código existente inalterado) ...
+
     if not npj or not data:
         return jsonify({"error": "NPJ e data são obrigatórios"}), 400
-    try:
-        conn = get_db_connection()
-        # Busca a primeira notificação que corresponde para pegar os dados JSON
-        notificacao = conn.execute(
-            "SELECT andamentos, documentos FROM notificacoes WHERE NPJ = ? AND data_notificacao = ? LIMIT 1",
-            (npj, data)
-        ).fetchone()
-        conn.close()
 
-        if notificacao:
-            andamentos = json.loads(notificacao['andamentos']) if notificacao['andamentos'] else []
-            documentos = json.loads(notificacao['documentos']) if notificacao['documentos'] else []
-            return jsonify({"andamentos": andamentos, "documentos": documentos})
-        else:
-            return jsonify({"andamentos": [], "documentos": []})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    db = get_db()
+    detalhes = db.execute(
+        "SELECT MAX(andamentos) as andamentos, MAX(documentos) as documentos FROM notificacoes WHERE NPJ = ? AND data_notificacao = ?",
+        (npj, data)
+    ).fetchone()
+    
+    if detalhes and (detalhes['andamentos'] or detalhes['documentos']):
+        return jsonify({
+            'andamentos': json.loads(detalhes['andamentos'] or '[]'),
+            'documentos': json.loads(detalhes['documentos'] or '[]')
+        })
+    return jsonify({'andamentos': [], 'documentos': []})
 
-# --- ROTA DE DOWNLOAD CORRIGIDA ---
-@app.route('/api/download-documento', methods=['GET'])
-def download_documento():
-    caminho_completo = request.args.get('caminho')
-    if not caminho_completo:
-        return "Caminho do arquivo não fornecido.", 400
+@app.route('/api/download')
+def download_file():
+    caminho = request.args.get('path')
+    if not caminho: return "Caminho do arquivo não fornecido.", 400
+    
+    diretorio_base = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'documentos'))
+    caminho_seguro = os.path.abspath(caminho)
 
-    # Medida de segurança: garante que o caminho solicitado está dentro do diretório de documentos
-    caminho_sanitizado = os.path.abspath(caminho_completo)
-    if not caminho_sanitizado.startswith(DOCUMENTOS_DIR):
-        return "Acesso negado.", 403
+    if not caminho_seguro.startswith(diretorio_base): return "Acesso negado.", 403
+    if os.path.exists(caminho_seguro): return send_from_directory(os.path.dirname(caminho_seguro), os.path.basename(caminho_seguro), as_attachment=True)
+    return "Arquivo não encontrado.", 404
 
-    try:
-        # Extrai o diretório e o nome do arquivo do caminho completo
-        diretorio, nome_arquivo = os.path.split(caminho_sanitizado)
-        # CORREÇÃO: Usando a variável 'diretorio' (em português) que foi definida acima.
-        return send_from_directory(diretorio, nome_arquivo, as_attachment=True)
-    except FileNotFoundError:
-        return "Arquivo não encontrado.", 404
-    except Exception as e:
-        return str(e), 500
-
-@app.route('/api/atualizar-status', methods=['POST'])
-def atualizar_status():
+@app.route('/api/acoes/status', methods=['POST'])
+def update_status():
     data = request.json
-    # ... (código existente inalterado) ...
-    ids = data.get('ids', [])
+    ids_list = data.get('ids') # Agora recebe uma lista
     novo_status = data.get('novo_status')
 
-    if not ids or not novo_status:
-        return jsonify({"message": "IDs e novo_status são obrigatórios"}), 400
-
-    try:
-        conn = get_db_connection()
-        placeholders = ', '.join(['?'] * len(ids))
-        query = f"UPDATE notificacoes SET status = ? WHERE id IN ({placeholders})"
-        params = [novo_status] + ids
-        cursor = conn.cursor()
-        cursor.execute(query, params)
-        conn.commit()
-        updated_count = cursor.rowcount
-        conn.close()
-        
-        return jsonify({"message": f"{updated_count} notificações atualizadas para '{novo_status}' com sucesso!"})
-
-    except Exception as e:
-        return jsonify({"message": f"Erro ao atualizar status: {str(e)}"}), 500
-
-@app.route('/api/corrigir-data', methods=['POST'])
-def corrigir_data():
-    data = request.json
-    # ... (código existente inalterado) ...
-    ids = data.get('ids', [])
-    nova_data = data.get('nova_data')
-
-    if not ids or not nova_data:
-        return jsonify({"message": "IDs e nova_data são obrigatórios"}), 400
+    if not ids_list or not novo_status: return jsonify({'error': 'IDs e novo_status são obrigatórios'}), 400
     
-    # Simples validação de formato de data
+    # *** CORREÇÃO APLICADA AQUI ***
+    # A variável já é uma lista, não precisa de split. Apenas garantimos que são inteiros.
+    ids = [int(i) for i in ids_list]
+    
+    db = get_db()
+    placeholders = ', '.join(['?'] * len(ids))
+    db.execute(f"UPDATE notificacoes SET status = ? WHERE id IN ({placeholders})", [novo_status] + ids)
+    db.commit()
+    return jsonify({'message': f'{len(ids)} notificações atualizadas para {novo_status}'})
+
+@app.route('/api/usuarios', methods=['GET'])
+def get_usuarios():
+    db = get_db()
+    users_raw = db.execute("SELECT id, nome FROM usuarios ORDER BY nome").fetchall()
+    return jsonify([dict(row) for row in users_raw])
+
+@app.route('/api/usuarios', methods=['POST'])
+def add_usuario():
+    nome = request.json.get('nome')
+    if not nome: return jsonify({'error': 'Nome é obrigatório'}), 400
     try:
-        from datetime import datetime
-        datetime.strptime(nova_data, '%d/%m/%Y')
-    except ValueError:
-        return jsonify({"message": "Formato de data inválido. Use DD/MM/AAAA."}), 400
+        db = get_db()
+        db.execute("INSERT INTO usuarios (nome) VALUES (?)", (nome,))
+        db.commit()
+        return jsonify({'message': f'Usuário {nome} criado com sucesso'}), 201
+    except sqlite3.IntegrityError:
+        return jsonify({'error': f'Usuário {nome} já existe'}), 409
 
-    try:
-        conn = get_db_connection()
-        placeholders = ', '.join(['?'] * len(ids))
-        query = f"UPDATE notificacoes SET data_notificacao = ? WHERE id IN ({placeholders})"
-        params = [nova_data] + ids
-        cursor = conn.cursor()
-        cursor.execute(query, params)
-        conn.commit()
-        updated_count = cursor.rowcount
-        conn.close()
+@app.route('/api/usuarios/<int:user_id>', methods=['DELETE'])
+def delete_usuario(user_id):
+    db = get_db()
+    db.execute("DELETE FROM usuarios WHERE id = ?", (user_id,))
+    db.commit()
+    return jsonify({'message': 'Usuário removido com sucesso'})
 
-        return jsonify({"message": f"Data de {updated_count} notificações corrigida com sucesso!"})
-
-    except Exception as e:
-        return jsonify({"message": f"Erro ao corrigir data: {str(e)}"}), 500
-
-
-if __name__ == '__main__':
-    # Garante que o diretório de documentos exista
-    os.makedirs(DOCUMENTOS_DIR, exist_ok=True)
-    app.run(debug=True, port=5001)
+# --- Servir React App ---
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    return send_from_directory(app.static_folder, 'index.html')
 

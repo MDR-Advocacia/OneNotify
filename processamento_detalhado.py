@@ -1,4 +1,3 @@
-# arquivo: processamento_detalhado.py
 import logging
 import re
 from typing import List, Dict, Any, Optional
@@ -6,8 +5,6 @@ from playwright.sync_api import Page, BrowserContext, Error, TimeoutError
 from datetime import datetime, timedelta
 import database
 from pathlib import Path
-
-# Importa a exceção customizada que será usada para sinalizar a sessão expirada.
 from session import SessionExpiredError
 
 def extrair_numero_processo(page: Page) -> Optional[str]:
@@ -92,6 +89,7 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str) -> List[Dict[s
         logging.info(f"      - {len(andamentos)} andamento(s) capturado(s) dentro do período de datas.")
     except Error as e:
         logging.warning(f"      - Erro inesperado ao extrair andamentos: {e}")
+        raise
     return andamentos
 
 def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str) -> List[Dict[str, str]]:
@@ -101,8 +99,13 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str) -> Li
         logging.info("      - Procurando e expandindo seções de documentos...")
         
         secao_documentos = page.locator('div.accordion__item[bb-item-title="Documentos"]')
-        secao_documentos.wait_for(state='attached', timeout=10000)
         
+        try:
+            secao_documentos.wait_for(state='attached', timeout=5000) 
+        except TimeoutError:
+            logging.info("      - Seção 'Documentos' não encontrada para este NPJ. Pulando a etapa de download.")
+            return []
+
         if secao_documentos.count() == 0:
             logging.info("      - Nenhuma seção de documentos encontrada na página.")
             return []
@@ -168,6 +171,7 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str) -> Li
                 
     except Error as e:
         logging.warning(f"      - Ocorreu um erro geral ao processar documentos: {e}")
+        raise
     
     return documentos_baixados
 
@@ -195,68 +199,68 @@ def navegar_para_detalhes_do_npj(page: Page, npj: str):
         raise Error(f"Processo {npj} não foi encontrado no portal (página de erro).")
 
 def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any]]) -> Dict[str, int]:
-    """Processa um lote de NPJs, navegando para a URL de cada um e extraindo os detalhes."""
+    """Processa um lote de tarefas (NPJ + data), navegando para a URL de cada um e extraindo os detalhes."""
     stats = {"sucesso": 0, "falha": 0, "andamentos": 0, "documentos": 0}
     
     page = context.new_page()
 
-    for i, item in enumerate(lote):
-        npj = item.get('NPJ')
-        data_notificacao = item.get('data_notificacao')
+    for i, tarefa in enumerate(lote):
+        npj = tarefa.get('NPJ')
+        data_notificacao = tarefa.get('data_notificacao')
+        data_hora_processamento = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
         
         if not data_notificacao:
             logging.error(f"  - [{i+1}/{len(lote)}] ERRO DE DADOS: O grupo para o NPJ {npj} foi recebido sem uma data válida. Pulando este item.")
-            database.marcar_npj_como_erro(npj, data_notificacao, "Dados inconsistentes: Data da notificação não encontrada.")
+            motivo = "Dados inconsistentes: Data da notificação não encontrada."
+            database.marcar_tarefa_como_erro(npj, data_notificacao, motivo, data_hora_processamento)
             stats["falha"] += 1
             continue
 
-        logging.info(f"\n[{i+1}/{len(lote)}] Processando NPJ: {npj} (Notificação base: {data_notificacao})")
+        logging.info(f"\n[{i+1}/{len(lote)}] Processando Tarefa: {npj} (Data: {data_notificacao})")
         
         try:
-            # Tenta executar o bloco de processamento completo
             navegar_para_detalhes_do_npj(page, npj)
             
             numero_processo = extrair_numero_processo(page)
+            
+            # *** ORDEM CORRIGIDA AQUI ***
             documentos = baixar_documentos(page, data_notificacao, npj)
-            stats["documentos"] += len(documentos)
             andamentos = extrair_andamentos(page, data_notificacao)
+            
+            stats["documentos"] += len(documentos)
             stats["andamentos"] += len(andamentos)
 
-            database.atualizar_notificacoes_de_npj_processado(npj, data_notificacao, numero_processo, andamentos, documentos)
+            proximo_responsavel = database.get_next_user()
+            
+            database.atualizar_notificacoes_processadas(npj, data_notificacao, numero_processo, andamentos, documentos, data_hora_processamento, proximo_responsavel)
+            logging.info(f"SUCESSO: Tarefa {npj} finalizada e atribuída a {proximo_responsavel or 'Ninguém'}.")
             stats["sucesso"] += 1
 
         except TimeoutError as e:
-            # Se ocorrer um timeout, é um sinal forte de que a sessão pode ter expirado.
             detalhes_erro = f"Timeout: A página demorou muito para responder. Causa provável: sessão expirada ou instabilidade do portal. Detalhe: {e}"
             logging.critical(f"    - Timeout detectado ao processar NPJ {npj}. {detalhes_erro}")
-            database.marcar_npj_como_erro(npj, data_notificacao, detalhes_erro)
+            database.marcar_tarefa_como_erro(npj, data_notificacao, detalhes_erro, data_hora_processamento)
             stats["falha"] += 1
             if not page.is_closed():
                 page.close()
-            # Lança a exceção para que o 'main' possa lidar com a renovação.
             raise SessionExpiredError("Timeout durante a navegação, indicando possível sessão expirada.") from e
 
         except (ValueError, Error) as e:
-            # Captura erros conhecidos como GED Indisponível ou erros de Playwright
             detalhes_erro = f"Erro de automação ou portal: {e}"
             logging.error(f"  - ERRO CONHECIDO ao processar NPJ {npj}: {detalhes_erro}", exc_info=False)
-            database.marcar_npj_como_erro(npj, data_notificacao, detalhes_erro)
+            database.marcar_tarefa_como_erro(npj, data_notificacao, detalhes_erro, data_hora_processamento)
             stats["falha"] += 1
-            # Continua para o próximo item do lote
 
         except SessionExpiredError:
-             # Se a exceção de sessão já foi lançada internamente, apenas a repassamos para cima
-             raise
+            raise
 
         except Exception as e:
-            # Captura qualquer outro erro inesperado
             detalhes_erro = f"Erro inesperado no sistema: {e}"
             logging.critical(f"Ocorreu um erro inesperado ao processar NPJ {npj}.\n{detalhes_erro}", exc_info=True)
-            database.marcar_npj_como_erro(npj, data_notificacao, detalhes_erro)
+            database.marcar_tarefa_como_erro(npj, data_notificacao, detalhes_erro, data_hora_processamento)
             stats["falha"] += 1
             if not page.is_closed():
                 page.close()
-            # Criamos uma nova página para o próximo item do lote, para garantir um estado limpo
             page = context.new_page()
             
     if not page.is_closed():
