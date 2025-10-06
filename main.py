@@ -1,4 +1,3 @@
-# arquivo: main.py
 import logging
 import time
 from datetime import datetime
@@ -13,9 +12,9 @@ from config import LOG_FORMAT, LOG_LEVEL, TAMANHO_LOTE
 from autologin import realizar_login_automatico
 from modulo_notificacoes import executar_extracao_e_ciencia
 from processamento_detalhado import processar_detalhes_de_lote
-# Importa a exceção e a função de renovação
 from session import SessionExpiredError, refresh_session_if_needed
 
+# --- Configuração de Log ---
 LOG_DIR = Path(__file__).resolve().parent / "logs"
 LOG_DIR.mkdir(exist_ok=True)
 timestamp_log = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -48,27 +47,48 @@ def main():
         database.resetar_notificacoes_em_processamento_ou_erro()
 
         with sync_playwright() as playwright:
-            logging.info("\nFASE 1: LOGIN E CONFIGURAÇÃO DA SESSÃO")
-            browser, context, browser_process_ref, page = realizar_login_automatico(playwright)
-            session_start_time = time.time()
+            # --- LÓGICA DE RETENTATIVA DE LOGIN ---
+            login_success = False
+            for attempt in range(3):
+                try:
+                    logging.info(f"\nFASE 1: TENTATIVA DE LOGIN E CONFIGURAÇÃO DA SESSÃO ({attempt + 1}/3)")
+                    browser, context, browser_process_ref, page = realizar_login_automatico(playwright)
+                    session_start_time = time.time()
+                    login_success = True
+                    logging.info("Login realizado com sucesso!")
+                    break 
+                except Exception as login_error:
+                    logging.error(f"Falha na tentativa de login {attempt + 1}. Erro: {login_error}")
+                    if attempt < 2:
+                        logging.info("Aguardando 60 segundos antes de tentar novamente...")
+                        time.sleep(60)
+            
+            if not login_success:
+                logging.critical("Não foi possível realizar o login após 3 tentativas. Abortando execução.")
+                raise ConnectionError("Falha persistente no login.")
+            # --- FIM DA LÓGICA DE RETENTATIVA ---
 
             logging.info("\nFASE 2: EXTRAÇÃO DE NOVAS NOTIFICAÇÕES E REGISTRO DE CIÊNCIA")
             stats_extracao = executar_extracao_e_ciencia(page)
             
             logging.info("\nFASE 3: PROCESSAMENTO DETALHADO EM LOTES")
             
+            pendentes_iniciais = database.contar_pendentes()
+            logging.info(f"Total de tarefas pendentes para processar: {pendentes_iniciais}")
+
             while database.contar_pendentes() > 0:
                 try:
                     page, browser, context, browser_process_ref, session_start_time = refresh_session_if_needed(
                         playwright, page, browser, context, browser_process_ref, session_start_time
                     )
-
-                    lote_para_processar = database.obter_npjs_pendentes_por_lote(TAMANHO_LOTE)
+                    
+                    logging.info("Buscando novo lote de tarefas...")
+                    lote_para_processar = database.obter_tarefas_pendentes_por_lote(TAMANHO_LOTE)
                     if not lote_para_processar:
-                        logging.info("Não há mais lotes para processar.")
+                        logging.warning("Não há mais lotes para processar nesta iteração (pode ser concorrência ou fim da fila).")
                         break
                     
-                    logging.info(f"Iniciando processamento detalhado de {len(lote_para_processar)} NPJ(s).")
+                    logging.info(f"Iniciando processamento detalhado de {len(lote_para_processar)} tarefa(s).")
                     stats_lote = processar_detalhes_de_lote(context, lote_para_processar)
 
                     stats_processamento["sucesso"] += stats_lote["sucesso"]
@@ -77,7 +97,7 @@ def main():
                     stats_processamento["documentos"] += stats_lote["documentos"]
                     
                     pendentes_restantes = database.contar_pendentes()
-                    logging.info(f"Lote finalizado. Restam {pendentes_restantes} NPJs pendentes.")
+                    logging.info(f"Lote finalizado. Restam {pendentes_restantes} tarefas pendentes.")
 
                 except SessionExpiredError:
                     logging.warning("Exceção de sessão capturada no loop principal. Forçando renovação imediata.")
@@ -85,9 +105,11 @@ def main():
                     continue
     
     except Error as e:
-        logging.critical(f"Ocorreu uma falha inesperada na automação.\n{e}")
+        logging.critical(f"Ocorreu uma falha inesperada na automação do Playwright.", exc_info=True)
+        raise
     except Exception as e:
-        logging.critical(f"Ocorreu uma falha inesperada na automação.\n{e}", exc_info=True)
+        logging.critical(f"Ocorreu uma falha geral inesperada na automação.", exc_info=True)
+        raise
     finally:
         end_time = time.time()
         duracao_total = end_time - start_time
@@ -104,11 +126,8 @@ def main():
                 else:
                     proc.kill()
         
-        total_processado = stats_processamento["sucesso"] + stats_processamento["falha"]
-        tempo_medio = (duracao_total / total_processado) if total_processado > 0 else 0
-        
         resumo = {
-            "timestamp": timestamp_log, "duracao_total": duracao_total, "tempo_medio_npj": tempo_medio,
+            "timestamp": timestamp_log, "duracao_total": duracao_total,
             "notificacoes_salvas": stats_extracao["notificacoes_salvas"], "ciencias_registradas": stats_extracao["ciencias_registradas"],
             "andamentos": stats_processamento["andamentos"], "documentos": stats_processamento["documentos"],
             "npjs_sucesso": stats_processamento["sucesso"], "npjs_falha": stats_processamento["falha"]

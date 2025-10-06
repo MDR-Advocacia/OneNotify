@@ -1,127 +1,215 @@
-from flask import Flask, jsonify, request, send_file
-from flask_cors import CORS
+# arquivo: server.py
+import os
 import sqlite3
 import json
-import sys
-import os
+import click
+from flask import Flask, jsonify, request, g, send_from_directory
+from flask.cli import with_appcontext
+from flask_cors import CORS
 
-# Adiciona o diretório pai ao path para encontrar os módulos do projeto principal
-diretorio_pai = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.append(diretorio_pai)
+# --- Configuração do App ---
+app = Flask(__name__, static_folder='build', static_url_path='/')
+CORS(app, origins="http://localhost:3000", supports_credentials=True)
 
-# Importa as funções do database.py
-from database import (
-    atualizar_status_de_notificacoes_por_ids,
-    corrigir_e_consolidar_datas_por_ids
-)
+# --- Configuração do Banco de Dados ---
+DATABASE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'rpa_refatorado.db'))
 
-app = Flask(__name__)
-CORS(app)
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect(DATABASE)
+        db.row_factory = sqlite3.Row
+    return db
 
-DB_PATH = os.path.join(diretorio_pai, 'rpa_refatorado.db')
-DOCUMENTOS_PATH = os.path.join(diretorio_pai, 'documentos')
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
 
+# --- Comandos CLI ---
+def init_db():
+    db = get_db()
+    cursor = db.cursor()
+    # Verifica e adiciona colunas à tabela de notificações se não existirem
+    cursor.execute("PRAGMA table_info(notificacoes)")
+    cols = [col['name'] for col in cursor.fetchall()]
+    if 'responsavel' not in cols:
+        db.execute('ALTER TABLE notificacoes ADD COLUMN responsavel TEXT')
+    if 'data_processamento' not in cols:
+        db.execute('ALTER TABLE notificacoes ADD COLUMN data_processamento TEXT')
+    if 'detalhes_erro' not in cols:
+        db.execute('ALTER TABLE notificacoes ADD COLUMN detalhes_erro TEXT')
+    
+    # Cria a tabela de usuários se não existir
+    db.execute('''
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT NOT NULL UNIQUE
+        )
+    ''')
+    db.commit()
 
-def query_db(query, args=(), one=False):
-    """Função auxiliar para conectar e consultar o banco de dados."""
+@click.command('init-db')
+@with_appcontext
+def init_db_command():
+    init_db()
+    click.echo('Banco de dados verificado e atualizado.')
+
+app.cli.add_command(init_db_command)
+
+@click.command('add-user')
+@click.argument('nome')
+@with_appcontext
+def add_user_command(nome):
+    db = get_db()
     try:
-        with sqlite3.connect(DB_PATH) as conn:
-            conn.row_factory = sqlite3.Row
-            cur = conn.cursor()
-            cur.execute(query, args)
-            rv = cur.fetchall()
-            return (rv[0] if rv else None) if one else rv
-    except sqlite3.Error as e:
-        print(f"Erro no banco de dados: {e}")
-        return None
+        db.execute("INSERT INTO usuarios (nome) VALUES (?)", (nome,))
+        db.commit()
+        click.echo(f"Usuário '{nome}' adicionado com sucesso.")
+    except sqlite3.IntegrityError:
+        click.echo(f"Erro: Usuário '{nome}' já existe.")
 
-@app.route('/api/logs', methods=['GET'])
-def get_logs():
-    logs = query_db("SELECT * FROM logs_execucao ORDER BY id DESC")
-    if logs is None:
-        return jsonify({"error": "Não foi possível buscar os logs"}), 500
-    return jsonify([dict(log) for log in logs])
+app.cli.add_command(add_user_command)
 
-@app.route('/api/notificacoes', methods=['GET'])
+# --- Rotas da API ---
+
+@app.route('/api/stats')
+def get_stats():
+    db = get_db()
+    stats = {}
+    statuses = {'pendente': 'Pendente', 'processado': 'Processado', 'arquivado': 'Arquivado'}
+    for key, status_val in statuses.items():
+        count = db.execute(
+            "SELECT COUNT(DISTINCT NPJ || data_notificacao) FROM notificacoes WHERE status = ?", (status_val,)
+        ).fetchone()[0]
+        stats[key] = count
+    
+    # Soma os dois tipos de erro
+    erro_count = db.execute(
+        "SELECT COUNT(DISTINCT NPJ || data_notificacao) FROM notificacoes WHERE status LIKE 'Erro%'"
+    ).fetchone()[0]
+    stats['erro'] = erro_count
+    
+    return jsonify(stats)
+
+@app.route('/api/notificacoes')
 def get_notificacoes():
-    notificacoes_data = query_db("SELECT * FROM notificacoes ORDER BY id DESC")
-    if notificacoes_data is None:
-        return jsonify({"error": "Não foi possível buscar as notificações"}), 500
-        
-    lista_notificacoes = []
-    for n in notificacoes_data:
-        notificacao_dict = dict(n)
-        try:
-            if notificacao_dict.get('andamentos'):
-                notificacao_dict['andamentos'] = json.loads(notificacao_dict['andamentos'])
-            if notificacao_dict.get('documentos'):
-                notificacao_dict['documentos'] = json.loads(notificacao_dict['documentos'])
-        except (json.JSONDecodeError, TypeError):
-            pass
-        lista_notificacoes.append(notificacao_dict)
+    status_filter = request.args.get('status', 'Pendente')
+    responsavel_filter = request.args.get('responsavel')
+    db = get_db()
+    
+    params = []
+    
+    if status_filter == 'Erro':
+        query_status = "WHERE status LIKE 'Erro%'"
+    else:
+        query_status = "WHERE status = ?"
+        params.append(status_filter)
 
-    return jsonify(lista_notificacoes)
+    query = f"""
+        SELECT
+            NPJ, data_notificacao, MAX(adverso_principal) as adverso_principal,
+            MAX(numero_processo) as numero_processo, GROUP_CONCAT(id, ';') as ids,
+            GROUP_CONCAT(tipo_notificacao, '; ') as tipos_notificacao, MAX(responsavel) as responsavel,
+            MAX(data_processamento) as data_processamento, MAX(detalhes_erro) as detalhes_erro,
+            status
+        FROM notificacoes {query_status}
+    """
+    
+    if responsavel_filter and responsavel_filter != 'Todos':
+        query += " AND responsavel = ?"
+        params.append(responsavel_filter)
+    elif responsavel_filter == 'Sem Responsável':
+        query += " AND (responsavel IS NULL OR responsavel = '')"
 
-@app.route('/api/notificacoes/bulk-update-status', methods=['POST'])
-def bulk_update_status():
-    data = request.get_json()
-    if not data or 'ids' not in data or 'status' not in data:
-        return jsonify({'error': 'Dados inválidos fornecidos.'}), 400
+    query += " GROUP BY NPJ, data_notificacao ORDER BY data_notificacao DESC, NPJ"
 
-    ids = data.get('ids')
-    novo_status = data.get('status')
+    notificacoes_raw = db.execute(query, params).fetchall()
+    notificacoes = [dict(row) for row in notificacoes_raw]
+    return jsonify(notificacoes)
 
-    if not isinstance(ids, list) or not ids:
-        return jsonify({'message': 'Nenhum ID fornecido para atualização.', 'updated_rows': 0}), 200
+@app.route('/api/detalhes')
+def get_detalhes():
+    npj = request.args.get('npj')
+    data = request.args.get('data')
 
+    if not npj or not data:
+        return jsonify({"error": "NPJ e data são obrigatórios"}), 400
+
+    db = get_db()
+    detalhes = db.execute(
+        "SELECT MAX(andamentos) as andamentos, MAX(documentos) as documentos FROM notificacoes WHERE NPJ = ? AND data_notificacao = ?",
+        (npj, data)
+    ).fetchone()
+    
+    if detalhes and (detalhes['andamentos'] or detalhes['documentos']):
+        return jsonify({
+            'andamentos': json.loads(detalhes['andamentos'] or '[]'),
+            'documentos': json.loads(detalhes['documentos'] or '[]')
+        })
+    return jsonify({'andamentos': [], 'documentos': []})
+
+@app.route('/api/download')
+def download_file():
+    caminho = request.args.get('path')
+    if not caminho: return "Caminho do arquivo não fornecido.", 400
+    
+    diretorio_base = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'documentos'))
+    caminho_seguro = os.path.abspath(caminho)
+
+    if not caminho_seguro.startswith(diretorio_base): return "Acesso negado.", 403
+    if os.path.exists(caminho_seguro): return send_from_directory(os.path.dirname(caminho_seguro), os.path.basename(caminho_seguro), as_attachment=True)
+    return "Arquivo não encontrado.", 404
+
+@app.route('/api/acoes/status', methods=['POST'])
+def update_status():
+    data = request.json
+    ids_list = data.get('ids') # Agora recebe uma lista
+    novo_status = data.get('novo_status')
+
+    if not ids_list or not novo_status: return jsonify({'error': 'IDs e novo_status são obrigatórios'}), 400
+    
+    # *** CORREÇÃO APLICADA AQUI ***
+    # A variável já é uma lista, não precisa de split. Apenas garantimos que são inteiros.
+    ids = [int(i) for i in ids_list]
+    
+    db = get_db()
+    placeholders = ', '.join(['?'] * len(ids))
+    db.execute(f"UPDATE notificacoes SET status = ? WHERE id IN ({placeholders})", [novo_status] + ids)
+    db.commit()
+    return jsonify({'message': f'{len(ids)} notificações atualizadas para {novo_status}'})
+
+@app.route('/api/usuarios', methods=['GET'])
+def get_usuarios():
+    db = get_db()
+    users_raw = db.execute("SELECT id, nome FROM usuarios ORDER BY nome").fetchall()
+    return jsonify([dict(row) for row in users_raw])
+
+@app.route('/api/usuarios', methods=['POST'])
+def add_usuario():
+    nome = request.json.get('nome')
+    if not nome: return jsonify({'error': 'Nome é obrigatório'}), 400
     try:
-        updated_rows = atualizar_status_de_notificacoes_por_ids(ids, novo_status)
-        return jsonify({'updated_rows': updated_rows})
-    except Exception as e:
-        print(f"Erro ao executar atualização em massa: {e}")
-        return jsonify({'error': f'Erro interno do servidor: {e}'}), 500
+        db = get_db()
+        db.execute("INSERT INTO usuarios (nome) VALUES (?)", (nome,))
+        db.commit()
+        return jsonify({'message': f'Usuário {nome} criado com sucesso'}), 201
+    except sqlite3.IntegrityError:
+        return jsonify({'error': f'Usuário {nome} já existe'}), 409
 
-@app.route('/api/notificacoes/bulk-update-date', methods=['POST'])
-def bulk_update_date():
-    data = request.get_json()
-    if not data or 'ids' not in data or 'nova_data' not in data:
-        return jsonify({'error': 'Dados inválidos fornecidos.'}), 400
+@app.route('/api/usuarios/<int:user_id>', methods=['DELETE'])
+def delete_usuario(user_id):
+    db = get_db()
+    db.execute("DELETE FROM usuarios WHERE id = ?", (user_id,))
+    db.commit()
+    return jsonify({'message': 'Usuário removido com sucesso'})
 
-    ids = data.get('ids')
-    nova_data = data.get('nova_data')
-
-    if not isinstance(ids, list) or not ids:
-        return jsonify({'message': 'Nenhum ID fornecido para atualização.'}), 200
-
-    try:
-        result = corrigir_e_consolidar_datas_por_ids(ids, nova_data)
-        return jsonify(result)
-    except Exception as e:
-        print(f"Erro ao executar atualização de data em massa: {e}")
-        return jsonify({'error': f'Erro interno do servidor: {e}'}), 500
-
-@app.route('/download-documento', methods=['GET'])
-def download_documento():
-    caminho_relativo = request.args.get('path')
-    if not caminho_relativo:
-        return "Caminho do arquivo não fornecido.", 400
-
-    # Medida de segurança: Garante que o caminho é seguro e dentro do diretório esperado
-    caminho_seguro = os.path.normpath(os.path.join(DOCUMENTOS_PATH, caminho_relativo))
-    if not caminho_seguro.startswith(DOCUMENTOS_PATH):
-        return "Acesso negado.", 403
-
-    try:
-        if os.path.exists(caminho_seguro) and os.path.isfile(caminho_seguro):
-            return send_file(caminho_seguro, as_attachment=True)
-        else:
-            return "Arquivo não encontrado.", 404
-    except Exception as e:
-        print(f"Erro ao tentar baixar o arquivo {caminho_seguro}: {e}")
-        return "Erro ao processar o download.", 500
-
-if __name__ == '__main__':
-    from database import inicializar_banco
-    inicializar_banco()
-    app.run(debug=True, port=5000)
+# --- Servir React App ---
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    return send_from_directory(app.static_folder, 'index.html')
 
