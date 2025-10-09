@@ -284,3 +284,179 @@ Traceback (most recent call last):
   File "C:\OneNotify\venv\Lib\site-packages\playwright\_impl\_sync_base.py", line 104, in _sync
     raise Error("Event loop is closed! Is Playwright already stopped?")
 playwright._impl._errors.Error: Event loop is closed! Is Playwright already stopped?
+Traceback (most recent call last):
+  File "C:\OneNotify\main.py", line 143, in <module>
+    main()
+    ~~~~^^
+  File "C:\OneNotify\main.py", line 119, in main
+    browser.close()
+    ~~~~~~~~~~~~~^^
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\sync_api\_generated.py", line 14269, in close
+    return mapping.from_maybe_impl(self._sync(self._impl_obj.close(reason=reason)))
+                                   ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\_impl\_sync_base.py", line 104, in _sync
+    raise Error("Event loop is closed! Is Playwright already stopped?")
+playwright._impl._errors.Error: Event loop is closed! Is Playwright already stopped?
+Traceback (most recent call last):
+  File "C:\OneNotify\main.py", line 55, in main
+    browser, context, browser_process_ref, page = realizar_login_automatico(playwright)
+                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\OneNotify\autologin.py", line 54, in realizar_login_automatico
+    extension_page = context.new_page()
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\sync_api\_generated.py", line 12815, in new_page
+    return mapping.from_impl(self._sync(self._impl_obj.new_page()))
+                             ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\_impl\_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\_impl\_browser_context.py", line 335, in new_page
+    return from_channel(await self._channel.send("newPage", None))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\_impl\_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\_impl\_connection.py", line 558, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: BrowserContext.new_page: Protocol error (Target.createTarget): Failed to open a new tab
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\OneNotify\main.py", line 143, in <module>
+    main()
+    ~~~~^^
+  File "C:\OneNotify\main.py", line 64, in main
+    time.sleep(60)
+    ~~~~~~~~~~^^^^
+KeyboardInterrupt
+^C================================================================ 
+Supervisor iniciado em 06/10/2025 14:07:26,41 
+================================================================ 
+ 
+---------------------------------------------------------------- 
+[SUPERVISOR] Iniciando novo ciclo de RPA em 06/10/2025 14:07:26,49 
+---------------------------------------------------------------- 
+Traceback (most recent call last):
+  File "C:\OneNotify\main.py", line 55, in main
+    browser, context, browser_process_ref, page = realizar_login_automatico(playwright)
+                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\OneNotify\autologin.py", line 79, in realizar_login_automatico
+    portal_page.locator("#aPaginaInicial").wait_for(state="visible", timeout=90000)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\sync_api\_generated.py", line 17975, in wait_for
+    self._sync(self._impl_obj.wait_for(timeout=timeout, state=state))
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\_impl\_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\_impl\_locator.py", line 692, in wait_for
+    await self._frame.wait_for_selector(
+        self._selector, strict=True, timeout=timeout, state=state
+    )
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\_impl\_frame.py", line 369, in wait_for_selector
+    await self._channel.send(
+        "waitForSelector", self._timeout, locals_to_params(locals())
+    )
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\_impl\_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\_impl\_connection.py", line 558, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TargetClosedError: Locator.wait_for: Target page, context or browser has been closed
+Call log:
+  - waiting for locator("#aPaginaInicial") to be visible
+    - waiting for" https://loginweb.bb.com.br/sso/XUI/?realm=/paj&goto=https://juridico.bb.com.br/paj/juridico" navigation to finish...
+    - navigated to "https://loginweb.bb.com.br/sso/XUI/?realm=/paj&goto=https://juridico.bb.com.br/paj/juridico#login"
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\OneNotify\main.py", line 143, in <module>
+    main()
+    ~~~~^^
+  File "C:\OneNotify\main.py", line 64, in main
+    time.sleep(60)
+    ~~~~~~~~~~^^^^
+KeyboardInterrupt
+^C================================================================ 
+Supervisor iniciado em 06/10/2025 14:08:55,37 
+================================================================ 
+ 
+---------------------------------------------------------------- 
+[SUPERVISOR] Iniciando novo ciclo de RPA em 06/10/2025 14:08:55,46 
+---------------------------------------------------------------- 
+Traceback (most recent call last):
+  File "C:\OneNotify\main.py", line 143, in <module>
+    main()
+    ~~~~^^
+  File "C:\OneNotify\main.py", line 119, in main
+    browser.close()
+    ~~~~~~~~~~~~~^^
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\sync_api\_generated.py", line 14269, in close
+    return mapping.from_maybe_impl(self._sync(self._impl_obj.close(reason=reason)))
+                                   ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\_impl\_sync_base.py", line 104, in _sync
+    raise Error("Event loop is closed! Is Playwright already stopped?")
+playwright._impl._errors.Error: Event loop is closed! Is Playwright already stopped?
+Traceback (most recent call last):
+  File "C:\OneNotify\main.py", line 55, in main
+    browser, context, browser_process_ref, page = realizar_login_automatico(playwright)
+                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\OneNotify\autologin.py", line 54, in realizar_login_automatico
+    extension_page = context.new_page()
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\sync_api\_generated.py", line 12815, in new_page
+    return mapping.from_impl(self._sync(self._impl_obj.new_page()))
+                             ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\_impl\_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\_impl\_browser_context.py", line 335, in new_page
+    return from_channel(await self._channel.send("newPage", None))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\_impl\_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\_impl\_connection.py", line 558, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: BrowserContext.new_page: Protocol error (Target.createTarget): Failed to open a new tab
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\OneNotify\main.py", line 143, in <module>
+    main()
+    ~~~~^^
+  File "C:\OneNotify\main.py", line 64, in main
+    time.sleep(60)
+    ~~~~~~~~~~^^^^
+KeyboardInterrupt
+^C================================================================ 
+Supervisor iniciado em 09/10/2025 10:42:49,03 
+================================================================ 
+ 
+---------------------------------------------------------------- 
+[SUPERVISOR] Iniciando novo ciclo de RPA em 09/10/2025 10:42:49,19 
+---------------------------------------------------------------- 
+Traceback (most recent call last):
+  File "C:\OneNotify\main.py", line 143, in <module>
+    main()
+    ~~~~^^
+  File "C:\OneNotify\main.py", line 119, in main
+    browser.close()
+    ~~~~~~~~~~~~~^^
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\sync_api\_generated.py", line 14269, in close
+    return mapping.from_maybe_impl(self._sync(self._impl_obj.close(reason=reason)))
+                                   ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\OneNotify\venv\Lib\site-packages\playwright\_impl\_sync_base.py", line 104, in _sync
+    raise Error("Event loop is closed! Is Playwright already stopped?")
+playwright._impl._errors.Error: Event loop is closed! Is Playwright already stopped?
