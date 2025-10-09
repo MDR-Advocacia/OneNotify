@@ -1,42 +1,44 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 
 :: --- Configurações ---
-:: %~dp0 se expande para o diretório onde este script está localizado, tornando os caminhos mais robustos.
 set "SCRIPT_DIR=%~dp0"
+set "LOG_DIR=%SCRIPT_DIR%logs"
 set "VENV_DIR=%SCRIPT_DIR%venv"
 set "SCRIPT_PRINCIPAL=%SCRIPT_DIR%main.py"
-set "LOG_SUPERVISOR=%SCRIPT_DIR%log_supervisor.txt"
 set "PAUSA_SUCESSO_SEGUNDOS=1800"
 set "PAUSA_FALHA_SEGUNDOS=120"
 
-echo ================================================================ >> "%LOG_SUPERVISOR%"
-echo Supervisor iniciado em %date% %time% >> "%LOG_SUPERVISOR%"
-echo ================================================================ >> "%LOG_SUPERVISOR%"
+:: --- Criação da pasta de logs ---
+if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
 
 :LOOP
-echo. >> "%LOG_SUPERVISOR%"
-echo ---------------------------------------------------------------- >> "%LOG_SUPERVISOR%"
-echo [SUPERVISOR] Iniciando novo ciclo de RPA em %date% %time% >> "%LOG_SUPERVISOR%"
-echo ---------------------------------------------------------------- >> "%LOG_SUPERVISOR%"
+cls
+
+:: --- Geração de timestamp robusto via WMIC (independente de localidade) ---
+for /f "tokens=2 delims==" %%I in ('wmic os get localdatetime /format:list') do set "datetime=%%I"
+set "YYYY=!datetime:~0,4!"
+set "MM=!datetime:~4,2!"
+set "DD=!datetime:~6,2!"
+set "HH=!datetime:~8,2!"
+set "MIN=!datetime:~10,2!"
+set "SEC=!datetime:~12,2!"
+set "TIMESTAMP=!YYYY!-!MM!-!DD!_!HH!-!MIN!-!SEC!"
+set "LOG_CICLO=%LOG_DIR%\supervisor_ciclo_!TIMESTAMP!.log"
+
+echo ---------------------------------------------------------------- >> "%LOG_CICLO%"
+echo [SUPERVISOR] Iniciando novo ciclo de RPA em %date% %time% >> "%LOG_CICLO%"
+echo ---------------------------------------------------------------- >> "%LOG_CICLO%"
 
 :: --- Validação de Caminhos ---
 echo [SUPERVISOR] Verificando ambiente...
 if not exist "%VENV_DIR%\Scripts\activate.bat" (
-    echo.
-    echo [SUPERVISOR] ERRO CRITICO: Ambiente virtual nao encontrado em "%VENV_DIR%"
-    echo [SUPERVISOR] Verifique se a pasta 'venv' foi criada corretamente neste diretorio.
-    echo. >> "%LOG_SUPERVISOR%"
-    echo [SUPERVISOR] ERRO CRITICO: Ambiente virtual nao encontrado. Script abortado. >> "%LOG_SUPERVISOR%"
+    echo [SUPERVISOR] ERRO CRITICO: Ambiente virtual nao encontrado. Script abortado. >> "%LOG_CICLO%"
     pause
     exit /b 1
 )
 if not exist "%SCRIPT_PRINCIPAL%" (
-    echo.
-    echo [SUPERVISOR] ERRO CRITICO: Script principal 'main.py' nao encontrado.
-    echo [SUPERVISOR] Verifique se o arquivo 'main.py' esta neste diretorio.
-    echo. >> "%LOG_SUPERVISOR%"
-    echo [SUPERVISOR] ERRO CRITICO: 'main.py' nao encontrado. Script abortado. >> "%LOG_SUPERVISOR%"
+    echo [SUPERVISOR] ERRO CRITICO: Script principal 'main.py' nao encontrado. Script abortado. >> "%LOG_CICLO%"
     pause
     exit /b 1
 )
@@ -48,29 +50,40 @@ echo [SUPERVISOR] Ativando ambiente virtual...
 call "%VENV_DIR%\Scripts\activate.bat"
 
 echo [SUPERVISOR] Executando o script principal da RPA...
-python "%SCRIPT_PRINCIPAL%" 2>> "%LOG_SUPERVISOR%"
+echo [SUPERVISOR] Log detalhado desta execucao em: %LOG_CICLO%
+
+:: Redireciona a saida de erro (2) para o log do ciclo
+python "%SCRIPT_PRINCIPAL%" 2>> "%LOG_CICLO%"
 
 if %ERRORLEVEL% NEQ 0 (
-    echo.
-    echo !!!!!!!!!! FALHA DETECTADA !!!!!!!!!!
-    echo [SUPERVISOR] O robo encerrou com um erro. Verifique o log para detalhes.
-    echo [SUPERVISOR] O script vai reiniciar em 2 minutos. Pressione CTRL+C para cancelar.
-    echo. >> "%LOG_SUPERVISOR%"
-    echo [SUPERVISOR] !!!!!!!!!! FALHA DETECTADA (Exit Code: %ERRORLEVEL%) em %date% %time% !!!!!!!!!! >> "%LOG_SUPERVISOR%"
-    echo [SUPERVISOR] A mensagem de erro do Python (se houver) foi registrada acima. >> "%LOG_SUPERVISOR%"
-    echo [SUPERVISOR] Aguardando %PAUSA_FALHA_SEGUNDOS% segundos para reiniciar... >> "%LOG_SUPERVISOR%"
-    timeout /t %PAUSA_FALHA_SEGUNDOS% /nobreak > nul
+    goto :HANDLE_FAILURE
 ) else (
-    echo [SUPERVISOR] Tarefas concluidas. Proxima verificacao em 30 minutos...
-    echo [SUPERVISOR] Ciclo de RPA finalizado com SUCESSO em %date% %time%. >> "%LOG_SUPERVISOR%"
-    echo [SUPERVISOR] Aguardando %PAUSA_SUCESSO_SEGUNDOS% segundos para o proximo ciclo... >> "%LOG_SUPERVISOR%"
-    timeout /t %PAUSA_SUCESSO_SEGUNDOS% /nobreak > nul
+    goto :HANDLE_SUCCESS
 )
 
-echo [SUPERVISOR] Desativando ambiente virtual...
-call deactivate
+:: --- SUB-ROTINA DE SUCESSO ---
+:HANDLE_SUCCESS
+echo.
+echo [SUPERVISOR] Tarefas concluidas com sucesso.
+echo [SUPERVISOR] Pressione CTRL+C para interromper o loop.
+echo [SUPERVISOR] Ciclo de RPA finalizado com SUCESSO. >> "%LOG_CICLO%"
 
+powershell -Command "$curTop = [System.Console]::CursorTop; for ($i = %PAUSA_SUCESSO_SEGUNDOS%; $i -ge 1; $i--) { [System.Console]::SetCursorPosition(0, $curTop); $min = [int]($i/60); $sec = $i%%60; Write-Host -NoNewline ('[PAUSA] Proximo ciclo em: {0}m {1:00}s...' -f $min, $sec).PadRight([System.Console]::WindowWidth - 1); Start-Sleep -Seconds 1 }"
+echo.
+goto :LOOP
+
+:: --- SUB-ROTINA DE FALHA ---
+:HANDLE_FAILURE
+echo.
+echo !!!!!!!!!! FALHA DETECTADA !!!!!!!!!!
+echo [SUPERVISOR] O robo encerrou com um erro. Verifique o log para detalhes.
+echo [SUPERVISOR] O script vai reiniciar em breve. Pressione CTRL+C para cancelar.
+echo [SUPERVISOR] !!!!!!!!!! FALHA DETECTADA (Exit Code: %ERRORLEVEL%) em %date% %time% !!!!!!!!!! >> "%LOG_CICLO%"
+
+powershell -Command "$curTop = [System.Console]::CursorTop; for ($i = %PAUSA_FALHA_SEGUNDOS%; $i -ge 1; $i--) { [System.Console]::SetCursorPosition(0, $curTop); Write-Host -NoNewline ('[REINICIANDO] Em: {0}s...' -f $i).PadRight([System.Console]::WindowWidth - 1); Start-Sleep -Seconds 1 }"
+echo.
 goto :LOOP
 
 endlocal
+pause
 
