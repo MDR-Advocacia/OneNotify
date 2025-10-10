@@ -18,7 +18,9 @@ def _executar_migracoes(conn):
     colunas_para_adicionar = {
         'responsavel': 'TEXT',
         'data_processamento': 'TEXT',
-        'detalhes_erro': 'TEXT'
+        'detalhes_erro': 'TEXT',
+        'origem': 'TEXT DEFAULT "onenotify"', # ACRESCENTADO
+        'gerou_tarefa': 'INTEGER DEFAULT 0'    # ACRESCENTADO
     }
     for col, tipo in colunas_para_adicionar.items():
         if col not in tabela_notificacoes_cols:
@@ -101,8 +103,9 @@ def obter_tarefas_pendentes_por_lote(tamanho_lote: int) -> List[Dict]:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             
+            # ACRESCENTADO: MAX(origem) para identificar tarefas de migração
             cursor.execute("""
-                SELECT DISTINCT NPJ, data_notificacao 
+                SELECT DISTINCT NPJ, data_notificacao, MAX(origem) as origem 
                 FROM notificacoes 
                 WHERE status = 'Pendente' AND data_notificacao IS NOT NULL
                 ORDER BY data_notificacao, NPJ 
@@ -162,16 +165,16 @@ def get_next_user() -> str | None:
         return None
 
 
-def atualizar_notificacoes_processadas(npj, data, numero_processo, andamentos, documentos, data_processamento, responsavel):
-    """Atualiza as notificações de uma tarefa como 'Processado'."""
+def atualizar_notificacoes_processadas(npj, data, numero_processo, andamentos, documentos, data_processamento, responsavel, status='Processado'):
+    """Atualiza as notificações de uma tarefa com o status final correto (Processado ou Migrado)."""
     try:
         with sqlite3.connect(DATABASE_PATH) as conn:
             conn.execute("""
                 UPDATE notificacoes
-                SET status = 'Processado', numero_processo = ?, andamentos = ?, documentos = ?,
+                SET status = ?, numero_processo = ?, andamentos = ?, documentos = ?,
                     data_processamento = ?, responsavel = ?, detalhes_erro = NULL
                 WHERE NPJ = ? AND data_notificacao = ? AND status = 'Em Processamento'
-            """, (numero_processo, json.dumps(andamentos), json.dumps(documentos), data_processamento, responsavel, npj, data))
+            """, (status, numero_processo, json.dumps(andamentos), json.dumps(documentos), data_processamento, responsavel, npj, data))
     except sqlite3.Error as e:
         logging.error(f"ERRO ao atualizar tarefa {npj}-{data} como processada: {e}")
 

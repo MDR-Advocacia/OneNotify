@@ -8,6 +8,7 @@ from flask_cors import CORS
 import logging
 import time
 from datetime import datetime
+import pandas as pd
 
 # --- Configuração do App ---
 app = Flask(__name__, static_folder='build', static_url_path='/')
@@ -56,7 +57,9 @@ def init_db():
         db.execute('ALTER TABLE notificacoes ADD COLUMN detalhes_erro TEXT')
     if 'gerou_tarefa' not in cols:
         db.execute('ALTER TABLE notificacoes ADD COLUMN gerou_tarefa INTEGER DEFAULT 0')
-    
+    if 'origem' not in cols:
+        db.execute('ALTER TABLE notificacoes ADD COLUMN origem TEXT DEFAULT "onenotify"')
+
     db.execute('''
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -96,6 +99,47 @@ def table_has_column(db, table_name, column_name):
 
 # --- Rotas da API ---
 
+@app.route('/api/migracao', methods=['POST'])
+def migrar_planilha():
+    if 'file' not in request.files:
+        return jsonify({'error': 'Nenhum arquivo enviado'}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'Nome de arquivo inválido'}), 400
+
+    try:
+        if file.filename.endswith('.csv'):
+            df = pd.read_csv(file)
+        elif file.filename.endswith('.xlsx'):
+            df = pd.read_excel(file)
+        else:
+            return jsonify({'error': 'Formato de arquivo não suportado. Use .csv ou .xlsx'}), 400
+
+        if 'npj' not in df.columns or 'data' not in df.columns:
+            return jsonify({'error': 'A planilha deve conter as colunas "npj" e "data"'}), 400
+
+        db = get_db()
+        cursor = db.cursor()
+        
+        for index, row in df.iterrows():
+            npj = str(row['npj'])
+            data_notificacao = str(row['data'])
+            
+            # CORREÇÃO APLICADA AQUI: De INSERT para INSERT OR IGNORE
+            cursor.execute("""
+                INSERT OR IGNORE INTO notificacoes (NPJ, data_notificacao, status, origem, tipo_notificacao)
+                VALUES (?, ?, 'Pendente', 'migracao', 'Migração de Dados')
+            """, (npj, data_notificacao))
+
+        db.commit()
+        return jsonify({'message': f'{len(df)} notificações foram adicionadas à fila de migração.'}), 201
+
+    except Exception as e:
+        app.logger.error(f"Erro ao processar planilha: {e}")
+        return jsonify({'error': 'Falha ao processar o arquivo da planilha'}), 500
+
+
 @app.route('/api/tarefas', methods=['POST'])
 def criar_tarefa():
     tarefa_data = request.json
@@ -115,14 +159,11 @@ def criar_tarefa():
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
                     file_content = json.load(f)
-                    # Garante que a estrutura básica exista, caso o arquivo esteja corrompido
                     if "processos" not in file_content or not isinstance(file_content["processos"], list):
                          file_content["processos"] = []
             except (json.JSONDecodeError, FileNotFoundError):
-                # Se o arquivo estiver vazio ou corrompido, começa de novo
                 pass
 
-        # Adiciona o novo processo à lista de processos
         file_content["processos"].append(tarefa_data["processos"][0])
         
         with open(file_path, 'w', encoding='utf-8') as f:
@@ -171,7 +212,7 @@ def get_legalone_tasks():
 def get_stats():
     db = get_db()
     stats = {}
-    statuses = {'pendente': 'Pendente', 'processado': 'Processado', 'arquivado': 'Arquivado', 'tratada': 'Tratada'}
+    statuses = {'pendente': 'Pendente', 'processado': 'Processado', 'arquivado': 'Arquivado', 'tratada': 'Tratada', 'migrado': 'Migrado'}
     for key, status_val in statuses.items():
         count = db.execute(
             "SELECT COUNT(DISTINCT NPJ || data_notificacao) FROM notificacoes WHERE status = ?", (status_val,)
