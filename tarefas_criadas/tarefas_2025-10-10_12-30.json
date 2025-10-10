@@ -1,0 +1,21 @@
+{
+  "fonte": "Onenotify",
+  "processos": [
+    {
+      "id_responsavel": 26,
+      "numero_processo": "00514381220028040001",
+      "parent_type_external_id": 17,
+      "external_id": 1047,
+      "data agendamento": "13/10/2025",
+      "observacao": "Acompanhar Custas"
+    },
+    {
+      "id_responsavel": 25,
+      "numero_processo": "00543975320028040001",
+      "parent_type_external_id": 17,
+      "external_id": 1047,
+      "data agendamento": "13/10/2025",
+      "observacao": "Acompanhar Custas"
+    }
+  ]
+}
