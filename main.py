@@ -107,7 +107,7 @@ def main():
                         logging.warning("Exceção de sessão capturada no loop principal. Forçando renovação imediata.")
                         session_start_time = 0 
                         continue
-            
+                
             finally:
                 # Este bloco garante que o navegador e os processos sejam fechados
                 logging.info("Finalizando a sessão do navegador e processos relacionados.")

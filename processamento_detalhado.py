@@ -22,7 +22,8 @@ def extrair_numero_processo(page: Page) -> Optional[str]:
         logging.warning(f"      - Não foi possível extrair o número do processo: {e}")
     return None
 
-def extrair_andamentos(page: Page, data_notificacao_recente: str) -> List[Dict[str, str]]:
+# ADICIONADO: Parâmetro 'is_migracao' para controlar o período de busca
+def extrair_andamentos(page: Page, data_notificacao_recente: str, is_migracao: bool) -> List[Dict[str, str]]:
     """Clica no menu 'Andamentos', filtra por data e extrai os dados."""
     andamentos = []
     try:
@@ -42,7 +43,14 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str) -> List[Dict[s
             return []
 
         data_base = datetime.strptime(data_notificacao_recente, '%d/%m/%Y').date()
-        datas_permitidas = { data_base - timedelta(days=i) for i in range(3) }
+        
+        # LÓGICA CONDICIONAL: 7 dias para migração, 3 dias para o normal
+        dias_a_buscar = 7 if is_migracao else 3
+        datas_permitidas = { data_base - timedelta(days=i) for i in range(dias_a_buscar) }
+        
+        if is_migracao:
+            logging.info(f"      - [MIGRAÇÃO] Filtrando andamentos para os últimos {dias_a_buscar} dias.")
+        
         logging.info(f"      - Filtrando andamentos para as datas: {[d.strftime('%d/%m/%Y') for d in sorted(list(datas_permitidas))]}")
 
         linhas = page.locator(primeira_linha_selector).all()
@@ -92,7 +100,8 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str) -> List[Dict[s
         raise
     return andamentos
 
-def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str) -> List[Dict[str, str]]:
+# ADICIONADO: Parâmetro 'is_migracao' para controlar o período de busca
+def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_migracao: bool) -> List[Dict[str, str]]:
     """Expande as seções de documentos, filtra pela data e baixa os arquivos."""
     documentos_baixados = []
     try:
@@ -121,7 +130,14 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str) -> Li
         diretorio_download_npj.mkdir(parents=True, exist_ok=True)
         
         data_base = datetime.strptime(data_notificacao_recente, '%d/%m/%Y').date()
-        datas_permitidas = {data_base - timedelta(days=i) for i in range(3)}
+        
+        # LÓGICA CONDICIONAL: 7 dias para migração, 3 dias para o normal
+        dias_a_buscar = 7 if is_migracao else 3
+        datas_permitidas = {data_base - timedelta(days=i) for i in range(dias_a_buscar)}
+
+        if is_migracao:
+            logging.info(f"      - [MIGRAÇÃO] Filtrando documentos para os últimos {dias_a_buscar} dias.")
+        
         logging.info(f"      - Filtrando documentos para as datas: {[d.strftime('%d/%m/%Y') for d in sorted(list(datas_permitidas))]}")
 
         tabela_selector = 'table[ng-table="vm.tabelaDocumento"]'
@@ -207,6 +223,8 @@ def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any
     for i, tarefa in enumerate(lote):
         npj = tarefa.get('NPJ')
         data_notificacao = tarefa.get('data_notificacao')
+        # ADICIONADO: Identificação da origem da tarefa
+        origem = tarefa.get('origem', 'onenotify')
         data_hora_processamento = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
         
         if not data_notificacao:
@@ -216,24 +234,32 @@ def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any
             stats["falha"] += 1
             continue
 
-        logging.info(f"\n[{i+1}/{len(lote)}] Processando Tarefa: {npj} (Data: {data_notificacao})")
+        logging.info(f"\n[{i+1}/{len(lote)}] Processando Tarefa: {npj} (Data: {data_notificacao}, Origem: {origem})")
         
         try:
             navegar_para_detalhes_do_npj(page, npj)
             
             numero_processo = extrair_numero_processo(page)
             
-            # *** ORDEM CORRIGIDA AQUI ***
-            documentos = baixar_documentos(page, data_notificacao, npj)
-            andamentos = extrair_andamentos(page, data_notificacao)
+            # ADICIONADO: Flag 'is_migracao' para controlar a lógica de busca
+            is_migracao = (origem == 'migracao')
+            
+            documentos = baixar_documentos(page, data_notificacao, npj, is_migracao)
+            andamentos = extrair_andamentos(page, data_notificacao, is_migracao)
             
             stats["documentos"] += len(documentos)
             stats["andamentos"] += len(andamentos)
 
             proximo_responsavel = database.get_next_user()
             
-            database.atualizar_notificacoes_processadas(npj, data_notificacao, numero_processo, andamentos, documentos, data_hora_processamento, proximo_responsavel)
-            logging.info(f"SUCESSO: Tarefa {npj} finalizada e atribuída a {proximo_responsavel or 'Ninguém'}.")
+            # ADICIONADO: Definição do status final com base na origem
+            status_final = 'Migrado' if is_migracao else 'Processado'
+            
+            database.atualizar_notificacoes_processadas(
+                npj, data_notificacao, numero_processo, andamentos, documentos, 
+                data_hora_processamento, proximo_responsavel, status=status_final
+            )
+            logging.info(f"SUCESSO: Tarefa {npj} finalizada como '{status_final}' e atribuída a {proximo_responsavel or 'Ninguém'}.")
             stats["sucesso"] += 1
 
         except TimeoutError as e:

@@ -17,6 +17,7 @@ const MoonIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-
 const GearIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
 const XIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>;
 const TaskIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-500" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 000 2h6a1 1 0 100-2H7zm0 4a1 1 0 000 2h6a1 1 0 100-2H7zm0 4a1 1 0 000 2h4a1 1 0 100-2H7z" clipRule="evenodd" /></svg>;
+const UploadIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>;
 
 // --- Helper Functions ---
 const abbreviateTipo = (tipo) => {
@@ -76,6 +77,103 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
                     <button onClick={onClose} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 font-semibold">Cancelar</button>
                     <button onClick={onConfirm} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-semibold">Confirmar</button>
                 </div>
+            </div>
+        </div>
+    );
+};
+
+const MigrationModal = ({ isOpen, onClose, onMigrationComplete }) => {
+    const [file, setFile] = useState(null);
+    const [uploading, setUploading] = useState(false);
+    const [message, setMessage] = useState('');
+    const [isError, setIsError] = useState(false);
+
+    const handleFileChange = (e) => {
+        setFile(e.target.files[0]);
+        setMessage('');
+        setIsError(false);
+    };
+
+    const handleUpload = async () => {
+        if (!file) {
+            setMessage('Por favor, selecione um arquivo.');
+            setIsError(true);
+            return;
+        }
+
+        setUploading(true);
+        setMessage('Enviando arquivo...');
+        setIsError(false);
+        
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch(`${API_URL}/migracao`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Erro desconhecido');
+            }
+            
+            setMessage(data.message);
+            setIsError(false);
+            onMigrationComplete();
+            setTimeout(() => { 
+                onClose();
+            }, 3000);
+
+        } catch (error) {
+            setMessage(`Erro: ${error.message}`);
+            setIsError(true);
+        } finally {
+            setUploading(false);
+        }
+    };
+    
+    useEffect(() => {
+        if (!isOpen) {
+            setFile(null);
+            setUploading(false);
+            setMessage('');
+            setIsError(false);
+        }
+    }, [isOpen]);
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
+                <header className="p-4 border-b dark:border-gray-700 flex justify-between items-center">
+                    <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Migrar Notificações</h2>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                        <XIcon />
+                    </button>
+                </header>
+                <main className="p-6">
+                    <p className="text-gray-600 dark:text-gray-300 mb-4">
+                        Selecione uma planilha (.xlsx ou .csv) contendo as colunas "npj" e "data" para adicionar as notificações à fila de processamento.
+                    </p>
+                    <input 
+                        type="file" 
+                        onChange={handleFileChange} 
+                        accept=".xlsx, .csv"
+                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    />
+                    {file && <p className="text-sm text-gray-500 mt-2">Arquivo selecionado: {file.name}</p>}
+                    {message && <p className={`mt-4 text-sm ${isError ? 'text-red-500' : 'text-green-500'}`}>{message}</p>}
+                </main>
+                <footer className="px-6 py-4 bg-gray-50 dark:bg-gray-700 flex justify-end gap-4">
+                    <button onClick={onClose} disabled={uploading} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 font-semibold disabled:opacity-50">Cancelar</button>
+                    <button onClick={handleUpload} disabled={uploading} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-semibold disabled:opacity-50 disabled:bg-blue-400">
+                        {uploading ? 'Enviando...' : 'Iniciar Migração'}
+                    </button>
+                </footer>
             </div>
         </div>
     );
@@ -323,7 +421,7 @@ function App() {
 
     const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
 
-    const [stats, setStats] = useState({ pendente: 0, processado: 0, erro: 0, erro_data_invalida: 0, arquivado: 0, tratada: 0 });
+    const [stats, setStats] = useState({ pendente: 0, processado: 0, erro: 0, erro_data_invalida: 0, arquivado: 0, tratada: 0, migrado: 0 });
     const [notificacoes, setNotificacoes] = useState([]);
     const [statusFiltro, setStatusFiltro] = useState('Processado');
     const [loading, setLoading] = useState(true);
@@ -335,6 +433,7 @@ function App() {
     const [selectedIds, setSelectedIds] = useState([]);
     const [modalDetalhes, setModalDetalhes] = useState({ isOpen: false, item: null });
     const [showUserManagement, setShowUserManagement] = useState(false);
+    const [showMigrationModal, setShowMigrationModal] = useState(false);
     const [listaUsuarios, setListaUsuarios] = useState([]);
     const [responsavelFiltro, setResponsavelFiltro] = useState('Todos');
     const [activeActionMenu, setActiveActionMenu] = useState(null);
@@ -509,6 +608,9 @@ function App() {
                 <button onClick={toggleTheme} className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     {theme === 'light' ? <MoonIcon /> : <SunIcon />}
                 </button>
+                <button onClick={() => setShowMigrationModal(true)} className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 border border-purple-700 rounded-lg shadow-sm text-sm flex items-center">
+                    <UploadIcon /> Migrar Planilha
+                </button>
                 <button onClick={() => setShowUserManagement(!showUserManagement)} className="bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm">
                     {showUserManagement ? 'Ver Notificações' : 'Gerenciar Responsáveis'}
                 </button>
@@ -517,10 +619,11 @@ function App() {
     
           {showUserManagement ? ( <UserManagement users={listaUsuarios} onUserChange={fetchAllData} /> ) : (
             <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4 mb-6">
                     <StatsCard title="Pendentes" value={stats.pendente} color="border-yellow-400" />
                     <StatsCard title="Processados" value={stats.processado} color="border-green-400" />
                     <StatsCard title="Tratadas" value={stats.tratada} color="border-blue-400" />
+                    <StatsCard title="Migrados" value={stats.migrado} color="border-purple-400" />
                     <StatsCard title="Com Erro" value={stats.erro} color="border-red-400" />
                     <StatsCard title="Erro de Dados" value={stats.erro_data_invalida} color="border-orange-400" />
                     <StatsCard title="Arquivados" value={stats.arquivado} color="border-gray-400" />
@@ -529,6 +632,7 @@ function App() {
                     <StatusTab status="Pendente" label="Pendentes" activeStatus={statusFiltro} setActiveStatus={handleStatusChange} count={stats.pendente} />
                     <StatusTab status="Processado" label="Processados" activeStatus={statusFiltro} setActiveStatus={handleStatusChange} count={stats.processado} />
                     <StatusTab status="Tratada" label="Tratadas" activeStatus={statusFiltro} setActiveStatus={handleStatusChange} count={stats.tratada} />
+                    <StatusTab status="Migrado" label="Migrados" activeStatus={statusFiltro} setActiveStatus={handleStatusChange} count={stats.migrado} />
                     <StatusTab status="Erro" label="Erro" activeStatus={statusFiltro} setActiveStatus={handleStatusChange} count={stats.erro} />
                     <StatusTab status="Arquivado" label="Arquivados" activeStatus={statusFiltro} setActiveStatus={handleStatusChange} count={stats.arquivado} />
                 </div>
@@ -592,7 +696,7 @@ function App() {
                                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300 truncate">{item.numero_processo || '-'}</td>
                                         <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                                             <div className="flex flex-wrap gap-1">
-                                                {item.tipos_notificacao.split('; ').map(tipo => (
+                                                {item.tipos_notificacao && item.tipos_notificacao.split('; ').map(tipo => (
                                                     <span key={tipo} className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-0.5 rounded-full">{abbreviateTipo(tipo)}</span>
                                                 ))}
                                             </div>
@@ -628,7 +732,12 @@ function App() {
                 </div>
             </>
           )}
-    
+          
+          <MigrationModal
+            isOpen={showMigrationModal}
+            onClose={() => setShowMigrationModal(false)}
+            onMigrationComplete={fetchAllData}
+          />
           <ConfirmationModal
             isOpen={confirmationModal.isOpen}
             onClose={() => setConfirmationModal({ isOpen: false, onConfirm: () => {}, message: '' })}

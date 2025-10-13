@@ -6,6 +6,7 @@ que são baixados automaticamente com o comando "npm install".
 Arquivos de build de produção
 Quando você gerar a versão final do painel, os arquivos ficarão aqui.
 /build
+/venv-painel-stable
 
 Logs de depuração
 npm-debug.log*
