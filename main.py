@@ -35,7 +35,6 @@ def main():
     stats_processamento = {"sucesso": 0, "falha": 0, "andamentos": 0, "documentos": 0}
     start_time = time.time()
     
-    # --- Flag para controlar o status da execução ---
     ocorreu_falha_critica = False
     
     logging.info("=" * 60)
@@ -47,11 +46,12 @@ def main():
 
     try:
         database.inicializar_banco()
-        database.resetar_notificacoes_em_processamento_ou_erro()
+        # AJUSTADO: Lógica de reset inteligente
+        database.resetar_notificacoes_em_processamento() # Reseta apenas o que parou no meio
+        database.resetar_erros_de_portal_antigos()      # Libera erros de portal com mais de 24h
 
         with sync_playwright() as playwright:
             try:
-                # --- LÓGICA DE RETENTATIVA DE LOGIN ---
                 login_success = False
                 for attempt in range(3):
                     try:
@@ -70,7 +70,6 @@ def main():
                 if not login_success:
                     logging.critical("Não foi possível realizar o login após 3 tentativas. Abortando execução.")
                     raise ConnectionError("Falha persistente no login.")
-                # --- FIM DA LÓGICA DE RETENTATIVA ---
 
                 logging.info("\nFASE 2: EXTRAÇÃO DE NOVAS NOTIFICAÇÕES E REGISTRO DE CIÊNCIA")
                 stats_extracao = executar_extracao_e_ciencia(page)
@@ -87,9 +86,9 @@ def main():
                         )
                         
                         logging.info("Buscando novo lote de tarefas...")
-                        lote_para_processar = database.obter_tarefas_pendentes_por_lote(TAMANHO_LOTE)
+                        lote_para_processar = database.buscar_lote_para_processamento(TAMANHO_LOTE)
                         if not lote_para_processar:
-                            logging.warning("Não há mais lotes para processar nesta iteração (pode ser concorrência ou fim da fila).")
+                            logging.info("Fila de tarefas pendentes concluída.")
                             break
                         
                         logging.info(f"Iniciando processamento detalhado de {len(lote_para_processar)} tarefa(s).")
@@ -109,7 +108,6 @@ def main():
                         continue
                 
             finally:
-                # Este bloco garante que o navegador e os processos sejam fechados
                 logging.info("Finalizando a sessão do navegador e processos relacionados.")
                 if browser and browser.is_connected():
                     try:
@@ -135,7 +133,6 @@ def main():
         logging.critical(f"Ocorreu uma falha geral e inesperada na automação.", exc_info=True)
         ocorreu_falha_critica = True
     finally:
-        # Este bloco externo CUIDA APENAS DO RESUMO E LOGS FINAIS
         end_time = time.time()
         duracao_total = end_time - start_time
         
@@ -152,7 +149,6 @@ def main():
             logging.info(f"{key.replace('_', ' ').capitalize()}: {value:.2f}" if isinstance(value, float) else f"{key.replace('_', ' ').capitalize()}: {value}")
         logging.info("=" * 60)
         
-        # --- Lógica de saída para o .bat ---
         if ocorreu_falha_critica:
             logging.error("Execução finalizada com erro crítico. O supervisor irá reiniciar no modo de falha.")
             sys.exit(1)
