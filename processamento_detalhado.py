@@ -22,14 +22,25 @@ def extrair_numero_processo(page: Page) -> Optional[str]:
         logging.warning(f"      - Não foi possível extrair o número do processo: {e}")
     return None
 
-# AJUSTADO: Lógica híbrida para tratar layout de abas ou de accordion.
+def extrair_polo(page: Page) -> Optional[str]:
+    """Extrai o polo (Ativo/Passivo) do cabeçalho da página."""
+    try:
+        selector_polo = 'div[bb-title="Polo"] span.chip__desc'
+        if page.locator(selector_polo).count() > 0:
+            polo = page.locator(selector_polo).inner_text().strip()
+            logging.info(f"      - Polo do BB encontrado: {polo}")
+            return polo
+        logging.warning("      - Não foi possível encontrar o elemento do Polo na página.")
+    except Error as e:
+        logging.warning(f"      - Erro ao tentar extrair o Polo: {e}")
+    return None
+
 def extrair_andamentos(page: Page, data_notificacao_recente: str, is_migracao: bool) -> List[Dict[str, str]]:
     """Clica no menu 'Andamentos' (seja aba ou accordion), filtra por data e extrai os dados."""
     andamentos = []
     try:
         logging.info("      - Procurando pela seção 'Andamentos'...")
         
-        # Tenta a nova estrutura (accordion) primeiro
         secao_andamentos_accordion = page.locator('div.accordion__item[bb-item-title="ANDAMENTOS"]')
         
         if secao_andamentos_accordion.count() > 0:
@@ -40,7 +51,6 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str, is_migracao: b
                 andamentos_title.click()
                 page.wait_for_timeout(1000)
         else:
-            # Fallback para a estrutura antiga (abas)
             logging.info("      - Layout de Abas detectado para Andamentos.")
             page.locator('li:has-text("Andamentos")').click(timeout=10000)
 
@@ -113,20 +123,17 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str, is_migracao: b
         raise
     return andamentos
 
-# AJUSTADO: Lógica híbrida para tratar layout novo (aninhado) ou antigo.
 def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_migracao: bool) -> List[Dict[str, str]]:
     """Expande as seções de documentos (seja qual for o layout), filtra pela data e baixa os arquivos."""
     documentos_baixados = []
     try:
         logging.info("      - Procurando e expandindo seções de documentos...")
         
-        # Define os seletores para os dois layouts
         seletor_layout_novo = 'div.accordion__item[bb-item-title="DOCUMENTOS"]'
         seletor_layout_antigo = 'div.accordion__item[bb-item-title="Documentos"]'
 
         secao_container = None
 
-        # Tenta o layout novo primeiro
         if page.locator(seletor_layout_novo).count() > 0:
             logging.info("      - Layout Novo (aninhado) de documentos detectado.")
             secao_container = page.locator(seletor_layout_novo)
@@ -136,7 +143,6 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_mi
                  titulo_principal.click()
                  page.wait_for_timeout(1000)
 
-            # Procura e expande a sub-seção
             sub_secao = secao_container.locator(seletor_layout_antigo)
             if sub_secao.count() > 0:
                 titulo_sub_secao = sub_secao.locator('.accordion__title').first
@@ -145,7 +151,6 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_mi
                     titulo_sub_secao.click()
                     page.wait_for_timeout(1000)
 
-        # Se não encontrou, tenta o layout antigo
         elif page.locator(seletor_layout_antigo).count() > 0:
             logging.info("      - Layout Antigo (simples) de documentos detectado.")
             secao_container = page.locator(seletor_layout_antigo)
@@ -155,11 +160,9 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_mi
                 titulo_secao.click()
                 page.wait_for_timeout(1000)
         
-        # Se não encontrou nenhum container de documentos
         if not secao_container:
             logging.info("      - Nenhuma seção de documentos encontrada para este NPJ. Pulando a etapa de download.")
             return []
-
 
         nome_pasta_npj = re.sub(r'[\\/*?:"<>|]', '_', npj)
         diretorio_download_npj = Path(__file__).resolve().parent / "documentos" / nome_pasta_npj
@@ -177,7 +180,6 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_mi
 
         tabela_selector = 'table[ng-table="vm.tabelaDocumento"]'
         tabela_documentos = secao_container.locator(tabela_selector)
-        # Timeout aumentado para acomodar NPJs com muitos documentos que demoram a carregar
         tabela_documentos.wait_for(state='visible', timeout=45000)
         
         linhas_documentos = tabela_documentos.locator('tbody tr').all()
@@ -225,6 +227,15 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_mi
         logging.warning(f"      - Ocorreu um erro geral ao processar documentos: {e}")
         raise
     
+    # Adiciona a espera pelo loader antes de finalizar a função
+    finally:
+        logging.info("      - Verificando se o loader da página está ativo antes de prosseguir...")
+        try:
+            page.locator('plt-carregando div.loader.is-loading').wait_for(state='hidden', timeout=20000)
+            logging.info("      - Loader desapareceu. Prosseguindo...")
+        except TimeoutError:
+            logging.warning("      - O loader não desapareceu no tempo esperado, mas a execução continuará.")
+
     return documentos_baixados
 
 def navegar_para_detalhes_do_npj(page: Page, npj: str):
@@ -233,7 +244,7 @@ def navegar_para_detalhes_do_npj(page: Page, npj: str):
     
     match = re.match(r"(\d+)/(\d+)-(\d+)", npj)
     if not match:
-        raise ValueError(f"Formato de NPJ inválido: {npj}") # Erro permanente
+        raise ValueError(f"Formato de NPJ inválido: {npj}")
     ano, numero, _ = match.groups()
     id_processo_url = f"{ano}{numero.zfill(7)}"
     
@@ -248,7 +259,7 @@ def navegar_para_detalhes_do_npj(page: Page, npj: str):
     logging.info("      - Sincronização com a página do NPJ confirmada.")
     
     if page.locator('text=/processo n(ã|a)o localizado/i').count() > 0:
-        raise Error(f"Processo {npj} não foi encontrado no portal (página de erro).") # Erro permanente
+        raise Error(f"Processo {npj} não foi encontrado no portal (página de erro).")
 
 def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any]]) -> Dict[str, int]:
     """Processa um lote de tarefas (NPJ + data), navegando para a URL de cada um e extraindo os detalhes."""
@@ -275,10 +286,10 @@ def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any
             navegar_para_detalhes_do_npj(page, npj)
             
             numero_processo = extrair_numero_processo(page)
+            polo = extrair_polo(page) # Extrai a nova informação
             
             is_migracao = (origem == 'migracao')
             
-            # Ordem correta: primeiro documentos, depois andamentos
             documentos = baixar_documentos(page, data_notificacao, npj, is_migracao)
             andamentos = extrair_andamentos(page, data_notificacao, is_migracao)
             
@@ -291,7 +302,8 @@ def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any
             
             database.atualizar_notificacoes_processadas(
                 npj, data_notificacao, numero_processo, andamentos, documentos, 
-                data_hora_processamento, proximo_responsavel, status=status_final
+                data_hora_processamento, proximo_responsavel, status=status_final,
+                polo=polo # Passa a nova informação para o banco
             )
             logging.info(f"SUCESSO: Tarefa {npj} finalizada como '{status_final}' e atribuída a {proximo_responsavel or 'Ninguém'}.")
             stats["sucesso"] += 1

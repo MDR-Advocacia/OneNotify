@@ -8,7 +8,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright, Error as PlaywrightError
 
 import database
-from config import LOG_FORMAT, LOG_LEVEL, TAMANHO_LOTE
+from config import LOG_FORMAT, LOG_LEVEL, TAMANHO_LOTE, TAREFAS_CONFIG, TEMPO_LIMITE_EXTRACAO
 from autologin import realizar_login_automatico
 from modulo_notificacoes import executar_extracao_e_ciencia
 from processamento_detalhado import processar_detalhes_de_lote
@@ -46,9 +46,9 @@ def main():
 
     try:
         database.inicializar_banco()
-        # AJUSTADO: Lógica de reset inteligente
-        database.resetar_notificacoes_em_processamento() # Reseta apenas o que parou no meio
-        database.resetar_erros_de_portal_antigos()      # Libera erros de portal com mais de 24h
+        database.resetar_notificacoes_em_processamento()
+        database.resetar_erros_de_portal_antigos()
+
 
         with sync_playwright() as playwright:
             try:
@@ -70,9 +70,38 @@ def main():
                 if not login_success:
                     logging.critical("Não foi possível realizar o login após 3 tentativas. Abortando execução.")
                     raise ConnectionError("Falha persistente no login.")
+                
+                # --- NOVA LÓGICA DE EXTRAÇÃO EM CICLOS ---
+                logging.info("\nFASE 2: EXTRAÇÃO DE NOVAS NOTIFICAÇÕES E REGISTRO DE CIÊNCIA (EM CICLOS)")
+                tarefas_pendentes_extracao = list(TAREFAS_CONFIG)
+                
+                while tarefas_pendentes_extracao:
+                    logging.info("-" * 20)
+                    logging.info(f"Iniciando novo ciclo de extração. {len(tarefas_pendentes_extracao)} tipo(s) de tarefa(s) restante(s).")
+                    
+                    ciclo_start_time = time.time()
+                    
+                    resultados_ciclo, tempo_esgotado, tarefas_restantes = executar_extracao_e_ciencia(
+                        page, tarefas_pendentes_extracao, ciclo_start_time, TEMPO_LIMITE_EXTRACAO
+                    )
+                    
+                    # Acumula as estatísticas do ciclo
+                    stats_extracao["notificacoes_salvas"] += resultados_ciclo["notificacoes_salvas"]
+                    stats_extracao["ciencias_registradas"] += resultados_ciclo["ciencias_registradas"]
+                    
+                    tarefas_pendentes_extracao = tarefas_restantes
 
-                logging.info("\nFASE 2: EXTRAÇÃO DE NOVAS NOTIFICAÇÕES E REGISTRO DE CIÊNCIA")
-                stats_extracao = executar_extracao_e_ciencia(page)
+                    if tempo_esgotado and tarefas_pendentes_extracao:
+                        logging.warning("Ciclo de extração interrompido por tempo. Renovando a sessão para continuar...")
+                        # Força a renovação da sessão
+                        session_start_time = 0 
+                        page, browser, context, browser_process_ref, session_start_time = refresh_session_if_needed(
+                            playwright, page, browser, context, browser_process_ref, session_start_time
+                        )
+                    elif not tarefas_pendentes_extracao:
+                         logging.info("Todos os tipos de tarefa de extração foram processados.")
+                         break
+                # --- FIM DA NOVA LÓGICA ---
                 
                 logging.info("\nFASE 3: PROCESSAMENTO DETALHADO EM LOTES")
                 
@@ -81,6 +110,7 @@ def main():
 
                 while database.contar_pendentes() > 0:
                     try:
+                        # Verifica se a sessão de login precisa ser renovada antes de processar o lote de detalhes
                         page, browser, context, browser_process_ref, session_start_time = refresh_session_if_needed(
                             playwright, page, browser, context, browser_process_ref, session_start_time
                         )
@@ -88,7 +118,7 @@ def main():
                         logging.info("Buscando novo lote de tarefas...")
                         lote_para_processar = database.buscar_lote_para_processamento(TAMANHO_LOTE)
                         if not lote_para_processar:
-                            logging.info("Fila de tarefas pendentes concluída.")
+                            logging.info("Não há mais lotes para processar nesta iteração.")
                             break
                         
                         logging.info(f"Iniciando processamento detalhado de {len(lote_para_processar)} tarefa(s).")
@@ -103,7 +133,7 @@ def main():
                         logging.info(f"Lote finalizado. Restam {pendentes_restantes} tarefas pendentes.")
 
                     except SessionExpiredError:
-                        logging.warning("Exceção de sessão capturada no loop principal. Forçando renovação imediata.")
+                        logging.warning("Exceção de sessão capturada no loop de processamento. Forçando renovação imediata.")
                         session_start_time = 0 
                         continue
                 

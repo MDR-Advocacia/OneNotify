@@ -22,7 +22,8 @@ def _executar_migracoes(conn):
         'detalhes_erro': 'TEXT',
         'origem': 'TEXT DEFAULT "onenotify"',
         'gerou_tarefa': 'INTEGER DEFAULT 0',
-        'tentativas': 'INTEGER DEFAULT 0' # NOVA COLUNA
+        'tentativas': 'INTEGER DEFAULT 0',
+        'polo': 'TEXT' # NOVA COLUNA ADICIONADA
     }
     for col, tipo in colunas_para_adicionar.items():
         if col not in tabela_notificacoes_cols:
@@ -63,7 +64,6 @@ def inicializar_banco():
         logging.error(f"ERRO CRÍTICO ao inicializar o banco de dados: {e}", exc_info=True)
         raise
 
-# AJUSTADO: Agora reseta apenas tarefas que pararam no meio da execução.
 def resetar_notificacoes_em_processamento():
     """Reseta o status de notificações que foram interrompidas durante o processamento."""
     try:
@@ -75,7 +75,6 @@ def resetar_notificacoes_em_processamento():
     except sqlite3.Error as e:
         logging.error(f"ERRO ao resetar status de notificações: {e}", exc_info=True)
 
-# NOVA FUNÇÃO: Implementa a regra de reprocessar erros de portal uma vez por dia.
 def resetar_erros_de_portal_antigos():
     """Verifica notificações com 'Erro_Portal' e as libera para nova tentativa se tiverem mais de 24 horas."""
     try:
@@ -98,7 +97,6 @@ def resetar_erros_de_portal_antigos():
                     if data_proc < limite_tempo:
                         ids_para_resetar.append((tarefa['id'],))
                 except (ValueError, TypeError):
-                    # Se a data for inválida ou nula, reseta para tentar corrigir
                     ids_para_resetar.append((tarefa['id'],))
 
             if ids_para_resetar:
@@ -110,6 +108,7 @@ def resetar_erros_de_portal_antigos():
         logging.error(f"ERRO ao reprocessar erros de portal antigos: {e}", exc_info=True)
 
 def salvar_notificacoes(lista_notificacoes: list[dict]) -> int:
+    """Salva uma lista de notificações no banco, ignorando duplicatas."""
     salvas = 0
     for n in lista_notificacoes:
         if not n.get('data_notificacao'):
@@ -129,6 +128,7 @@ def salvar_notificacoes(lista_notificacoes: list[dict]) -> int:
     return salvas
 
 def buscar_lote_para_processamento(tamanho_lote: int) -> List[Dict]:
+    """Obtém um lote de tarefas (NPJ + data) únicas e marca-as como 'Em Processamento'."""
     try:
         with sqlite3.connect(DATABASE_PATH) as conn:
             conn.row_factory = sqlite3.Row
@@ -156,6 +156,7 @@ def buscar_lote_para_processamento(tamanho_lote: int) -> List[Dict]:
         return []
 
 def contar_pendentes() -> int:
+    """Conta quantas tarefas (grupos NPJ + data) únicas ainda estão pendentes."""
     try:
         with sqlite3.connect(DATABASE_PATH) as conn:
             cursor = conn.cursor()
@@ -166,6 +167,7 @@ def contar_pendentes() -> int:
         return 0
 
 def get_next_user() -> str | None:
+    """Busca o próximo usuário para atribuição de tarefa (round-robin)."""
     try:
         with sqlite3.connect(DATABASE_PATH) as conn:
             last_assigned = conn.execute("SELECT responsavel FROM notificacoes WHERE responsavel IS NOT NULL ORDER BY data_processamento DESC LIMIT 1").fetchone()
@@ -185,35 +187,35 @@ def get_next_user() -> str | None:
         logging.error(f"ERRO ao buscar próximo usuário: {e}")
         return None
 
-def atualizar_notificacoes_processadas(npj, data, numero_processo, andamentos, documentos, data_processamento, responsavel, status='Processado'):
+def atualizar_notificacoes_processadas(npj, data, numero_processo, andamentos, documentos, data_processamento, responsavel, status='Processado', polo=None):
+    """Atualiza as notificações de uma tarefa como 'Processado' ou 'Migrado' e adiciona o polo."""
     try:
         with sqlite3.connect(DATABASE_PATH) as conn:
             conn.execute("""
                 UPDATE notificacoes
                 SET status = ?, numero_processo = ?, andamentos = ?, documentos = ?,
-                    data_processamento = ?, responsavel = ?, detalhes_erro = NULL, tentativas = 0
+                    data_processamento = ?, responsavel = ?, detalhes_erro = NULL, tentativas = 0,
+                    polo = ?
                 WHERE NPJ = ? AND data_notificacao = ? AND status = 'Em Processamento'
-            """, (status, numero_processo, json.dumps(andamentos), json.dumps(documentos), data_processamento, responsavel, npj, data))
+            """, (status, numero_processo, json.dumps(andamentos), json.dumps(documentos), data_processamento, responsavel, polo, npj, data))
     except sqlite3.Error as e:
         logging.error(f"ERRO ao atualizar tarefa {npj}-{data} como processada: {e}")
 
-# AJUSTADO: Função agora categoriza o erro e gerencia as tentativas.
 def marcar_tarefa_como_erro(npj, data, motivo, data_processamento, tipo_erro: str):
     """Marca as notificações de uma tarefa com um status de erro específico e controla as tentativas."""
     try:
         with sqlite3.connect(DATABASE_PATH) as conn:
             cursor = conn.cursor()
             
-            # Busca as tentativas atuais para a tarefa específica
             cursor.execute("SELECT tentativas FROM notificacoes WHERE NPJ = ? AND data_notificacao = ? LIMIT 1", (npj, data))
             resultado = cursor.fetchone()
-            tentativas_atuais = resultado[0] if resultado else 0
+            tentativas_atuais = resultado[0] if resultado and resultado[0] is not None else 0
 
             novo_status = "Erro" # Default
             
             if tipo_erro == 'permanente':
                 novo_status = 'Erro_Permanente'
-                tentativas_atuais += 1 # Incrementa para registro, mas não será reprocessado
+                tentativas_atuais += 1
             
             elif tipo_erro == 'portal':
                 tentativas_atuais += 1
@@ -231,6 +233,7 @@ def marcar_tarefa_como_erro(npj, data, motivo, data_processamento, tipo_erro: st
         logging.error(f"ERRO ao marcar tarefa {npj}-{data} como erro: {e}")
 
 def salvar_log_execucao(log_data: dict):
+    """Salva um registro de log no banco de dados."""
     try:
         with sqlite3.connect(DATABASE_PATH) as conn:
             cols = ', '.join(log_data.keys())
