@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 
-const API_URL = 'http://127.0.0.1:5000/api';
+// CORREÇÃO: A URL da API agora é dinâmica, usando o endereço do servidor principal.
+const API_URL = `http://${window.location.hostname}:5000/api`;
 
 // --- Ícones ---
 const EyeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" /></svg>;
@@ -87,6 +88,7 @@ const MigrationModal = ({ isOpen, onClose, onMigrationComplete }) => {
     const [uploading, setUploading] = useState(false);
     const [message, setMessage] = useState('');
     const [isError, setIsError] = useState(false);
+    const [migrationMode, setMigrationMode] = useState('adicionar'); // 'adicionar' ou 'conciliar'
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
@@ -108,8 +110,10 @@ const MigrationModal = ({ isOpen, onClose, onMigrationComplete }) => {
         const formData = new FormData();
         formData.append('file', file);
 
+        const endpoint = migrationMode === 'adicionar' ? '/api/migracao' : '/api/migracao/conciliar';
+
         try {
-            const response = await fetch(`${API_URL}/migracao`, {
+            const response = await fetch(`${API_URL}${endpoint.substring(4)}`, {
                 method: 'POST',
                 body: formData,
             });
@@ -141,6 +145,7 @@ const MigrationModal = ({ isOpen, onClose, onMigrationComplete }) => {
             setUploading(false);
             setMessage('');
             setIsError(false);
+            setMigrationMode('adicionar');
         }
     }, [isOpen]);
 
@@ -150,14 +155,30 @@ const MigrationModal = ({ isOpen, onClose, onMigrationComplete }) => {
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
                 <header className="p-4 border-b dark:border-gray-700 flex justify-between items-center">
-                    <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Migrar Notificações</h2>
+                    <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Migrar/Conciliar Notificações</h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                         <XIcon />
                     </button>
                 </header>
                 <main className="p-6">
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">
-                        Selecione uma planilha (.xlsx ou .csv) contendo as colunas "npj" e "data" para adicionar as notificações à fila de processamento.
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Modo de Operação</label>
+                        <div className="flex gap-4">
+                            <label className="flex items-center">
+                                <input type="radio" value="adicionar" checked={migrationMode === 'adicionar'} onChange={() => setMigrationMode('adicionar')} className="form-radio" />
+                                <span className="ml-2 text-gray-700 dark:text-gray-300">Adicionar Pendentes</span>
+                            </label>
+                            <label className="flex items-center">
+                                <input type="radio" value="conciliar" checked={migrationMode === 'conciliar'} onChange={() => setMigrationMode('conciliar')} className="form-radio" />
+                                <span className="ml-2 text-gray-700 dark:text-gray-300">Marcar como Tratadas</span>
+                            </label>
+                        </div>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+                      {migrationMode === 'adicionar' 
+                        ? 'Selecione uma planilha (.xlsx ou .csv) com "npj" e "data" para adicionar novas notificações como pendentes.'
+                        : 'Selecione uma planilha (.xlsx ou .csv) com "npj" e "data" para encontrar notificações pendentes e marcá-las como "Tratada".'
+                      }
                     </p>
                     <input 
                         type="file" 
@@ -171,7 +192,7 @@ const MigrationModal = ({ isOpen, onClose, onMigrationComplete }) => {
                 <footer className="px-6 py-4 bg-gray-50 dark:bg-gray-700 flex justify-end gap-4">
                     <button onClick={onClose} disabled={uploading} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 font-semibold disabled:opacity-50">Cancelar</button>
                     <button onClick={handleUpload} disabled={uploading} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-semibold disabled:opacity-50 disabled:bg-blue-400">
-                        {uploading ? 'Enviando...' : 'Iniciar Migração'}
+                        {uploading ? 'Processando...' : (migrationMode === 'adicionar' ? 'Iniciar Migração' : 'Iniciar Conciliação')}
                     </button>
                 </footer>
             </div>
@@ -619,7 +640,7 @@ function App() {
                     {theme === 'light' ? <MoonIcon /> : <SunIcon />}
                 </button>
                 <button onClick={() => setShowMigrationModal(true)} className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 border border-purple-700 rounded-lg shadow-sm text-sm flex items-center">
-                    <UploadIcon /> Migrar Planilha
+                    <UploadIcon /> Migrar/Conciliar
                 </button>
                 <button onClick={() => setShowUserManagement(!showUserManagement)} className="bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm">
                     {showUserManagement ? 'Ver Notificações' : 'Gerenciar Responsáveis'}
