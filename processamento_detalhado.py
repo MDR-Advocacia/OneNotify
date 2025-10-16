@@ -22,14 +22,38 @@ def extrair_numero_processo(page: Page) -> Optional[str]:
         logging.warning(f"      - Não foi possível extrair o número do processo: {e}")
     return None
 
-# ADICIONADO: Parâmetro 'is_migracao' para controlar o período de busca
+def extrair_polo(page: Page) -> Optional[str]:
+    """Extrai o polo (Ativo/Passivo) do cabeçalho da página."""
+    try:
+        selector_polo = 'div[bb-title="Polo"] span.chip__desc'
+        if page.locator(selector_polo).count() > 0:
+            polo = page.locator(selector_polo).inner_text().strip()
+            logging.info(f"      - Polo do BB encontrado: {polo}")
+            return polo
+        logging.warning("      - Não foi possível encontrar o elemento do Polo na página.")
+    except Error as e:
+        logging.warning(f"      - Erro ao tentar extrair o Polo: {e}")
+    return None
+
 def extrair_andamentos(page: Page, data_notificacao_recente: str, is_migracao: bool) -> List[Dict[str, str]]:
-    """Clica no menu 'Andamentos', filtra por data e extrai os dados."""
+    """Clica no menu 'Andamentos' (seja aba ou accordion), filtra por data e extrai os dados."""
     andamentos = []
     try:
-        logging.info("      - Clicando na aba 'Andamentos'...")
-        page.locator('li:has-text("Andamentos")').click(timeout=10000)
+        logging.info("      - Procurando pela seção 'Andamentos'...")
         
+        secao_andamentos_accordion = page.locator('div.accordion__item[bb-item-title="ANDAMENTOS"]')
+        
+        if secao_andamentos_accordion.count() > 0:
+            logging.info("      - Layout de Accordion detectado para Andamentos.")
+            andamentos_title = secao_andamentos_accordion.locator(".accordion__title").first
+            if 'mi--keyboard-arrow-down' in (andamentos_title.locator('i').get_attribute('class') or ''):
+                logging.info("      - Seção 'Andamentos' está fechada, clicando para expandir.")
+                andamentos_title.click()
+                page.wait_for_timeout(1000)
+        else:
+            logging.info("      - Layout de Abas detectado para Andamentos.")
+            page.locator('li:has-text("Andamentos")').click(timeout=10000)
+
         tabela_container_selector = 'lista-andamentos-processo'
         page.wait_for_selector(tabela_container_selector, state='visible', timeout=15000)
 
@@ -44,7 +68,6 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str, is_migracao: b
 
         data_base = datetime.strptime(data_notificacao_recente, '%d/%m/%Y').date()
         
-        # LÓGICA CONDICIONAL: 7 dias para migração, 3 dias para o normal
         dias_a_buscar = 7 if is_migracao else 3
         datas_permitidas = { data_base - timedelta(days=i) for i in range(dias_a_buscar) }
         
@@ -58,14 +81,14 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str, is_migracao: b
 
         for linha in linhas:
             try:
-                data_andamento_str = linha.locator('td').nth(4).inner_text(timeout=2000).strip()
+                data_andamento_str = (linha.locator('td').nth(4).inner_text(timeout=2000)).strip()
                 data_andamento = datetime.strptime(data_andamento_str, '%d/%m/%Y').date()
 
                 if data_andamento not in datas_permitidas:
                     continue 
 
                 logging.info(f"      - Processando andamento de {data_andamento_str} (data válida).")
-                descricao = linha.locator('td').nth(1).inner_text().strip()
+                descricao = (linha.locator('td').nth(1).inner_text()).strip()
                 detalhes = descricao
 
                 if "PUBLICACAO DJ/DO" in descricao.upper():
@@ -100,30 +123,46 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str, is_migracao: b
         raise
     return andamentos
 
-# ADICIONADO: Parâmetro 'is_migracao' para controlar o período de busca
 def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_migracao: bool) -> List[Dict[str, str]]:
-    """Expande as seções de documentos, filtra pela data e baixa os arquivos."""
+    """Expande as seções de documentos (seja qual for o layout), filtra pela data e baixa os arquivos."""
     documentos_baixados = []
     try:
         logging.info("      - Procurando e expandindo seções de documentos...")
         
-        secao_documentos = page.locator('div.accordion__item[bb-item-title="Documentos"]')
-        
-        try:
-            secao_documentos.wait_for(state='attached', timeout=5000) 
-        except TimeoutError:
-            logging.info("      - Seção 'Documentos' não encontrada para este NPJ. Pulando a etapa de download.")
-            return []
+        seletor_layout_novo = 'div.accordion__item[bb-item-title="DOCUMENTOS"]'
+        seletor_layout_antigo = 'div.accordion__item[bb-item-title="Documentos"]'
 
-        if secao_documentos.count() == 0:
-            logging.info("      - Nenhuma seção de documentos encontrada na página.")
-            return []
+        secao_container = None
 
-        titulo_secao = secao_documentos.locator('.accordion__title')
-        if titulo_secao.is_visible():
-            if 'mi--keyboard-arrow-down' in (titulo_secao.locator('i').get_attribute('class') or ''):
-                 titulo_secao.click()
+        if page.locator(seletor_layout_novo).count() > 0:
+            logging.info("      - Layout Novo (aninhado) de documentos detectado.")
+            secao_container = page.locator(seletor_layout_novo)
+            titulo_principal = secao_container.locator('.accordion__title').first
+            if 'mi--keyboard-arrow-down' in (titulo_principal.locator('i').get_attribute('class') or ''):
+                 logging.info("      - Seção principal 'DOCUMENTOS' está fechada, clicando para expandir.")
+                 titulo_principal.click()
                  page.wait_for_timeout(1000)
+
+            sub_secao = secao_container.locator(seletor_layout_antigo)
+            if sub_secao.count() > 0:
+                titulo_sub_secao = sub_secao.locator('.accordion__title').first
+                if 'mi--keyboard-arrow-down' in (titulo_sub_secao.locator('i').get_attribute('class') or ''):
+                    logging.info("      - Sub-seção 'Documentos' está fechada, clicando para expandir.")
+                    titulo_sub_secao.click()
+                    page.wait_for_timeout(1000)
+
+        elif page.locator(seletor_layout_antigo).count() > 0:
+            logging.info("      - Layout Antigo (simples) de documentos detectado.")
+            secao_container = page.locator(seletor_layout_antigo)
+            titulo_secao = secao_container.locator('.accordion__title').first
+            if 'mi--keyboard-arrow-down' in (titulo_secao.locator('i').get_attribute('class') or ''):
+                logging.info("      - Seção 'Documentos' está fechada, clicando para expandir.")
+                titulo_secao.click()
+                page.wait_for_timeout(1000)
+        
+        if not secao_container:
+            logging.info("      - Nenhuma seção de documentos encontrada para este NPJ. Pulando a etapa de download.")
+            return []
 
         nome_pasta_npj = re.sub(r'[\\/*?:"<>|]', '_', npj)
         diretorio_download_npj = Path(__file__).resolve().parent / "documentos" / nome_pasta_npj
@@ -131,7 +170,6 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_mi
         
         data_base = datetime.strptime(data_notificacao_recente, '%d/%m/%Y').date()
         
-        # LÓGICA CONDICIONAL: 7 dias para migração, 3 dias para o normal
         dias_a_buscar = 7 if is_migracao else 3
         datas_permitidas = {data_base - timedelta(days=i) for i in range(dias_a_buscar)}
 
@@ -141,15 +179,15 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_mi
         logging.info(f"      - Filtrando documentos para as datas: {[d.strftime('%d/%m/%Y') for d in sorted(list(datas_permitidas))]}")
 
         tabela_selector = 'table[ng-table="vm.tabelaDocumento"]'
-        tabela_documentos = secao_documentos.locator(tabela_selector)
-        tabela_documentos.wait_for(state='visible', timeout=15000)
+        tabela_documentos = secao_container.locator(tabela_selector)
+        tabela_documentos.wait_for(state='visible', timeout=45000)
         
         linhas_documentos = tabela_documentos.locator('tbody tr').all()
         logging.info(f"      - Encontrados {len(linhas_documentos)} documentos para verificação.")
 
         for linha in linhas_documentos:
             try:
-                data_doc_str = linha.locator('td').nth(4).inner_text(timeout=2000).strip()
+                data_doc_str = (linha.locator('td').nth(4).inner_text(timeout=2000)).strip()
                 data_doc = datetime.strptime(data_doc_str, '%d/%m/%Y').date()
 
                 if data_doc not in datas_permitidas:
@@ -157,7 +195,7 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_mi
 
                 link_locator = linha.locator('td').nth(1).locator('a')
                 if link_locator.count() > 0:
-                    nome_arquivo = link_locator.inner_text().strip()
+                    nome_arquivo = (link_locator.inner_text()).strip()
                     logging.info(f"        - Documento encontrado na data permitida '{data_doc_str}': {nome_arquivo}")
                     
                     try:
@@ -175,12 +213,12 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_mi
                         if "GED indisponível" in page.content():
                             logging.error(f"        - ERRO DE PORTAL: GED indisponível para o arquivo '{nome_arquivo}'.")
                             page.go_back(wait_until="networkidle")
-                            raise ValueError("GED Indisponível")
+                            raise ValueError("GED indisponível")
                         else:
                             logging.warning(f"        - Timeout ou outra falha no download do arquivo '{nome_arquivo}'.")
             
             except (Error, IndexError, ValueError) as e:
-                if "GED Indisponível" in str(e):
+                if "GED indisponível" in str(e):
                     raise e
                 logging.warning(f"      - Erro ao processar uma linha de documento: {e}")
                 continue
@@ -189,6 +227,15 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_mi
         logging.warning(f"      - Ocorreu um erro geral ao processar documentos: {e}")
         raise
     
+    # Adiciona a espera pelo loader antes de finalizar a função
+    finally:
+        logging.info("      - Verificando se o loader da página está ativo antes de prosseguir...")
+        try:
+            page.locator('plt-carregando div.loader.is-loading').wait_for(state='hidden', timeout=20000)
+            logging.info("      - Loader desapareceu. Prosseguindo...")
+        except TimeoutError:
+            logging.warning("      - O loader não desapareceu no tempo esperado, mas a execução continuará.")
+
     return documentos_baixados
 
 def navegar_para_detalhes_do_npj(page: Page, npj: str):
@@ -223,14 +270,13 @@ def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any
     for i, tarefa in enumerate(lote):
         npj = tarefa.get('NPJ')
         data_notificacao = tarefa.get('data_notificacao')
-        # ADICIONADO: Identificação da origem da tarefa
         origem = tarefa.get('origem', 'onenotify')
         data_hora_processamento = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
         
         if not data_notificacao:
             logging.error(f"  - [{i+1}/{len(lote)}] ERRO DE DADOS: O grupo para o NPJ {npj} foi recebido sem uma data válida. Pulando este item.")
             motivo = "Dados inconsistentes: Data da notificação não encontrada."
-            database.marcar_tarefa_como_erro(npj, data_notificacao, motivo, data_hora_processamento)
+            database.marcar_tarefa_como_erro(npj, data_notificacao, motivo, data_hora_processamento, tipo_erro='permanente')
             stats["falha"] += 1
             continue
 
@@ -240,8 +286,8 @@ def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any
             navegar_para_detalhes_do_npj(page, npj)
             
             numero_processo = extrair_numero_processo(page)
+            polo = extrair_polo(page) # Extrai a nova informação
             
-            # ADICIONADO: Flag 'is_migracao' para controlar a lógica de busca
             is_migracao = (origem == 'migracao')
             
             documentos = baixar_documentos(page, data_notificacao, npj, is_migracao)
@@ -252,12 +298,12 @@ def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any
 
             proximo_responsavel = database.get_next_user()
             
-            # ADICIONADO: Definição do status final com base na origem
             status_final = 'Migrado' if is_migracao else 'Processado'
             
             database.atualizar_notificacoes_processadas(
                 npj, data_notificacao, numero_processo, andamentos, documentos, 
-                data_hora_processamento, proximo_responsavel, status=status_final
+                data_hora_processamento, proximo_responsavel, status=status_final,
+                polo=polo # Passa a nova informação para o banco
             )
             logging.info(f"SUCESSO: Tarefa {npj} finalizada como '{status_final}' e atribuída a {proximo_responsavel or 'Ninguém'}.")
             stats["sucesso"] += 1
@@ -265,16 +311,24 @@ def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any
         except TimeoutError as e:
             detalhes_erro = f"Timeout: A página demorou muito para responder. Causa provável: sessão expirada ou instabilidade do portal. Detalhe: {e}"
             logging.critical(f"    - Timeout detectado ao processar NPJ {npj}. {detalhes_erro}")
-            database.marcar_tarefa_como_erro(npj, data_notificacao, detalhes_erro, data_hora_processamento)
+            database.marcar_tarefa_como_erro(npj, data_notificacao, detalhes_erro, data_hora_processamento, tipo_erro='portal')
             stats["falha"] += 1
             if not page.is_closed():
                 page.close()
             raise SessionExpiredError("Timeout durante a navegação, indicando possível sessão expirada.") from e
 
         except (ValueError, Error) as e:
-            detalhes_erro = f"Erro de automação ou portal: {e}"
+            erro_str = str(e).lower()
+            tipo_erro = 'portal'
+            
+            if "processo nao localizado" in erro_str or "formato de npj inválido" in erro_str:
+                tipo_erro = 'permanente'
+            elif "ged indisponível" in erro_str:
+                tipo_erro = 'portal'
+
+            detalhes_erro = f"Erro de automação ou portal ({tipo_erro}): {e}"
             logging.error(f"  - ERRO CONHECIDO ao processar NPJ {npj}: {detalhes_erro}", exc_info=False)
-            database.marcar_tarefa_como_erro(npj, data_notificacao, detalhes_erro, data_hora_processamento)
+            database.marcar_tarefa_como_erro(npj, data_notificacao, detalhes_erro, data_hora_processamento, tipo_erro=tipo_erro)
             stats["falha"] += 1
 
         except SessionExpiredError:
@@ -283,7 +337,7 @@ def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any
         except Exception as e:
             detalhes_erro = f"Erro inesperado no sistema: {e}"
             logging.critical(f"Ocorreu um erro inesperado ao processar NPJ {npj}.\n{detalhes_erro}", exc_info=True)
-            database.marcar_tarefa_como_erro(npj, data_notificacao, detalhes_erro, data_hora_processamento)
+            database.marcar_tarefa_como_erro(npj, data_notificacao, detalhes_erro, data_hora_processamento, tipo_erro='portal')
             stats["falha"] += 1
             if not page.is_closed():
                 page.close()

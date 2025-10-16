@@ -1,17 +1,20 @@
 import logging
 import re
+import time
 from playwright.sync_api import Page, TimeoutError
 from config import TAREFAS_CONFIG
 import database
-from datetime import datetime, timedelta # Adicionado para cálculo de data
+from datetime import datetime, timedelta 
 
-def extrair_dados_e_dar_ciencia_em_lote(page: Page, tarefa: dict) -> tuple[list[dict], int]:
+def extrair_dados_e_dar_ciencia_em_lote(page: Page, tarefa: dict, start_time_ciclo: float, limite_tempo: int) -> tuple[list[dict], int, bool]:
     """
-    Localiza uma tarefa, entra nos detalhes, extrai dados, dá ciência e navega
-    pelas páginas de forma robusta, aguardando os carregamentos AJAX.
+    Localiza uma tarefa, extrai dados página por página, e dá ciência, respeitando um limite de tempo.
+    Retorna a lista de notificações, a contagem de ciências e um booleano indicando se o tempo esgotou.
     """
     notificacoes_para_salvar = []
     npjs_marcados_para_ciencia = set()
+    houve_marcacao = False
+    tempo_esgotado = False
     
     try:
         logging.info(f"--- Processando tarefa: {tarefa['nome']} ---")
@@ -21,12 +24,12 @@ def extrair_dados_e_dar_ciencia_em_lote(page: Page, tarefa: dict) -> tuple[list[
         
         if linha_alvo.count() == 0:
             logging.warning(f"Tarefa '{tarefa['nome']}' não encontrada. Pulando.")
-            return [], 0
+            return [], 0, False
         
         contagem_texto = linha_alvo.locator("td").nth(2).inner_text().strip()
         if not contagem_texto.isdigit() or int(contagem_texto.replace('.', '')) == 0:
-            logging.info(f"Tarefa '{tarefa['nome']}' sem notificações pendentes. Pulando.")
-            return [], 0
+            logging.info(f"Tarefa '{tarefa['nome']}' sem notificações pendentes.")
+            return [], 0, False
 
         logging.info(f"{contagem_texto} itens encontrados. Abrindo detalhes...")
         linha_alvo.locator('td').last.locator('input[type="button"]').click()
@@ -39,10 +42,15 @@ def extrair_dados_e_dar_ciencia_em_lote(page: Page, tarefa: dict) -> tuple[list[
         corpo_da_tabela.locator("tr").first.wait_for(state="visible", timeout=20000)
 
         pagina_atual = 1
-        houve_marcacao = False
         modal_carregando = page.locator('#notificacoesNaoLidasForm\\:ajaxLoadingModalBox').first
 
         while True:
+            # CHECAGEM DE TEMPO A CADA PÁGINA
+            if time.time() - start_time_ciclo > limite_tempo:
+                logging.warning(f"Limite de tempo de extração atingido durante a paginação. O processamento desta tarefa será interrompido.")
+                tempo_esgotado = True
+                break
+
             logging.info(f"    - Verificando página {pagina_atual}...")
             
             for linha in corpo_da_tabela.locator("tr").all():
@@ -125,16 +133,18 @@ def extrair_dados_e_dar_ciencia_em_lote(page: Page, tarefa: dict) -> tuple[list[
         
     except Exception as e:
         logging.error(f"Falha crítica ao processar a tarefa '{tarefa['nome']}': {e}", exc_info=True)
+        tempo_esgotado = True # Sinaliza erro como tempo esgotado para forçar reinício do ciclo
 
-    return notificacoes_para_salvar, len(npjs_marcados_para_ciencia)
+    return notificacoes_para_salvar, len(npjs_marcados_para_ciencia), tempo_esgotado
 
-def executar_extracao_e_ciencia(page: Page) -> dict:
+def executar_extracao_e_ciencia(page: Page, tarefas_a_processar: list[dict], start_time_ciclo: float, limite_tempo: int) -> tuple[dict, bool, list[dict]]:
     """
-    Orquestra a navegação inicial e o loop através das tarefas configuradas.
+    Orquestra a extração e ciência para uma lista de tarefas, respeitando um limite de tempo.
+    Retorna os resultados, se o tempo esgotou, e a lista de tarefas restantes.
     """
-    logging.info("Iniciando módulo de extração e ciência...")
     resultados = {"notificacoes_salvas": 0, "ciencias_registradas": 0}
-    
+    tempo_esgotado = False
+
     try:
         logging.info("Navegando para a Central de Notificações...")
         page.goto("https://juridico.bb.com.br/paj/app/paj-central-notificacoes/spas/central-notificacoes/central-notificacoes.app.html")
@@ -148,17 +158,30 @@ def executar_extracao_e_ciencia(page: Page) -> dict:
         tabela_principal_selector = 'table[id="tabelaTipoSubtipoGeral"]'
         page.wait_for_selector(tabela_principal_selector, state='visible', timeout=30000)
         
-        for tarefa in TAREFAS_CONFIG:
-            notificacoes, ciencias = extrair_dados_e_dar_ciencia_em_lote(page, tarefa)
+        tarefas_restantes = list(tarefas_a_processar)
+        for tarefa in tarefas_a_processar:
+            if time.time() - start_time_ciclo > limite_tempo:
+                logging.warning("Limite de tempo de extração atingido antes de iniciar nova tarefa. O ciclo será interrompido.")
+                tempo_esgotado = True
+                break
+
+            notificacoes, ciencias, tempo_esgotado_sub = extrair_dados_e_dar_ciencia_em_lote(page, tarefa, start_time_ciclo, limite_tempo)
             if notificacoes:
                 salvas = database.salvar_notificacoes(notificacoes)
                 resultados["notificacoes_salvas"] += salvas
                 resultados["ciencias_registradas"] += ciencias
                 logging.info(f"Tarefa '{tarefa['nome']}' finalizada. {salvas} novas notificações salvas. {ciencias} ciências registradas.")
+            
+            tarefas_restantes.pop(0)
+
+            if tempo_esgotado_sub:
+                tempo_esgotado = True
+                break
+        
+        return resultados, tempo_esgotado, tarefas_restantes
 
     except Exception as e:
         logging.critical(f"Falha irrecuperável na FASE 2: {e}", exc_info=True)
-        raise
+        # Em caso de falha grave, sinaliza para reiniciar e retorna as tarefas que não foram processadas
+        return resultados, True, tarefas_a_processar
 
-    logging.info(f"Extração/ciência concluídas. Salvas: {resultados['notificacoes_salvas']}, Ciências: {resultados['ciencias_registradas']}.")
-    return resultados

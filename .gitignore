@@ -183,3 +183,4 @@ cython_debug/
 
 logs
 *.db
+rpa_refatorado.db

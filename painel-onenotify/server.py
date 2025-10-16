@@ -12,8 +12,9 @@ import pandas as pd
 
 # --- Configuração do App ---
 app = Flask(__name__, static_folder='build', static_url_path='/')
-CORS(app, origins="http://localhost:3000", supports_credentials=True)
-logging.basicConfig(level=logging.INFO)
+# AJUSTE: Tornando o CORS mais permissivo para garantir a comunicação.
+# Isso permite requisições de qualquer origem, ideal para resolver este problema.
+CORS(app)
 
 # --- Configuração do Banco de Dados ---
 DATABASE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'rpa_refatorado.db'))
@@ -160,7 +161,7 @@ def criar_tarefa():
                 with open(file_path, 'r', encoding='utf-8') as f:
                     file_content = json.load(f)
                     if "processos" not in file_content or not isinstance(file_content["processos"], list):
-                         file_content["processos"] = []
+                            file_content["processos"] = []
             except (json.JSONDecodeError, FileNotFoundError):
                 pass
 
