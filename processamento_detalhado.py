@@ -95,14 +95,14 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str, is_migracao: b
                     botao_detalhar = linha.locator('a[bb-tooltip="Detalhar publicação"]')
                     
                     if botao_detalhar.count() > 0:
-                        logging.info("        - Andamento de publicação encontrado. Abrindo modal de detalhes...")
+                        logging.info("         - Andamento de publicação encontrado. Abrindo modal de detalhes...")
                         botao_detalhar.click()
                         modal_selector = 'div.modal__data'
                         page.wait_for_selector(modal_selector, state='visible', timeout=10000)
                         
                         leia_mais_btn = page.locator(f'{modal_selector} button:has-text("Leia mais")')
                         if leia_mais_btn.count() > 0:
-                            logging.info("        - Botão 'Leia mais' encontrado. Expandindo texto...")
+                            logging.info("         - Botão 'Leia mais' encontrado. Expandindo texto...")
                             leia_mais_btn.click(timeout=5000)
                             page.wait_for_timeout(500)
 
@@ -111,7 +111,7 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str, is_migracao: b
                         
                         page.keyboard.press("Escape")
                         page.wait_for_selector(modal_selector, state='hidden', timeout=5000)
-                        logging.info("        - Modal de publicação fechado com sucesso.")
+                        logging.info("         - Modal de publicação fechado com sucesso.")
                 
                 andamentos.append({"data": data_andamento_str, "descricao": descricao, "detalhes": detalhes})
             except (Error, IndexError, ValueError) as e:
@@ -139,9 +139,9 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_mi
             secao_container = page.locator(seletor_layout_novo)
             titulo_principal = secao_container.locator('.accordion__title').first
             if 'mi--keyboard-arrow-down' in (titulo_principal.locator('i').get_attribute('class') or ''):
-                 logging.info("      - Seção principal 'DOCUMENTOS' está fechada, clicando para expandir.")
-                 titulo_principal.click()
-                 page.wait_for_timeout(1000)
+                  logging.info("      - Seção principal 'DOCUMENTOS' está fechada, clicando para expandir.")
+                  titulo_principal.click()
+                  page.wait_for_timeout(1000)
 
             sub_secao = secao_container.locator(seletor_layout_antigo)
             if sub_secao.count() > 0:
@@ -196,7 +196,7 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_mi
                 link_locator = linha.locator('td').nth(1).locator('a')
                 if link_locator.count() > 0:
                     nome_arquivo = (link_locator.inner_text()).strip()
-                    logging.info(f"        - Documento encontrado na data permitida '{data_doc_str}': {nome_arquivo}")
+                    logging.info(f"         - Documento encontrado na data permitida '{data_doc_str}': {nome_arquivo}")
                     
                     try:
                         with page.expect_download(timeout=15000) as download_info:
@@ -207,15 +207,15 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_mi
                         download.save_as(caminho_salvo)
                         
                         documentos_baixados.append({"nome": nome_arquivo, "caminho": str(caminho_salvo)})
-                        logging.info(f"        - Download concluído: {caminho_salvo}")
+                        logging.info(f"         - Download concluído: {caminho_salvo}")
 
                     except Error:
                         if "GED indisponível" in page.content():
-                            logging.error(f"        - ERRO DE PORTAL: GED indisponível para o arquivo '{nome_arquivo}'.")
+                            logging.error(f"         - ERRO DE PORTAL: GED indisponível para o arquivo '{nome_arquivo}'.")
                             page.go_back(wait_until="networkidle")
                             raise ValueError("GED indisponível")
                         else:
-                            logging.warning(f"        - Timeout ou outra falha no download do arquivo '{nome_arquivo}'.")
+                            logging.warning(f"         - Timeout ou outra falha no download do arquivo '{nome_arquivo}'.")
             
             except (Error, IndexError, ValueError) as e:
                 if "GED indisponível" in str(e):
@@ -296,7 +296,7 @@ def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any
             stats["documentos"] += len(documentos)
             stats["andamentos"] += len(andamentos)
 
-            proximo_responsavel = database.get_next_user()
+            proximo_responsavel = database.get_next_user(polo_da_tarefa=polo)
             
             status_final = 'Migrado' if is_migracao else 'Processado'
             
@@ -348,4 +348,3 @@ def processar_detalhes_de_lote(context: BrowserContext, lote: List[Dict[str, Any
         
     logging.info("Processamento do lote concluído.")
     return stats
-
