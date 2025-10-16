@@ -134,22 +134,73 @@ def migrar_planilha():
         db = get_db()
         cursor = db.cursor()
         
+        inseridos = 0
         for index, row in df.iterrows():
             npj = str(row['npj'])
             data_notificacao = str(row['data'])
             
-            # CORREÇÃO APLICADA AQUI: De INSERT para INSERT OR IGNORE
             cursor.execute("""
                 INSERT OR IGNORE INTO notificacoes (NPJ, data_notificacao, status, origem, tipo_notificacao)
                 VALUES (?, ?, 'Pendente', 'migracao', 'Migração de Dados')
             """, (npj, data_notificacao))
+            if cursor.rowcount > 0:
+                inseridos += 1
 
         db.commit()
-        return jsonify({'message': f'{len(df)} notificações foram adicionadas à fila de migração.'}), 201
+        return jsonify({'message': f'{inseridos} de {len(df)} notificações foram adicionadas à fila de migração.'}), 201
 
     except Exception as e:
         app.logger.error(f"Erro ao processar planilha: {e}")
         return jsonify({'error': 'Falha ao processar o arquivo da planilha'}), 500
+
+@app.route('/api/migracao/conciliar', methods=['POST'])
+def conciliar_planilha():
+    if 'file' not in request.files:
+        return jsonify({'error': 'Nenhum arquivo enviado'}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'Nome de arquivo inválido'}), 400
+
+    try:
+        if file.filename.endswith('.csv'):
+            df = pd.read_csv(file)
+        elif file.filename.endswith('.xlsx'):
+            df = pd.read_excel(file)
+        else:
+            return jsonify({'error': 'Formato de arquivo não suportado. Use .csv ou .xlsx'}), 400
+
+        if 'npj' not in df.columns or 'data' not in df.columns:
+            return jsonify({'error': 'A planilha deve conter as colunas "npj" e "data"'}), 400
+
+        db = get_db()
+        cursor = db.cursor()
+        
+        atualizados = 0
+        data_processamento = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+
+        for index, row in df.iterrows():
+            npj = str(row['npj'])
+            data_notificacao = str(row['data'])
+            
+            # CORREÇÃO: Remove a restrição de status para conciliar qualquer notificação correspondente
+            cursor.execute("""
+                UPDATE notificacoes 
+                SET status = 'Tratada', 
+                    responsavel = 'Conciliado', 
+                    data_processamento = ?
+                WHERE NPJ = ? AND data_notificacao = ?
+            """, (data_processamento, npj, data_notificacao))
+            
+            if cursor.rowcount > 0:
+                atualizados += 1
+
+        db.commit()
+        return jsonify({'message': f'{atualizados} notificações correspondentes foram marcadas como "Tratada".'}), 200
+
+    except Exception as e:
+        app.logger.error(f"Erro ao conciliar planilha: {e}")
+        return jsonify({'error': 'Falha ao processar o arquivo da planilha para conciliação'}), 500
 
 
 @app.route('/api/tarefas', methods=['POST'])
@@ -243,6 +294,7 @@ def get_notificacoes():
     status_filter = request.args.get('status', 'Pendente')
     responsavel_filter = request.args.get('responsavel')
     polo_filter = request.args.get('polo')
+    data_filter = request.args.get('data') # Recebe a data no formato YYYY-MM-DD
     db = get_db()
     
     params = []
@@ -276,6 +328,17 @@ def get_notificacoes():
     if polo_filter and polo_filter != 'Todos':
         query += " AND polo = ?"
         params.append(polo_filter)
+    
+    if data_filter:
+        try:
+            # Converte YYYY-MM-DD para DD/MM/YYYY
+            formatted_date = datetime.strptime(data_filter, '%Y-%m-%d').strftime('%d/%m/%Y')
+            query += " AND data_notificacao = ?"
+            params.append(formatted_date)
+        except ValueError:
+            # Ignora o filtro se a data for inválida
+            app.logger.warning(f"Formato de data inválido recebido no filtro: {data_filter}")
+
 
     query += " GROUP BY NPJ, data_notificacao ORDER BY data_notificacao DESC, NPJ"
 
