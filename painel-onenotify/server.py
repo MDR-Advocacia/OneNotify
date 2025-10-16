@@ -48,25 +48,35 @@ def close_connection(exception):
 def init_db():
     db = get_db()
     cursor = db.cursor()
+    
+    # Migrações da tabela 'notificacoes'
     cursor.execute("PRAGMA table_info(notificacoes)")
-    cols = [col['name'] for col in cursor.fetchall()]
-    if 'responsavel' not in cols:
+    cols_notificacoes = [col['name'] for col in cursor.fetchall()]
+    if 'responsavel' not in cols_notificacoes:
         db.execute('ALTER TABLE notificacoes ADD COLUMN responsavel TEXT')
-    if 'data_processamento' not in cols:
+    if 'data_processamento' not in cols_notificacoes:
         db.execute('ALTER TABLE notificacoes ADD COLUMN data_processamento TEXT')
-    if 'detalhes_erro' not in cols:
+    if 'detalhes_erro' not in cols_notificacoes:
         db.execute('ALTER TABLE notificacoes ADD COLUMN detalhes_erro TEXT')
-    if 'gerou_tarefa' not in cols:
+    if 'gerou_tarefa' not in cols_notificacoes:
         db.execute('ALTER TABLE notificacoes ADD COLUMN gerou_tarefa INTEGER DEFAULT 0')
-    if 'origem' not in cols:
+    if 'origem' not in cols_notificacoes:
         db.execute('ALTER TABLE notificacoes ADD COLUMN origem TEXT DEFAULT "onenotify"')
 
+    # Criação e migração da tabela 'usuarios'
     db.execute('''
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL UNIQUE
         )
     ''')
+    
+    cursor.execute("PRAGMA table_info(usuarios)")
+    cols_usuarios = [col['name'] for col in cursor.fetchall()]
+    if 'perfil' not in cols_usuarios:
+        click.echo("Aplicando migração: Adicionando coluna 'perfil' à tabela 'usuarios'...")
+        db.execute("ALTER TABLE usuarios ADD COLUMN perfil TEXT DEFAULT 'Geral'")
+
     db.commit()
 
 @click.command('init-db')
@@ -83,9 +93,10 @@ app.cli.add_command(init_db_command)
 def add_user_command(nome):
     db = get_db()
     try:
-        db.execute("INSERT INTO usuarios (nome) VALUES (?)", (nome,))
+        # Ajustado para incluir o perfil padrão na inserção via CLI
+        db.execute("INSERT INTO usuarios (nome, perfil) VALUES (?, 'Geral')", (nome,))
         db.commit()
-        click.echo(f"Usuário '{nome}' adicionado com sucesso.")
+        click.echo(f"Usuário '{nome}' adicionado com sucesso com perfil 'Geral'.")
     except sqlite3.IntegrityError:
         click.echo(f"Erro: Usuário '{nome}' já existe.")
 
@@ -231,6 +242,7 @@ def get_stats():
 def get_notificacoes():
     status_filter = request.args.get('status', 'Pendente')
     responsavel_filter = request.args.get('responsavel')
+    polo_filter = request.args.get('polo')
     db = get_db()
     
     params = []
@@ -246,7 +258,8 @@ def get_notificacoes():
     query = f"""
         SELECT
             NPJ, data_notificacao, MAX(adverso_principal) as adverso_principal,
-            MAX(numero_processo) as numero_processo, GROUP_CONCAT(id, ';') as ids,
+            MAX(numero_processo) as numero_processo, MAX(polo) as polo,
+            GROUP_CONCAT(id, ';') as ids,
             GROUP_CONCAT(tipo_notificacao, '; ') as tipos_notificacao, MAX(responsavel) as responsavel,
             MAX(data_processamento) as data_processamento, MAX(detalhes_erro) as detalhes_erro,
             {gerou_tarefa_select}
@@ -259,6 +272,10 @@ def get_notificacoes():
         params.append(responsavel_filter)
     elif responsavel_filter == 'Sem Responsável':
         query += " AND (responsavel IS NULL OR responsavel = '')"
+
+    if polo_filter and polo_filter != 'Todos':
+        query += " AND polo = ?"
+        params.append(polo_filter)
 
     query += " GROUP BY NPJ, data_notificacao ORDER BY data_notificacao DESC, NPJ"
 
@@ -326,20 +343,42 @@ def update_status():
 @app.route('/api/usuarios', methods=['GET'])
 def get_usuarios():
     db = get_db()
-    users_raw = db.execute("SELECT id, nome FROM usuarios ORDER BY nome").fetchall()
+    users_raw = db.execute("SELECT id, nome, perfil FROM usuarios ORDER BY nome").fetchall()
     return jsonify([dict(row) for row in users_raw])
 
 @app.route('/api/usuarios', methods=['POST'])
 def add_usuario():
-    nome = request.json.get('nome')
+    data = request.json
+    nome = data.get('nome')
+    perfil = data.get('perfil', 'Geral')
     if not nome: return jsonify({'error': 'Nome é obrigatório'}), 400
+    if perfil not in ['Geral', 'Polo Ativo']:
+        return jsonify({'error': 'Perfil inválido'}), 400
     try:
         db = get_db()
-        db.execute("INSERT INTO usuarios (nome) VALUES (?)", (nome,))
+        db.execute("INSERT INTO usuarios (nome, perfil) VALUES (?, ?)", (nome, perfil))
         db.commit()
         return jsonify({'message': f'Usuário {nome} criado com sucesso'}), 201
     except sqlite3.IntegrityError:
         return jsonify({'error': f'Usuário {nome} já existe'}), 409
+
+@app.route('/api/usuarios/<int:user_id>/perfil', methods=['PUT'])
+def update_perfil(user_id):
+    data = request.json
+    perfil = data.get('perfil')
+    if not perfil or perfil not in ['Geral', 'Polo Ativo']:
+        return jsonify({'error': 'Perfil inválido'}), 400
+    
+    try:
+        db = get_db()
+        cursor = db.execute("UPDATE usuarios SET perfil = ? WHERE id = ?", (perfil, user_id))
+        if cursor.rowcount == 0:
+            return jsonify({'error': 'Usuário não encontrado'}), 404
+        db.commit()
+        return jsonify({'message': 'Perfil do usuário atualizado com sucesso'})
+    except sqlite3.Error as e:
+        app.logger.error(f"Erro ao atualizar perfil do usuário: {e}")
+        return jsonify({'error': 'Falha ao atualizar o perfil no banco de dados'}), 500
 
 @app.route('/api/usuarios/<int:user_id>', methods=['DELETE'])
 def delete_usuario(user_id):

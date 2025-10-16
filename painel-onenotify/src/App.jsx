@@ -436,12 +436,16 @@ function App() {
     const [showMigrationModal, setShowMigrationModal] = useState(false);
     const [listaUsuarios, setListaUsuarios] = useState([]);
     const [responsavelFiltro, setResponsavelFiltro] = useState('Todos');
+    const [poloFiltro, setPoloFiltro] = useState('Todos');
     const [activeActionMenu, setActiveActionMenu] = useState(null);
     const menuRef = useRef(null);
     const [confirmationModal, setConfirmationModal] = useState({ isOpen: false, onConfirm: () => {}, message: '' });
 
     const [legalOneUsers, setLegalOneUsers] = useState([]);
     const [legalOneTasks, setLegalOneTasks] = useState([]);
+    
+    // ADICIONADO: Novo estado para o filtro de data
+    const [dataFiltro, setDataFiltro] = useState('');
 
     const fetchAllData = useCallback(async () => {
         setLoading(true);
@@ -468,6 +472,9 @@ function App() {
 
             let url = `${API_URL}/notificacoes?status=${statusFiltro}`;
             if (responsavelFiltro !== 'Todos') url += `&responsavel=${encodeURIComponent(responsavelFiltro)}`;
+            if (poloFiltro !== 'Todos') url += `&polo=${encodeURIComponent(poloFiltro)}`;
+            // ADICIONADO: Adiciona o filtro de data na URL se ele estiver preenchido
+            if (dataFiltro) url += `&data=${dataFiltro}`;
 
             const notificacoesRes = await fetch(url);
             if (!notificacoesRes.ok) throw new Error('Falha ao carregar notificações');
@@ -476,7 +483,7 @@ function App() {
             setNotificacoes(notificacoesData);
         } catch (err) { setError(err.message); } 
         finally { setLoading(false); }
-    }, [statusFiltro, responsavelFiltro]);
+    }, [statusFiltro, responsavelFiltro, poloFiltro, dataFiltro]); // ADICIONADO: dataFiltro como dependência
 
     useEffect(() => { fetchAllData(); }, [fetchAllData]);
     
@@ -499,8 +506,9 @@ function App() {
     }, [notificacoes, sortConfig]);
 
     const filteredItems = useMemo(() => sortedItems.filter(item =>
+        // AJUSTADO: Busca agora inclui NPJ e Número do Processo
         (item.NPJ?.toLowerCase() || '').includes(filtroBusca.toLowerCase()) ||
-        (item.adverso_principal?.toLowerCase() || '').includes(filtroBusca.toLowerCase())
+        (item.numero_processo?.toLowerCase() || '').includes(filtroBusca.toLowerCase())
     ), [sortedItems, filtroBusca]);
 
     const currentTableData = useMemo(() => {
@@ -519,24 +527,26 @@ function App() {
         setCurrentPage(1);
         setFiltroBusca('');
         setResponsavelFiltro('Todos');
+        setPoloFiltro('Todos');
+        setDataFiltro(''); // ADICIONADO: Reseta o filtro de data
     };
 
     const executeUpdateStatus = async (ids, novo_status, gerou_tarefa) => {
         const flatIds = ids.flatMap(idStr => idStr.split(';'));
         try {
-          const body = { ids: flatIds, novo_status };
-          if (novo_status === 'Tratada') {
-            body.gerou_tarefa = gerou_tarefa;
-          }
-          const response = await fetch(`${API_URL}/acoes/status`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-          });
-          if (!response.ok) throw new Error("Falha ao executar ação.");
-          fetchAllData();
+         const body = { ids: flatIds, novo_status };
+         if (novo_status === 'Tratada') {
+           body.gerou_tarefa = gerou_tarefa;
+         }
+         const response = await fetch(`${API_URL}/acoes/status`, {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify(body),
+         });
+         if (!response.ok) throw new Error("Falha ao executar ação.");
+         fetchAllData();
         } catch (err) {
-          console.error(err);
+         console.error(err);
         }
         setConfirmationModal({ isOpen: false, onConfirm: () => {}, message: '' });
     };
@@ -557,18 +567,18 @@ function App() {
     
     const handleSelectAll = (e) => {
         if (e.target.checked) {
-          const allIdsOnPage = currentTableData.map(item => item.ids);
-          setSelectedIds(allIdsOnPage);
+         const allIdsOnPage = currentTableData.map(item => item.ids);
+         setSelectedIds(allIdsOnPage);
         } else {
-          setSelectedIds([]);
+         setSelectedIds([]);
         }
     };
     
     const handleSelectOne = (e, ids) => {
         if (e.target.checked) {
-          setSelectedIds(prev => [...prev, ids]);
+         setSelectedIds(prev => [...prev, ids]);
         } else {
-          setSelectedIds(prev => prev.filter(id => id !== ids));
+         setSelectedIds(prev => prev.filter(id => id !== ids));
         }
     };
 
@@ -576,7 +586,7 @@ function App() {
         currentTableData.length > 0 && currentTableData.every(item => selectedIds.includes(item.ids)),
         [currentTableData, selectedIds]
     );
-      
+     
     const someOnPageSelected = useMemo(() => 
         currentTableData.some(item => selectedIds.includes(item.ids)),
         [currentTableData, selectedIds]
@@ -585,16 +595,16 @@ function App() {
     const masterCheckboxRef = useRef(null);
     useEffect(() => {
         if (masterCheckboxRef.current) {
-          masterCheckboxRef.current.indeterminate = someOnPageSelected && !allOnPageSelected;
+         masterCheckboxRef.current.indeterminate = someOnPageSelected && !allOnPageSelected;
         }
     }, [someOnPageSelected, allOnPageSelected]);
     
     
     useEffect(() => {
         const handleClickOutside = (event) => {
-          if (menuRef.current && !menuRef.current.contains(event.target)) {
-            setActiveActionMenu(null);
-          }
+         if (menuRef.current && !menuRef.current.contains(event.target)) {
+           setActiveActionMenu(null);
+         }
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -640,12 +650,27 @@ function App() {
                 <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md">
                     <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
                         <div className="flex items-center gap-2 md:gap-4 flex-wrap">
-                          <input type="text" placeholder="Buscar por NPJ ou Adverso..." value={filtroBusca} onChange={e => setFiltroBusca(e.target.value)} className="border rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border-gray-300 dark:border-gray-600" />
+                          <input type="text" placeholder="Buscar por NPJ ou Nº Processo..." value={filtroBusca} onChange={e => setFiltroBusca(e.target.value)} className="border rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border-gray-300 dark:border-gray-600" />
                           <select value={responsavelFiltro} onChange={e => setResponsavelFiltro(e.target.value)} className="border rounded-md py-2 px-3 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
                             <option value="Todos">Todos os Responsáveis</option>
                             <option value="Sem Responsável">Sem Responsável</option>
                             {listaUsuarios.map(user => <option key={user.id} value={user.nome}>{user.nome}</option>)}
                           </select>
+                          <select value={poloFiltro} onChange={e => setPoloFiltro(e.target.value)} className="border rounded-md py-2 px-3 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
+                            <option value="Todos">Todos os Polos</option>
+                            <option value="Ativo">Ativo</option>
+                            <option value="Passivo">Passivo</option>
+                          </select>
+                          {/* ADICIONADO: Campo de filtro por data */}
+                          <div className="relative">
+                            <input type="date" value={dataFiltro} onChange={e => setDataFiltro(e.target.value)} className="border rounded-md py-2 px-3 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto" />
+                            {dataFiltro && (
+                                <button onClick={() => setDataFiltro('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                    <XIcon className="h-4 w-4" />
+                                </button>
+                            )}
+                          </div>
+
                         </div>
                         <div className="relative" ref={menuRef}>
                             <button onClick={() => setActiveActionMenu(activeActionMenu === 'batch' ? null : 'batch')} disabled={selectedIds.length === 0} className="bg-blue-500 text-white font-bold py-2 px-4 rounded-md text-sm disabled:bg-gray-400 dark:disabled:bg-gray-600 flex items-center gap-2">
@@ -657,7 +682,7 @@ function App() {
                                     {statusFiltro !== 'Tratada' && <button onClick={() => {handleAction(selectedIds, 'Tratada'); setActiveActionMenu(null);}} className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">Marcar como Tratada</button>}
                                     {statusFiltro !== 'Pendente' && <button onClick={() => {handleAction(selectedIds, 'Pendente'); setActiveActionMenu(null);}} className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">Marcar como Pendente</button>}
                                     {statusFiltro !== 'Arquivado' && <button onClick={() => {handleAction(selectedIds, 'Arquivado'); setActiveActionMenu(null);}} className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">Arquivar</button>}
-                                </div>
+                                 </div>
                             )}
                         </div>
                     </div>
@@ -672,6 +697,7 @@ function App() {
                                     <th className="w-[10%] px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer" onClick={() => requestSort('data_notificacao')}>Data <SortIcon direction={sortConfig.key === 'data_notificacao' ? sortConfig.direction : null}/></th>
                                     <th className="w-[25%] px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer" onClick={() => requestSort('NPJ')}>NPJ <SortIcon direction={sortConfig.key === 'NPJ' ? sortConfig.direction : null}/></th>
                                     <th className="w-[15%] px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nº Processo</th>
+                                    <th className="w-[10%] px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Polo</th>
                                     <th className="w-[25%] px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tipos de Notificação</th>
                                     <th className="w-[15%] px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer" onClick={() => requestSort('responsavel')}>Responsável <SortIcon direction={sortConfig.key === 'responsavel' ? sortConfig.direction : null}/></th>
                                     <th className="w-[5%] px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Detalhes</th>
@@ -689,11 +715,15 @@ function App() {
                                             <input type="checkbox" checked={selectedIds.includes(item.ids)} onChange={(e) => handleSelectOne(e, item.ids)} className="rounded" />
                                         </td>
                                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{item.data_notificacao}</td>
-                                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
                                             {item.NPJ}
                                             {item.gerou_tarefa === 1 && <TaskIcon />}
                                         </td>
                                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300 truncate">{item.numero_processo || '-'}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                            {item.polo || '-'}
+                                        </td>
+
                                         <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                                             <div className="flex flex-wrap gap-1">
                                                 {item.tipos_notificacao && item.tipos_notificacao.split('; ').map(tipo => (
@@ -759,6 +789,7 @@ function App() {
 // --- Gerenciador de Usuários ---
 const UserManagement = ({ users, onUserChange }) => {
     const [newUserName, setNewUserName] = useState('');
+    const [newUserProfile, setNewUserProfile] = useState('Geral');
     const [error, setError] = useState('');
 
     const handleAddUser = async (e) => {
@@ -769,38 +800,68 @@ const UserManagement = ({ users, onUserChange }) => {
             const response = await fetch(`${API_URL}/usuarios`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nome: newUserName }),
+                body: JSON.stringify({ nome: newUserName, perfil: newUserProfile }),
             });
             if (!response.ok) {
                 const errData = await response.json();
                 throw new Error(errData.error || 'Falha ao adicionar usuário');
             }
             setNewUserName('');
+            setNewUserProfile('Geral');
             onUserChange();
         } catch (err) { setError(err.message); }
     };
     
     const handleDeleteUser = async (userId) => {
-            try {
-                const response = await fetch(`${API_URL}/usuarios/${userId}`, { method: 'DELETE' });
-                if (!response.ok) throw new Error('Falha ao remover usuário');
-                onUserChange();
-            } catch (err) { setError(err.message); }
+        try {
+            const response = await fetch(`${API_URL}/usuarios/${userId}`, { method: 'DELETE' });
+            if (!response.ok) throw new Error('Falha ao remover usuário');
+            onUserChange();
+        } catch (err) { setError(err.message); }
+    };
+
+    const handleProfileChange = async (userId, newProfile) => {
+        try {
+            const response = await fetch(`${API_URL}/usuarios/${userId}/perfil`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ perfil: newProfile }),
+            });
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error || 'Falha ao atualizar perfil.');
+            }
+            onUserChange();
+        } catch (err) {
+            setError(err.message);
+        }
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md max-w-2xl mx-auto">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md max-w-4xl mx-auto">
             <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Gerenciar Responsáveis</h2>
             {error && <p className="text-red-500 mb-4">{error}</p>}
-            <form onSubmit={handleAddUser} className="flex items-center gap-2 mb-6">
-                <input type="text" value={newUserName} onChange={e => setNewUserName(e.target.value)} placeholder="Nome do novo responsável" className="border rounded-md py-2 px-3 flex-grow focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border-gray-300 dark:border-gray-600" />
-                <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md">Adicionar</button>
+            <form onSubmit={handleAddUser} className="flex flex-col sm:flex-row items-center gap-2 mb-6">
+                <input type="text" value={newUserName} onChange={e => setNewUserName(e.target.value)} placeholder="Nome do novo responsável" className="border rounded-md py-2 px-3 flex-grow focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border-gray-300 dark:border-gray-600 w-full" />
+                <select value={newUserProfile} onChange={e => setNewUserProfile(e.target.value)} className="border rounded-md py-2 px-3 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
+                    <option value="Geral">Geral</option>
+                    <option value="Polo Ativo">Polo Ativo</option>
+                </select>
+                <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md w-full sm:w-auto">Adicionar</button>
             </form>
             <div className="space-y-2">
                 {users.map(user => (
-                    <div key={user.id} className="flex justify-between items-center p-3 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                        <span className="font-medium text-gray-700 dark:text-gray-200">{user.nome}</span>
-                        <button onClick={() => handleDeleteUser(user.id)} className="text-red-500 hover:text-red-700 font-semibold text-sm">Remover</button>
+                    <div key={user.id} className="grid grid-cols-3 items-center p-3 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 gap-4">
+                        <span className="font-medium text-gray-700 dark:text-gray-200 col-span-1">{user.nome}</span>
+                        <div className="col-span-1">
+                            <select value={user.perfil || 'Geral'} onChange={(e) => handleProfileChange(user.id, e.target.value)} className="border rounded-md py-1 px-2 text-sm bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-200 border-gray-300 dark:border-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 w-full">
+                                <option value="Geral">Geral</option>
+                                <option value="Polo Ativo">Polo Ativo</option>
+                            </select>
+                        </div>
+                        <div className="col-span-1 text-right">
+                           <button onClick={() => handleDeleteUser(user.id)} className="text-red-500 hover:text-red-700 font-semibold text-sm">Remover</button>
+                        </div>
                     </div>
                 ))}
             </div>

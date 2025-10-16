@@ -2,7 +2,7 @@ import os
 import sqlite3
 import json
 import logging
-from typing import List, Dict
+from typing import List, Dict, Optional
 from datetime import datetime, timedelta
 
 # --- Configuração ---
@@ -14,28 +14,30 @@ def _executar_migracoes(conn):
     """Aplica migrações de schema no banco de dados de forma segura."""
     cursor = conn.cursor()
     
+    # Migrações para a tabela 'notificacoes'
     cursor.execute("PRAGMA table_info(notificacoes)")
     tabela_notificacoes_cols = [desc[1] for desc in cursor.fetchall()]
-    colunas_para_adicionar = {
+    colunas_para_adicionar_notif = {
         'responsavel': 'TEXT',
         'data_processamento': 'TEXT',
         'detalhes_erro': 'TEXT',
         'origem': 'TEXT DEFAULT "onenotify"',
         'gerou_tarefa': 'INTEGER DEFAULT 0',
         'tentativas': 'INTEGER DEFAULT 0',
-        'polo': 'TEXT' # NOVA COLUNA ADICIONADA
+        'polo': 'TEXT'
     }
-    for col, tipo in colunas_para_adicionar.items():
+    for col, tipo in colunas_para_adicionar_notif.items():
         if col not in tabela_notificacoes_cols:
             logging.info(f"Aplicando migração: Adicionando coluna '{col}' à tabela 'notificacoes'...")
             cursor.execute(f"ALTER TABLE notificacoes ADD COLUMN {col} {tipo}")
 
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS usuarios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL UNIQUE
-        )
-    """)
+    # Migrações para a tabela 'usuarios'
+    cursor.execute("PRAGMA table_info(usuarios)")
+    tabela_usuarios_cols = [desc[1] for desc in cursor.fetchall()]
+    if 'perfil' not in tabela_usuarios_cols:
+        logging.info("Aplicando migração: Adicionando coluna 'perfil' à tabela 'usuarios'...")
+        cursor.execute("ALTER TABLE usuarios ADD COLUMN perfil TEXT DEFAULT 'Geral'")
+
     conn.commit()
 
 # --- Funções Principais do Banco de Dados ---
@@ -57,6 +59,12 @@ def inicializar_banco():
                 notificacoes_salvas INTEGER, ciencias_registradas INTEGER, andamentos INTEGER, 
                 documentos INTEGER, npjs_sucesso INTEGER, npjs_falha INTEGER
             )
+            """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS usuarios (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nome TEXT NOT NULL UNIQUE
+                )
             """)
             _executar_migracoes(conn)
             logging.info(f"Banco de dados '{DATABASE_PATH}' verificado e atualizado com sucesso.")
@@ -166,26 +174,60 @@ def contar_pendentes() -> int:
         logging.error(f"ERRO ao contar tarefas pendentes: {e}", exc_info=True)
         return 0
 
-def get_next_user() -> str | None:
-    """Busca o próximo usuário para atribuição de tarefa (round-robin)."""
+def get_next_user(polo_da_tarefa: Optional[str]) -> str | None:
+    """
+    Busca o próximo usuário para atribuição (round-robin), considerando o perfil
+    e o polo da tarefa.
+    """
     try:
         with sqlite3.connect(DATABASE_PATH) as conn:
-            last_assigned = conn.execute("SELECT responsavel FROM notificacoes WHERE responsavel IS NOT NULL ORDER BY data_processamento DESC LIMIT 1").fetchone()
-            all_users = conn.execute("SELECT nome FROM usuarios ORDER BY nome").fetchall()
-            if not all_users:
+            conn.row_factory = sqlite3.Row
+            
+            # 1. Obter todos os usuários e seus perfis
+            all_users_raw = conn.execute("SELECT nome, perfil FROM usuarios ORDER BY nome").fetchall()
+            if not all_users_raw:
+                logging.warning("Nenhum usuário cadastrado para atribuição de tarefas.")
                 return None
-            user_list = [user[0] for user in all_users]
-            if not last_assigned or last_assigned[0] not in user_list:
-                return user_list[0]
+            
+            # 2. Definir o pool de usuários elegíveis com base no polo da tarefa
+            usuarios_gerais = [user['nome'] for user in all_users_raw if user['perfil'] == 'Geral']
+            
+            if polo_da_tarefa == 'Ativo':
+                usuarios_polo_ativo = [user['nome'] for user in all_users_raw if user['perfil'] == 'Polo Ativo']
+                user_pool = usuarios_gerais + usuarios_polo_ativo
+            else: # Tarefas de polo Passivo, Nulo ou outros só podem ser atribuídas a usuários Gerais
+                user_pool = usuarios_gerais
+
+            if not user_pool:
+                logging.error(f"Nenhum usuário elegível encontrado para uma tarefa com polo '{polo_da_tarefa}'. Verifique os perfis.")
+                # Fallback para qualquer usuário geral, se houver
+                return usuarios_gerais[0] if usuarios_gerais else None
+
+            # 3. Descobrir o último usuário atribuído DENTRO DO POOL ELEGÍVEL
+            placeholders = ', '.join(['?'] * len(user_pool))
+            last_assigned_raw = conn.execute(
+                f"SELECT responsavel FROM notificacoes WHERE responsavel IN ({placeholders}) ORDER BY data_processamento DESC LIMIT 1",
+                user_pool
+            ).fetchone()
+            
+            last_assigned = last_assigned_raw['responsavel'] if last_assigned_raw else None
+
+            # 4. Lógica de Round-Robin
+            if not last_assigned:
+                return user_pool[0]
+            
             try:
-                last_index = user_list.index(last_assigned[0])
-                next_index = (last_index + 1) % len(user_list)
-                return user_list[next_index]
+                last_index = user_pool.index(last_assigned)
+                next_index = (last_index + 1) % len(user_pool)
+                return user_pool[next_index]
             except ValueError:
-                return user_list[0]
+                # O último usuário atribuído não está mais no pool (ex: perfil mudou), começa do início do pool
+                return user_pool[0]
+                
     except sqlite3.Error as e:
-        logging.error(f"ERRO ao buscar próximo usuário: {e}")
+        logging.error(f"ERRO ao buscar próximo usuário: {e}", exc_info=True)
         return None
+
 
 def atualizar_notificacoes_processadas(npj, data, numero_processo, andamentos, documentos, data_processamento, responsavel, status='Processado', polo=None):
     """Atualiza as notificações de uma tarefa como 'Processado' ou 'Migrado' e adiciona o polo."""
@@ -241,4 +283,3 @@ def salvar_log_execucao(log_data: dict):
             conn.execute(f"INSERT INTO logs_execucao ({cols}) VALUES ({placeholders})", list(log_data.values()))
     except sqlite3.Error as e:
         logging.error(f"ERRO ao salvar log de execução: {e}", exc_info=True)
-
