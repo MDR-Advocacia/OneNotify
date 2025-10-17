@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 
-// CORREÇÃO: A URL da API agora é dinâmica, usando o endereço do servidor principal.
 const API_URL = `http://${window.location.hostname}:5000/api`;
 
 // --- Ícones ---
@@ -177,7 +176,7 @@ const MigrationModal = ({ isOpen, onClose, onMigrationComplete }) => {
                     <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
                       {migrationMode === 'adicionar' 
                         ? 'Selecione uma planilha (.xlsx ou .csv) com "npj" e "data" para adicionar novas notificações como pendentes.'
-                        : 'Selecione uma planilha (.xlsx ou .csv) com "npj" e "data" para encontrar notificações pendentes e marcá-las como "Tratada".'
+                        : 'Selecione uma planilha (.xlsx ou .csv) com "npj" e "data" para encontrar notificações existentes e marcá-las como "Tratada".'
                       }
                     </p>
                     <input 
@@ -200,26 +199,17 @@ const MigrationModal = ({ isOpen, onClose, onMigrationComplete }) => {
     );
 };
 
-const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus, legalOneUsers, legalOneTasks }) => {
+const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus }) => {
     const [step, setStep] = useState('details');
     const [activeAndamento, setActiveAndamento] = useState(null);
     const [detalhes, setDetalhes] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [formData, setFormData] = useState({
-        responsavel_name: '',
-        responsavel_id: null,
-        tarefa_name: '',
-        tarefa_parent_id: null,
-        tarefa_external_id: null,
-        data_agendamento: ''
-    });
     
-    const { NPJ: npj, data_notificacao, numero_processo, ids, status } = item || {};
+    const { NPJ: npj, data_notificacao, numero_processo, ids, status, responsavel, data_processamento, detalhes_erro } = item || {};
 
     useEffect(() => {
         if (isOpen) {
             setStep('details');
-            setFormData({ responsavel_name: '', responsavel_id: null, tarefa_name: '', tarefa_parent_id: null, tarefa_external_id: null, data_agendamento: '' });
             if (npj && data_notificacao) {
                 setLoading(true);
                 setActiveAndamento(null);
@@ -255,65 +245,9 @@ const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus, legalOneUse
         } catch (error) { console.error("Erro no download:", error); }
     };
 
-    const handleFinalizarSemTarefa = () => {
-        executeUpdateStatus([ids], 'Tratada', 0);
+    const handleFinalizar = (gerouTarefa) => {
+        executeUpdateStatus([ids], 'Tratada', gerouTarefa);
         onClose();
-    };
-
-    const handleCriarTarefa = async (e) => {
-        e.preventDefault();
-
-        const [year, month, day] = formData.data_agendamento.split('-');
-        const formattedDate = `${day}/${month}/${year}`;
-
-        const finalJson = {
-            fonte: "Onenotify",
-            processos: [
-                {
-                    id_responsavel: formData.responsavel_id,
-                    numero_processo: numero_processo ? numero_processo.replace(/\D/g, '') : '',
-                    parent_type_external_id: formData.tarefa_parent_id,
-                    external_id: formData.tarefa_external_id,
-                    "data agendamento": formattedDate,
-                    observacao: formData.tarefa_name
-                }
-            ]
-        };
-        
-        try {
-            const response = await fetch(`${API_URL}/tarefas`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(finalJson),
-            });
-            if (!response.ok) throw new Error("Falha ao salvar a tarefa.");
-            
-            executeUpdateStatus([ids], 'Tratada', 1);
-            onClose();
-
-        } catch (err) {
-            console.error(err);
-            alert(err.message);
-        }
-    };
-
-    const handleResponsavelChange = (name) => {
-        const selectedUser = legalOneUsers.find(user => user.name === name);
-        setFormData({
-            ...formData,
-            responsavel_name: name,
-            responsavel_id: selectedUser ? selectedUser.external_id : null
-        });
-    };
-    
-    const handleTarefaChange = (name) => {
-        const selectedTask = legalOneTasks.find(task => task.name === name);
-        setFormData({
-            ...formData,
-            tarefa_name: name,
-            tarefa_parent_id: selectedTask ? selectedTask.parent_type_external_id : null,
-            tarefa_external_id: selectedTask ? selectedTask.external_id : null
-        });
     };
     
     const renderContent = () => {
@@ -321,41 +255,12 @@ const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus, legalOneUse
             case 'decision':
                 return (
                     <div className="p-6 text-center flex-grow flex flex-col justify-center">
-                        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">Esta notificação vai gerar uma tarefa?</h3>
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">A finalização desta notificação gerou uma tarefa?</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Isso registrará se a tarefa foi criada manualmente no Legal One.</p>
                         <div className="flex justify-center gap-4 mt-6">
-                            <button onClick={() => setStep('form')} className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-semibold">Sim</button>
-                            <button onClick={handleFinalizarSemTarefa} className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-semibold">Não</button>
+                            <button onClick={() => handleFinalizar(1)} className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-semibold">Sim</button>
+                            <button onClick={() => handleFinalizar(0)} className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-semibold">Não</button>
                         </div>
-                    </div>
-                );
-            case 'form':
-                return (
-                    <div className="p-6 flex-grow overflow-y-auto">
-                        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-6">Agendar Nova Tarefa</h3>
-                        <form onSubmit={handleCriarTarefa} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Responsável</label>
-                                <input list="legal-one-users" value={formData.responsavel_name} onChange={e => handleResponsavelChange(e.target.value)} className="mt-1 block w-full border rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border-gray-300 dark:border-gray-600" required />
-                                <datalist id="legal-one-users">
-                                    {legalOneUsers.map(user => <option key={user.external_id} value={user.name} />)}
-                                </datalist>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipo de Tarefa</label>
-                                <input list="legal-one-tasks" value={formData.tarefa_name} onChange={e => handleTarefaChange(e.target.value)} className="mt-1 block w-full border rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border-gray-300 dark:border-gray-600" required />
-                                <datalist id="legal-one-tasks">
-                                    {legalOneTasks.map(task => <option key={task.external_id} value={task.name} />)}
-                                </datalist>
-                            </div>
-                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Data do Agendamento</label>
-                                <input type="date" value={formData.data_agendamento} onChange={e => setFormData({...formData, data_agendamento: e.target.value})} className="mt-1 block w-full border rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border-gray-300 dark:border-gray-600" required />
-                            </div>
-                            <div className="pt-4 flex justify-end gap-4">
-                                <button type="button" onClick={() => setStep('decision')} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 font-semibold">Voltar</button>
-                                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-semibold">Criar Tarefa</button>
-                            </div>
-                        </form>
                     </div>
                 );
             case 'details':
@@ -409,11 +314,21 @@ const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus, legalOneUse
                         <XIcon />
                     </button>
                     <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Detalhes do Processamento</h2>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                        {numero_processo ? `Nº Processo: ${numero_processo} | ` : ''}NPJ: {npj} | Data: {data_notificacao}
-                    </p>
-                    {item.responsavel && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Responsável: {item.responsavel}</p>}
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                        <span><strong>NPJ:</strong> {npj}</span>
+                        {numero_processo && <span><strong>Nº Processo:</strong> {numero_processo}</span>}
+                        <span><strong>Data:</strong> {data_notificacao}</span>
+                        {responsavel && <span className="text-xs text-gray-500 dark:text-gray-400 mt-1"><strong>Responsável:</strong> {responsavel}</span>}
+                        {data_processamento && <span className="text-xs text-gray-500 dark:text-gray-400 mt-1"><strong>Processado em:</strong> {data_processamento}</span>}
+                    </div>
                 </header>
+                
+                {detalhes_erro && (
+                    <div className="p-4 bg-red-50 dark:bg-red-900 border-b border-t border-red-200 dark:border-red-800">
+                        <h3 className="font-bold text-red-800 dark:text-red-200 mb-2">Detalhes do Erro</h3>
+                        <pre className="text-xs text-red-700 dark:text-red-300 whitespace-pre-wrap font-mono bg-transparent p-0">{detalhes_erro}</pre>
+                    </div>
+                )}
                 
                 {renderContent()}
 

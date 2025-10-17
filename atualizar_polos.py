@@ -25,6 +25,10 @@ def navegar_para_detalhes_do_npj(page: Page, npj: str):
     try:
         page.goto(url_final, wait_until="networkidle", timeout=60000)
         
+        # NOVA VERIFICAÇÃO: Checa se a página de erro do portal foi carregada
+        if page.locator('text=/Erro ao carregar o processo/i').count() > 0:
+            raise PlaywrightError(f"Página de erro 'Erro ao carregar o processo' encontrada para o NPJ {npj}.")
+
         # Garante que a página carregou o NPJ correto antes de prosseguir
         npj_formatado = f"{ano}/{numero}-000"
         chip_npj_selector = f'div[bb-title="NPJ"] span.chip__desc:has-text("{npj_formatado}")'
