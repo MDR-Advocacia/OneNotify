@@ -9,9 +9,11 @@ import logging
 import time
 from datetime import datetime
 import pandas as pd
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # --- Configuração do App ---
 app = Flask(__name__, static_folder='build', static_url_path='/')
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 # AJUSTE: Tornando o CORS mais permissivo para garantir a comunicação.
 # Isso permite requisições de qualquer origem, ideal para resolver este problema.
 CORS(app)

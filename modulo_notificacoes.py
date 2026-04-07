@@ -32,10 +32,14 @@ def extrair_dados_e_dar_ciencia_em_lote(page: Page, tarefa: dict, start_time_cic
             return [], 0, False
 
         logging.info(f"{contagem_texto} itens encontrados. Abrindo detalhes...")
-        linha_alvo.locator('td').last.locator('input[type="button"]').click()
+        # 1. Pode ser útil dar um pequeno timeout no clique, caso o navegador congele no ato
+        linha_alvo.locator('td').last.locator('input[type="button"]').click(timeout=60000)
 
         tabela_detalhes_selector = '[id*=":dataTabletableNotificacoesNaoLidas"]'
-        page.wait_for_selector(tabela_detalhes_selector, state='visible', timeout=30000)
+
+        # 2. Aumentando o timeout da tabela para 2 minutos (120000 ms)
+        logging.info("Aguardando o carregamento da tabela de detalhes (isso pode demorar devido ao volume)...")
+        page.wait_for_selector(tabela_detalhes_selector, state='visible', timeout=120000)
         tabela_detalhes = page.locator(tabela_detalhes_selector)
         
         corpo_da_tabela = tabela_detalhes.locator('tbody[id$=":tb"]')
