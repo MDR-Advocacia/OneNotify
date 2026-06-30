@@ -205,7 +205,8 @@ const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus }) => {
     const [detalhes, setDetalhes] = useState(null);
     const [loading, setLoading] = useState(false);
     
-    const { NPJ: npj, data_notificacao, numero_processo, ids, status, responsavel, data_processamento, detalhes_erro } = item || {};
+    const { NPJ: npjUpper, npj: npjLower, data_notificacao, numero_processo, ids, responsavel, data_processamento, detalhes_erro } = item || {};
+    const npj = npjUpper || npjLower || '';
 
     useEffect(() => {
         if (isOpen) {
@@ -429,6 +430,10 @@ function App() {
             sortableItems.sort((a, b) => {
                 let aValue = a[sortConfig.key] || '';
                 let bValue = b[sortConfig.key] || '';
+                if (sortConfig.key === 'NPJ') {
+                    aValue = a.NPJ || a.npj || '';
+                    bValue = b.NPJ || b.npj || '';
+                }
                 if (sortConfig.key === 'data_notificacao') {
                     aValue = aValue.split('/').reverse().join('');
                     bValue = bValue.split('/').reverse().join('');
@@ -443,7 +448,7 @@ function App() {
 
     const filteredItems = useMemo(() => sortedItems.filter(item =>
         // AJUSTADO: Busca agora inclui NPJ e Número do Processo
-        (item.NPJ?.toLowerCase() || '').includes(filtroBusca.toLowerCase()) ||
+        ((item.NPJ || item.npj)?.toLowerCase() || '').includes(filtroBusca.toLowerCase()) ||
         (item.numero_processo?.toLowerCase() || '').includes(filtroBusca.toLowerCase())
     ), [sortedItems, filtroBusca]);
 
@@ -644,7 +649,8 @@ function App() {
                                 {loading ? <tr><td colSpan="8" className="text-center p-4 dark:text-gray-300">Carregando...</td></tr> :
                                  error ? <tr><td colSpan="8" className="text-center p-4 text-red-500">{error}</td></tr> :
                                  currentTableData.map(item => {
-                                    const itemKey = item.NPJ + item.data_notificacao;
+                                    const itemNpj = item.NPJ || item.npj || '';
+                                    const itemKey = itemNpj + item.data_notificacao;
                                     return (
                                     <tr key={itemKey} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                         <td className="p-4">
@@ -652,7 +658,7 @@ function App() {
                                         </td>
                                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{item.data_notificacao}</td>
                                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                                            {item.NPJ}
+                                            {itemNpj}
                                             {item.gerou_tarefa === 1 && <TaskIcon />}
                                         </td>
                                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300 truncate">{item.numero_processo || '-'}</td>

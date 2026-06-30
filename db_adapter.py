@@ -152,7 +152,7 @@ def grouped_notificacoes_select(gerou_tarefa_select: str) -> str:
         gerou = "MAX(gerou_tarefa) as gerou_tarefa," if gerou_tarefa_select else ""
         return f"""
         SELECT
-            NPJ, data_notificacao, MAX(adverso_principal) as adverso_principal,
+            NPJ as "NPJ", data_notificacao, MAX(adverso_principal) as adverso_principal,
             MAX(numero_processo) as numero_processo, MAX(polo) as polo,
             STRING_AGG(id::text, ';') as ids,
             STRING_AGG(tipo_notificacao, '; ') as tipos_notificacao, MAX(responsavel) as responsavel,
