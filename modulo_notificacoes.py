@@ -38,16 +38,35 @@ def _aguardar_modal_sumir_se_visivel(modal_carregando, contexto: str, timeout_su
         logging.warning("    - Modal não liberou em %s dentro do tempo esperado.", contexto)
         raise
 
-def _aguardar_contagem_tarefa_diminuir(page: Page, tarefa_nome: str, quantidade_anterior: int, timeout_ms: int = 300000) -> int:
+def _ler_total_paginas_detalhes(page: Page, tabela_detalhes_selector: str) -> int | None:
+    try:
+        rodape = page.locator(tabela_detalhes_selector).locator("tfoot").inner_text(timeout=5000)
+        match = re.search(r"/\s*(\d+)\s*p", rodape, re.IGNORECASE)
+        if match:
+            return int(match.group(1))
+    except Exception:
+        return None
+    return None
+
+def _aguardar_consolidacao_ciencia(
+    page: Page,
+    tarefa_nome: str,
+    quantidade_anterior: int,
+    total_paginas_anterior: int | None,
+    tabela_detalhes_selector: str,
+    timeout_ms: int = 300000,
+) -> tuple[int, int | None]:
     tabela_principal_selector = 'table[id="tabelaTipoSubtipoGeral"]'
     deadline = time.time() + (timeout_ms / 1000)
     ultima_quantidade = quantidade_anterior
+    ultimo_total_paginas = total_paginas_anterior
     ultimo_log = 0.0
 
     logging.info(
-        "    - Aguardando o portal consolidar a ciência de '%s' (%s pendente(s) antes do clique)...",
+        "    - Aguardando o portal consolidar a ciência de '%s' (%s pendente(s), %s página(s) antes do clique)...",
         tarefa_nome,
         quantidade_anterior,
+        total_paginas_anterior or "total desconhecido",
     )
 
     while time.time() < deadline:
@@ -67,24 +86,39 @@ def _aguardar_contagem_tarefa_diminuir(page: Page, tarefa_nome: str, quantidade_
                     quantidade_anterior,
                     ultima_quantidade,
                 )
-                return ultima_quantidade
+                return ultima_quantidade, ultimo_total_paginas
         except Exception:
             pass
+
+        total_paginas_atual = _ler_total_paginas_detalhes(page, tabela_detalhes_selector)
+        if total_paginas_atual is not None:
+            ultimo_total_paginas = total_paginas_atual
+            if total_paginas_anterior is not None and total_paginas_atual < total_paginas_anterior:
+                logging.info(
+                    "    - Total de páginas da grade atualizado para '%s': %s -> %s.",
+                    tarefa_nome,
+                    total_paginas_anterior,
+                    total_paginas_atual,
+                )
+                return ultima_quantidade, total_paginas_atual
 
         agora = time.time()
         if agora - ultimo_log >= 15:
             logging.info(
-                "    - Contagem ainda não atualizou para '%s' (%s -> %s). Aguardando...",
+                "    - Portal ainda não consolidou '%s' (contagem %s -> %s; páginas %s -> %s). Aguardando...",
                 tarefa_nome,
                 quantidade_anterior,
                 ultima_quantidade,
+                total_paginas_anterior or "desconhecido",
+                ultimo_total_paginas or "desconhecido",
             )
             ultimo_log = agora
         time.sleep(2)
 
     raise TimeoutError(
-        f"Contagem da tarefa '{tarefa_nome}' nao diminuiu após ciência "
-        f"({quantidade_anterior} -> {ultima_quantidade})."
+        f"A tarefa '{tarefa_nome}' nao consolidou a ciência após o clique "
+        f"(contagem {quantidade_anterior} -> {ultima_quantidade}; "
+        f"páginas {total_paginas_anterior} -> {ultimo_total_paginas})."
     )
 
 def _confirmar_ciencia_com_monitoramento(page: Page) -> None:
@@ -185,6 +219,10 @@ def extrair_dados_e_dar_ciencia_em_lote(
         page.wait_for_selector(tabela_detalhes_selector, state='visible', timeout=120000)
         logging.info(f"    - Tabela de detalhes carregada em {time.time() - inicio_abertura:.2f}s.")
         tabela_detalhes = page.locator(tabela_detalhes_selector)
+        total_paginas_inicial = _ler_total_paginas_detalhes(page, tabela_detalhes_selector)
+        if total_paginas_inicial is None and quantidade > 0:
+            total_paginas_inicial = (quantidade + 9) // 10
+        logging.info("    - Total de páginas da grade no início da tarefa: %s.", total_paginas_inicial or "desconhecido")
         
         corpo_da_tabela = tabela_detalhes.locator('tbody[id$=":tb"]')
         corpo_da_tabela.locator("tr").first.wait_for(state="visible", timeout=20000)
@@ -433,7 +471,13 @@ def extrair_dados_e_dar_ciencia_em_lote(
                 timeout_sumir=300000,
             )
             page.wait_for_selector('table[id="tabelaTipoSubtipoGeral"]', state='visible', timeout=120000)
-            _aguardar_contagem_tarefa_diminuir(page, tarefa["nome"], quantidade)
+            _aguardar_consolidacao_ciencia(
+                page,
+                tarefa["nome"],
+                quantidade,
+                total_paginas_inicial,
+                tabela_detalhes_selector,
+            )
             ciencia_confirmada = True
         elif houve_marcacao and confirmar_ciencia_ao_final:
             tempo_esgotado = True
