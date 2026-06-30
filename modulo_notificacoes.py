@@ -183,11 +183,24 @@ def _abrir_detalhes_tarefa_pela_seta_superior(
             return
 
         logging.warning(
-            "    - Seta superior ainda deixou a grade na página %s/%s em %s.",
+            "    - Seta superior atualizou a consulta, mas preservou a grade na página %s/%s em %s.",
             pagina_atual or "?",
             total_paginas or "?",
             contexto,
         )
+        total_reposicionado = _garantir_primeira_pagina_detalhes(
+            page,
+            tabela_detalhes_selector,
+            modal_carregando,
+            f"{contexto} após seta superior",
+        )
+        pagina_reposicionada, total_reposicionado = _ler_paginacao_detalhes(page, tabela_detalhes_selector)
+        if pagina_reposicionada == 1:
+            logging.info(
+                "    - Consulta reaberta e grade reposicionada para página 1/%s.",
+                total_reposicionado or "?",
+            )
+            return
         time.sleep(2)
 
     raise TimeoutError(
