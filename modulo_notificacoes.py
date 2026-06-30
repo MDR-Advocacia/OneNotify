@@ -38,6 +38,39 @@ def _aguardar_modal_sumir_se_visivel(modal_carregando, contexto: str, timeout_su
         logging.warning("    - Modal não liberou em %s dentro do tempo esperado.", contexto)
         raise
 
+def _aguardar_overlay_ajax_sumir(page: Page, contexto: str, timeout_sumir: int = 300000) -> bool:
+    selectors = [
+        '#notificacoesNaoLidasForm\\:ajaxLoadingModalBoxDiv',
+        '#notificacoesNaoLidasForm\\:ajaxLoadingModalBoxContainer',
+        '#notificacoesNaoLidasForm\\:ajaxLoadingModalBox',
+    ]
+    deadline = time.time() + (timeout_sumir / 1000)
+    viu_bloqueio = False
+
+    while time.time() < deadline:
+        bloqueado = False
+        for selector in selectors:
+            loc = page.locator(selector).first
+            try:
+                if loc.count() > 0 and loc.is_visible(timeout=150):
+                    bloqueado = True
+                    if not viu_bloqueio:
+                        logging.info("    - Overlay AJAX visível em %s; aguardando liberação...", contexto)
+                        viu_bloqueio = True
+                    restante_ms = max(500, int((deadline - time.time()) * 1000))
+                    loc.wait_for(state='hidden', timeout=min(5000, restante_ms))
+            except TimeoutError:
+                bloqueado = True
+            except Exception:
+                continue
+
+        if not bloqueado:
+            return viu_bloqueio
+
+        time.sleep(0.5)
+
+    raise TimeoutError(f"Overlay AJAX nao liberou em {contexto} dentro do tempo esperado.")
+
 def _ler_total_paginas_detalhes(page: Page, tabela_detalhes_selector: str) -> int | None:
     try:
         rodape = page.locator(tabela_detalhes_selector).locator("tfoot").inner_text(timeout=5000)
@@ -197,6 +230,8 @@ def extrair_dados_e_dar_ciencia_em_lote(
         logging.info(f"--- Processando tarefa: {tarefa['nome']} ---")
         
         tabela_principal_selector = 'table[id="tabelaTipoSubtipoGeral"]'
+        modal_carregando = page.locator('#notificacoesNaoLidasForm\\:ajaxLoadingModalBox').first
+        _aguardar_overlay_ajax_sumir(page, "antes de localizar tarefa", timeout_sumir=120000)
         linha_alvo = page.locator(f"{tabela_principal_selector} tr:has-text(\"{tarefa['nome']}\")")
         
         if linha_alvo.count() == 0:
@@ -211,12 +246,14 @@ def extrair_dados_e_dar_ciencia_em_lote(
 
         logging.info(f"{contagem_texto} itens encontrados. Abrindo detalhes...")
         inicio_abertura = time.time()
+        _aguardar_overlay_ajax_sumir(page, "antes de abrir detalhes da tarefa", timeout_sumir=120000)
         linha_alvo.locator('td').last.locator('input[type="button"]').click(timeout=60000)
 
         tabela_detalhes_selector = '[id*=":dataTabletableNotificacoesNaoLidas"]'
 
         logging.info("Aguardando o carregamento da tabela de detalhes (isso pode demorar devido ao volume)...")
         page.wait_for_selector(tabela_detalhes_selector, state='visible', timeout=120000)
+        _aguardar_overlay_ajax_sumir(page, "após abrir detalhes da tarefa", timeout_sumir=300000)
         logging.info(f"    - Tabela de detalhes carregada em {time.time() - inicio_abertura:.2f}s.")
         tabela_detalhes = page.locator(tabela_detalhes_selector)
         total_paginas_inicial = _ler_total_paginas_detalhes(page, tabela_detalhes_selector)
@@ -229,7 +266,6 @@ def extrair_dados_e_dar_ciencia_em_lote(
 
         pagina_atual = 1
         pagina_final_alcancada = False
-        modal_carregando = page.locator('#notificacoesNaoLidasForm\\:ajaxLoadingModalBox').first
 
         if confirmar_ciencia and max_paginas is not None:
             logging.warning(
@@ -270,6 +306,7 @@ def extrair_dados_e_dar_ciencia_em_lote(
             notificacoes_da_pagina = []
             marcados_na_pagina = 0
             _aguardar_modal_sumir_se_visivel(modal_carregando, "início da página")
+            _aguardar_overlay_ajax_sumir(page, "início da página", timeout_sumir=300000)
             
             for linha in corpo_da_tabela.locator("tr").all():
                 try:
@@ -314,11 +351,13 @@ def extrair_dados_e_dar_ciencia_em_lote(
                             continue
 
                         _aguardar_modal_sumir_se_visivel(modal_carregando, f"antes de marcar NPJ {npj}")
+                        _aguardar_overlay_ajax_sumir(page, f"antes de marcar NPJ {npj}", timeout_sumir=300000)
                         if not checkbox.is_checked(timeout=1000):
                             try:
                                 checkbox.check(timeout=5000)
                             except TimeoutError:
                                 _aguardar_modal_sumir_se_visivel(modal_carregando, f"retry de marcação do NPJ {npj}")
+                                _aguardar_overlay_ajax_sumir(page, f"retry de marcação do NPJ {npj}", timeout_sumir=300000)
                                 checkbox.check(timeout=8000)
                             _esperar_modal_se_aparecer(
                                 modal_carregando,
@@ -327,6 +366,7 @@ def extrair_dados_e_dar_ciencia_em_lote(
                                 timeout_sumir=60000,
                                 log_ausente=False,
                             )
+                            _aguardar_overlay_ajax_sumir(page, f"após marcar NPJ {npj}", timeout_sumir=300000)
 
                         if checkbox.is_checked(timeout=1000):
                             notificacoes_da_pagina.append(notificacao)
@@ -416,8 +456,10 @@ def extrair_dados_e_dar_ciencia_em_lote(
             
             logging.info("    - Navegando para a próxima página de detalhes...")
             _aguardar_modal_sumir_se_visivel(modal_carregando, "antes da paginação")
+            _aguardar_overlay_ajax_sumir(page, "antes da paginação", timeout_sumir=300000)
             botao_proxima.click()
             _esperar_modal_se_aparecer(modal_carregando, "paginação")
+            _aguardar_overlay_ajax_sumir(page, "após paginação", timeout_sumir=300000)
             
             pagina_atual += 1
 
@@ -463,6 +505,7 @@ def extrair_dados_e_dar_ciencia_em_lote(
             else:
                 logging.info("    - Confirmando a ciência...")
             _aguardar_modal_sumir_se_visivel(modal_carregando, "antes de confirmar ciência")
+            _aguardar_overlay_ajax_sumir(page, "antes de confirmar ciência", timeout_sumir=300000)
             _confirmar_ciencia_com_monitoramento(page)
             _esperar_modal_se_aparecer(
                 modal_carregando,
@@ -470,6 +513,7 @@ def extrair_dados_e_dar_ciencia_em_lote(
                 timeout_aparecer=5000,
                 timeout_sumir=300000,
             )
+            _aguardar_overlay_ajax_sumir(page, "após confirmação de ciência", timeout_sumir=300000)
             page.wait_for_selector('table[id="tabelaTipoSubtipoGeral"]', state='visible', timeout=120000)
             _aguardar_consolidacao_ciencia(
                 page,
@@ -478,22 +522,27 @@ def extrair_dados_e_dar_ciencia_em_lote(
                 total_paginas_inicial,
                 tabela_detalhes_selector,
             )
+            _aguardar_overlay_ajax_sumir(page, "após consolidação de ciência", timeout_sumir=300000)
             ciencia_confirmada = True
         elif houve_marcacao and confirmar_ciencia_ao_final:
             tempo_esgotado = True
             logging.warning("    - Ciência NÃO confirmada. Voltando para a lista de tarefas.")
             _aguardar_modal_sumir_se_visivel(modal_carregando, "antes de voltar sem ciência")
+            _aguardar_overlay_ajax_sumir(page, "antes de voltar sem ciência", timeout_sumir=300000)
             page.locator('input[type="image"][src*="btVoltar.gif"]').click()
         elif houve_marcacao:
             logging.info("    - Dry-run: checkboxes marcados apenas para teste. Voltando sem confirmar ciência.")
             _aguardar_modal_sumir_se_visivel(modal_carregando, "antes de voltar no dry-run")
+            _aguardar_overlay_ajax_sumir(page, "antes de voltar no dry-run", timeout_sumir=300000)
             page.locator('input[type="image"][src*="btVoltar.gif"]').click()
         else:
             logging.info("    - Nenhuma ciência marcada. Voltando para a lista de tarefas.")
             _aguardar_modal_sumir_se_visivel(modal_carregando, "antes de voltar sem marcações")
+            _aguardar_overlay_ajax_sumir(page, "antes de voltar sem marcações", timeout_sumir=300000)
             page.locator('input[type="image"][src*="btVoltar.gif"]').click()
 
         _esperar_modal_se_aparecer(modal_carregando, "retorno/confirmacao")
+        _aguardar_overlay_ajax_sumir(page, "retorno/confirmacao", timeout_sumir=300000)
         if ciencia_confirmada:
             atualizadas = database.marcar_ciencia_enviada(notificacoes_para_salvar)
             logging.info("    - Ciência marcada no banco para %s registro(s).", atualizadas)
