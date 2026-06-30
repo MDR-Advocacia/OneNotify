@@ -3,6 +3,7 @@ import sqlite3
 import json
 import click
 import sys
+import mimetypes
 from flask import Flask, jsonify, request, g, send_from_directory
 from flask.cli import with_appcontext
 from flask_cors import CORS
@@ -18,7 +19,7 @@ if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
 import db_adapter
-from document_payload import safe_json_loads
+from document_payload import build_documents_json, safe_json_loads
 
 # --- Configuração do App ---
 app = Flask(__name__, static_folder='build', static_url_path='/')
@@ -181,11 +182,13 @@ def _public_base_url() -> str:
 def _document_api_path(document: dict) -> str | None:
     relative_path = document.get("relative_path")
     if relative_path:
-        return os.path.join(DOCUMENTOS_PATH, relative_path).replace("\\", "/")
+        resolved = _resolve_document_path(os.path.join(DOCUMENTOS_PATH, relative_path))
+        return resolved.replace("\\", "/") if resolved else None
 
     original_path = document.get("original_path")
-    if original_path and str(original_path).replace("\\", "/").startswith(DOCUMENTOS_PATH.replace("\\", "/")):
-        return str(original_path).replace("\\", "/")
+    if original_path:
+        resolved = _resolve_document_path(str(original_path))
+        return resolved.replace("\\", "/") if resolved else None
 
     return None
 
@@ -298,14 +301,36 @@ def _build_conteudo_payload(andamentos, documentos_json, documentos_originais):
         "documentos_links": documentos_links,
     }
 
+def _documents_payload_needs_refresh(documentos_json, documentos_originais) -> bool:
+    if not documentos_originais:
+        return False
+    if not isinstance(documentos_json, dict):
+        return True
+
+    items = [item for item in documentos_json.get("items", []) if isinstance(item, dict)]
+    if not items:
+        return True
+
+    for item in items:
+        extraction = item.get("extraction", {}) if isinstance(item.get("extraction"), dict) else {}
+        if item.get("exists") is False or extraction.get("status") == "missing_file":
+            return True
+        if not item.get("mime_type") and item.get("original_path"):
+            return True
+
+    return False
+
 def _flow_group_to_payload(row, include_documents=False):
     row_dict = dict(row)
     andamentos = safe_json_loads(row_dict.get("andamentos"), fallback=[])
     documentos_json = safe_json_loads(row_dict.get("documentos_json"), fallback=None)
     documentos_originais = safe_json_loads(row_dict.get("documentos"), fallback=[])
-    if include_documents and not documentos_json:
+    if include_documents and _documents_payload_needs_refresh(documentos_json, documentos_originais):
+        documentos_json = build_documents_json(documentos_originais, base_dir=DOCUMENTOS_PATH)
+    elif include_documents and not documentos_json:
         documentos_json = _empty_documents_payload()
-    elif not include_documents:
+
+    if not include_documents:
         documentos_json = None
     elif documentos_json:
         documentos_json = _decorate_document_links(documentos_json)
@@ -351,15 +376,38 @@ def _flow_group_to_payload(row, include_documents=False):
 
 def _resolve_document_path(caminho: str) -> str | None:
     diretorio_base = os.path.abspath(DOCUMENTOS_PATH)
-    caminho_seguro = os.path.abspath(caminho)
-
-    try:
-        if os.path.commonpath([diretorio_base, caminho_seguro]) != diretorio_base:
-            return None
-    except ValueError:
+    raw_path = str(caminho or "").strip()
+    if not raw_path:
         return None
 
-    return caminho_seguro
+    normalized = raw_path.replace("\\", "/")
+    candidates = []
+
+    windows_prefix = "C:/OneNotify/documentos/"
+    if normalized.lower().startswith(windows_prefix.lower()):
+        relative = normalized[len(windows_prefix):]
+        candidates.append(os.path.join(diretorio_base, *relative.split("/")))
+
+    documentos_prefix = "documentos/"
+    if normalized.lower().startswith(documentos_prefix):
+        relative = normalized[len(documentos_prefix):]
+        candidates.append(os.path.join(diretorio_base, *relative.split("/")))
+
+    base_normalized = diretorio_base.replace("\\", "/").rstrip("/") + "/"
+    if normalized.startswith(base_normalized):
+        candidates.append(normalized)
+
+    candidates.append(raw_path)
+
+    for candidate in candidates:
+        caminho_seguro = os.path.abspath(candidate)
+        try:
+            if os.path.commonpath([diretorio_base, caminho_seguro]) == diretorio_base:
+                return caminho_seguro
+        except ValueError:
+            continue
+
+    return None
 
 # --- Rotas da API ---
 
@@ -637,13 +685,15 @@ def view_document_file():
     caminho_seguro = _resolve_document_path(caminho)
     if caminho_seguro is None: return "Acesso negado.", 403
     if not os.path.exists(caminho_seguro): return "Arquivo não encontrado.", 404
-    if not caminho_seguro.lower().endswith('.pdf'): return "Visualização inline disponível apenas para PDF.", 400
+    extensao = os.path.splitext(caminho_seguro)[1].lower()
+    if extensao not in {'.pdf', '.txt', '.text'}:
+        return "Visualização inline disponível apenas para PDF e TXT.", 400
 
     response = send_from_directory(
         os.path.dirname(caminho_seguro),
         os.path.basename(caminho_seguro),
         as_attachment=False,
-        mimetype='application/pdf',
+        mimetype=mimetypes.guess_type(caminho_seguro)[0] or 'application/octet-stream',
     )
     response.headers['Content-Disposition'] = f'inline; filename="{os.path.basename(caminho_seguro)}"'
     response.headers['X-Content-Type-Options'] = 'nosniff'
@@ -659,7 +709,10 @@ def update_status():
 
     if not ids_list or not novo_status: return jsonify({'error': 'IDs e novo_status são obrigatórios'}), 400
     
-    ids = [int(i) for i in ids_list]
+    try:
+        ids = [int(i) for i in ids_list]
+    except (TypeError, ValueError):
+        return jsonify({'error': 'IDs inválidos'}), 400
     
     db = get_db()
     placeholders = db_adapter.placeholders(len(ids))
@@ -672,19 +725,22 @@ def update_status():
 
     if novo_status == 'Tratada' and gerou_tarefa is not None:
         params = [novo_status, gerou_tarefa, human_status] + ids
-        db.execute(
+        cursor = db.execute(
             f"UPDATE notificacoes SET status = ?, gerou_tarefa = ?, human_status = ? WHERE id IN ({placeholders})",
             params,
         )
     else:
         params = [novo_status, human_status] + ids
-        db.execute(
+        cursor = db.execute(
             f"UPDATE notificacoes SET status = ?, human_status = ? WHERE id IN ({placeholders})",
             params,
         )
         
     db.commit()
-    return jsonify({'message': f'{len(ids)} notificações atualizadas para {novo_status}'})
+    updated = cursor.rowcount if cursor.rowcount is not None and cursor.rowcount >= 0 else 0
+    if updated == 0:
+        return jsonify({'error': 'Nenhuma notificação foi atualizada. Recarregue a lista e tente novamente.'}), 404
+    return jsonify({'message': f'{updated} notificações atualizadas para {novo_status}', 'updated': updated})
 
 @app.route('/api/usuarios', methods=['GET'])
 def get_usuarios():

@@ -204,6 +204,7 @@ const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus }) => {
     const [activeAndamento, setActiveAndamento] = useState(null);
     const [detalhes, setDetalhes] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [actionError, setActionError] = useState('');
     
     const { NPJ: npjUpper, npj: npjLower, data_notificacao, numero_processo, ids, responsavel, data_processamento, detalhes_erro } = item || {};
     const npj = npjUpper || npjLower || '';
@@ -211,6 +212,7 @@ const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus }) => {
     useEffect(() => {
         if (isOpen) {
             setStep('details');
+            setActionError('');
             if (npj && data_notificacao) {
                 setLoading(true);
                 setActiveAndamento(null);
@@ -231,9 +233,16 @@ const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus }) => {
     
     if (!isOpen || !item) return null;
 
+    const documentViewUrl = (path) => `${API_URL}/documentos/view?path=${encodeURIComponent(path)}`;
+    const documentDownloadUrl = (path) => `${API_URL}/download?path=${encodeURIComponent(path)}`;
+
+    const handleViewDocument = (path) => {
+        window.open(documentViewUrl(path), '_blank', 'noopener,noreferrer');
+    };
+
     const handleDownload = async (path) => {
         try {
-            const response = await fetch(`${API_URL}/download?path=${encodeURIComponent(path)}`);
+            const response = await fetch(documentDownloadUrl(path));
             if (!response.ok) throw new Error('Falha no download');
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
@@ -246,9 +255,14 @@ const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus }) => {
         } catch (error) { console.error("Erro no download:", error); }
     };
 
-    const handleFinalizar = (gerouTarefa) => {
-        executeUpdateStatus([ids], 'Tratada', gerouTarefa);
-        onClose();
+    const handleFinalizar = async (gerouTarefa) => {
+        setActionError('');
+        const updated = await executeUpdateStatus([ids], 'Tratada', gerouTarefa);
+        if (updated) {
+            onClose();
+        } else {
+            setActionError('Não foi possível marcar como tratada. Recarregue a lista e tente novamente.');
+        }
     };
     
     const renderContent = () => {
@@ -258,6 +272,7 @@ const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus }) => {
                     <div className="p-6 text-center flex-grow flex flex-col justify-center">
                         <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">A finalização desta notificação gerou uma tarefa?</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">Isso registrará se a tarefa foi criada manualmente no Legal One.</p>
+                        {actionError && <p className="mt-3 text-sm text-red-600 dark:text-red-400">{actionError}</p>}
                         <div className="flex justify-center gap-4 mt-6">
                             <button onClick={() => handleFinalizar(1)} className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-semibold">Sim</button>
                             <button onClick={() => handleFinalizar(0)} className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-semibold">Não</button>
@@ -293,9 +308,17 @@ const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus }) => {
                                     <div className="border rounded-md p-2 overflow-y-auto flex-grow h-96 dark:border-gray-700">
                                        {detalhes?.documentos?.length > 0 ? (
                                             detalhes.documentos.map((doc, index) => (
-                                                <button key={index} onClick={() => handleDownload(doc.caminho)} className="w-full text-left p-2 border-b last:border-b-0 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center text-sm text-blue-600 dark:text-blue-400">
-                                                    <DownloadIcon /> {doc.nome}
-                                                </button>
+                                                <div key={index} className="p-2 border-b last:border-b-0 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm">
+                                                    <div className="text-gray-800 dark:text-gray-200 break-all mb-2">{doc.nome}</div>
+                                                    <div className="flex flex-wrap gap-3">
+                                                        <button onClick={() => handleViewDocument(doc.caminho)} className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline">
+                                                            <EyeIcon /> <span className="ml-1">Visualizar</span>
+                                                        </button>
+                                                        <button onClick={() => handleDownload(doc.caminho)} className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline">
+                                                            <DownloadIcon /> Baixar
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             ))
                                        ) : <p className="text-sm text-gray-500 dark:text-gray-400 p-2">Nenhum documento baixado.</p>}
                                     </div>
@@ -473,7 +496,7 @@ function App() {
     };
 
     const executeUpdateStatus = async (ids, novo_status, gerou_tarefa) => {
-        const flatIds = ids.flatMap(idStr => idStr.split(';'));
+        const flatIds = ids.flatMap(idStr => String(idStr).split(';')).filter(Boolean);
         try {
          const body = { ids: flatIds, novo_status };
          if (novo_status === 'Tratada') {
@@ -484,12 +507,19 @@ function App() {
            headers: { 'Content-Type': 'application/json' },
            body: JSON.stringify(body),
          });
-         if (!response.ok) throw new Error("Falha ao executar ação.");
+         if (!response.ok) {
+           const errorData = await response.json().catch(() => ({}));
+           throw new Error(errorData.error || "Falha ao executar ação.");
+         }
          fetchAllData();
+         return true;
         } catch (err) {
          console.error(err);
+         setError(err.message);
+         return false;
+        } finally {
+         setConfirmationModal({ isOpen: false, onConfirm: () => {}, message: '' });
         }
-        setConfirmationModal({ isOpen: false, onConfirm: () => {}, message: '' });
     };
 
     const handleAction = (ids, action) => {

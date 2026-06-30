@@ -190,11 +190,31 @@ ou ambos. O Flow deve considerar:
 
 - `tipo: "andamento"` para textos vindos da aba/accordion de andamentos, incluindo
   publicacoes DJ/DO.
-- `tipo: "documento"` para texto extraido de PDF/documento.
+- `tipo: "documento"` para texto extraido de PDF/documento. Arquivos `.txt`
+  baixados pela RPA tambem entram aqui com o texto completo em
+  `documentos.items[].extraction.pages[0].text`.
 
 Quando `include_documents=false`, a API ainda retorna textos de `andamentos`, mas
-nao duplica textos extraidos de PDFs. Para o intake completo com texto de PDF,
-chamar com `include_documents=true`.
+nao duplica textos extraidos de PDFs ou TXTs. Para o intake completo com texto
+de documentos, chamar com `include_documents=true`.
+
+Exemplo de documento `.txt` extraivel:
+
+```json
+{
+  "nome": "08024898920248205114-Intimacao-1780475272767-614955.txt",
+  "mime_type": "text/plain",
+  "access_mode": "text_json",
+  "extraction": {
+    "status": "ok",
+    "classification": "text_extractable",
+    "ocr_required": false,
+    "pages": [
+      {"page": 1, "text": "texto integral do arquivo...", "char_count": 12345}
+    ]
+  }
+}
+```
 
 ### PDFs escaneados ou baseados em imagem
 
@@ -228,12 +248,13 @@ O Flow nao deve tratar esse documento como conteudo textual completo. Para esses
 casos, o intake deve preservar o vinculo com o documento original e decidir se
 envia para OCR, revisao humana ou armazenamento externo.
 
-## Visualizacao de PDFs no navegador
+## Visualizacao de documentos no navegador
 
-Para abrir o PDF dentro do navegador, sem forcar download, use:
+Para abrir PDF ou TXT dentro do navegador, sem forcar download, use:
 
 ```http
 GET https://onenotify.mdradvocacia.com/api/flow/documentos/view?path=/app/documentos/<pasta>/<arquivo.pdf>
+GET https://onenotify.mdradvocacia.com/api/flow/documentos/view?path=/app/documentos/<pasta>/<arquivo.txt>
 ```
 
 Essa rota retorna `Content-Disposition: inline` e deve ser usada para links de
@@ -241,6 +262,7 @@ visualizacao no Flow. A rota antiga abaixo continua existindo para download:
 
 ```http
 GET https://onenotify.mdradvocacia.com/api/download?path=/app/documentos/<pasta>/<arquivo.pdf>
+GET https://onenotify.mdradvocacia.com/api/download?path=/app/documentos/<pasta>/<arquivo.txt>
 ```
 
 Exemplo real:

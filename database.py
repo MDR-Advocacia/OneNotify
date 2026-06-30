@@ -9,6 +9,10 @@ from document_payload import build_documents_json
 
 # --- Configuração ---
 DATABASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'rpa_refatorado.db'))
+DOCUMENTOS_PATH = os.getenv(
+    "DOCUMENTOS_PATH",
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "documentos")),
+)
 MAX_TENTATIVAS_PORTAL = 3 # Define o limite de tentativas para erros de portal
 
 # --- Funções Auxiliares de Migração ---
@@ -334,7 +338,7 @@ def get_next_user(polo_da_tarefa: Optional[str]) -> str | None:
 def atualizar_notificacoes_processadas(npj, data, numero_processo, andamentos, documentos, data_processamento, responsavel, status='Processado', polo=None):
     """Atualiza as notificações de uma tarefa como 'Processado' ou 'Migrado' e adiciona o polo."""
     try:
-        documentos_json = build_documents_json(documentos)
+        documentos_json = build_documents_json(documentos, base_dir=DOCUMENTOS_PATH)
         with db_adapter.connect_main() as conn:
             conn.execute("""
                 UPDATE notificacoes
