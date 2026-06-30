@@ -131,6 +131,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
+.venv-migration/
 env/
 venv/
 ENV/
@@ -184,3 +185,5 @@ cython_debug/
 logs
 *.db
 rpa_refatorado.db
+.venv-migration/
+chrome-profile-onenotify/

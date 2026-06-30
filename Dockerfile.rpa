@@ -1,0 +1,35 @@
+FROM mcr.microsoft.com/playwright/python:v1.55.0-jammy
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    DEBIAN_FRONTEND=noninteractive \
+    TZ=Etc/UTC \
+    DISPLAY=:99 \
+    SCREEN_GEOMETRY=1920x1080x24 \
+    VNC_PORT=5900 \
+    NOVNC_PORT=6080 \
+    CHROME_CDP_ENDPOINT=http://127.0.0.1:9222 \
+    BROWSER_START_COMMAND=/app/docker/start-chrome-cdp.sh
+
+WORKDIR /app
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        fluxbox \
+        novnc \
+        websockify \
+        x11-utils \
+        x11vnc \
+        xvfb \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+COPY . /app
+RUN chmod +x /app/docker/start-chrome-cdp.sh /app/docker/rpa-entrypoint.sh /app/docker/rpa-loop.sh
+
+EXPOSE 5900 6080
+
+ENTRYPOINT ["/app/docker/rpa-entrypoint.sh"]
+CMD ["/app/docker/rpa-loop.sh"]

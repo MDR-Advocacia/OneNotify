@@ -4,6 +4,8 @@ import json
 import logging
 from typing import List, Dict, Optional
 from datetime import datetime, timedelta
+import db_adapter
+from document_payload import build_documents_json
 
 # --- Configuração ---
 DATABASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'rpa_refatorado.db'))
@@ -24,7 +26,15 @@ def _executar_migracoes(conn):
         'origem': 'TEXT DEFAULT "onenotify"',
         'gerou_tarefa': 'INTEGER DEFAULT 0',
         'tentativas': 'INTEGER DEFAULT 0',
-        'polo': 'TEXT'
+        'polo': 'TEXT',
+        'rpa_status': 'TEXT DEFAULT "PENDENTE"',
+        'bb_ciencia_status': 'TEXT DEFAULT "PENDENTE"',
+        'human_status': 'TEXT DEFAULT "NOVO"',
+        'flow_status': 'TEXT DEFAULT "NAO_ENVIADO"',
+        'flow_external_id': 'TEXT',
+        'flow_synced_at': 'TEXT',
+        'flow_last_error': 'TEXT',
+        'documentos_json': 'TEXT'
     }
     for col, tipo in colunas_para_adicionar_notif.items():
         if col not in tabela_notificacoes_cols:
@@ -43,6 +53,11 @@ def _executar_migracoes(conn):
 # --- Funções Principais do Banco de Dados ---
 def inicializar_banco():
     """Garante que o banco de dados e as tabelas necessárias existam e estejam atualizados."""
+    if db_adapter.is_postgres():
+        logging.info("Banco PostgreSQL configurado via DATABASE_URL; schema gerenciado pelo migrador.")
+        garantir_indices_postgres()
+        return
+
     try:
         with sqlite3.connect(DATABASE_PATH) as conn:
             conn.execute("""
@@ -72,21 +87,61 @@ def inicializar_banco():
         logging.error(f"ERRO CRÍTICO ao inicializar o banco de dados: {e}", exc_info=True)
         raise
 
+def garantir_indices_postgres():
+    """Garante índices/constraints operacionais que protegem a integridade no Postgres."""
+    try:
+        with db_adapter.connect_main() as conn:
+            colunas = {
+                "rpa_status": "TEXT DEFAULT 'PENDENTE'",
+                "bb_ciencia_status": "TEXT DEFAULT 'PENDENTE'",
+                "human_status": "TEXT DEFAULT 'NOVO'",
+                "flow_status": "TEXT DEFAULT 'NAO_ENVIADO'",
+                "flow_external_id": "TEXT",
+                "flow_synced_at": "TEXT",
+                "flow_last_error": "TEXT",
+                "documentos_json": "TEXT",
+            }
+            for coluna, tipo in colunas.items():
+                if not db_adapter.table_has_column(conn, "notificacoes", coluna):
+                    conn.execute(f"ALTER TABLE notificacoes ADD COLUMN {coluna} {tipo}")
+
+            conn.execute("""
+                CREATE UNIQUE INDEX IF NOT EXISTS ux_notificacoes_npj_tipo_data
+                ON notificacoes (npj, tipo_notificacao, data_notificacao)
+            """)
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS ix_notificacoes_flow_status
+                ON notificacoes (flow_status)
+            """)
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS ix_notificacoes_rpa_status
+                ON notificacoes (rpa_status)
+            """)
+            conn.commit()
+            logging.info("Índice único ux_notificacoes_npj_tipo_data verificado no PostgreSQL.")
+    except Exception as e:
+        logging.error(f"ERRO ao garantir índices do PostgreSQL: {e}", exc_info=True)
+        raise
+
 def resetar_notificacoes_em_processamento():
     """Reseta o status de notificações que foram interrompidas durante o processamento."""
     try:
-        with sqlite3.connect(DATABASE_PATH) as conn:
+        with db_adapter.connect_main() as conn:
             cursor = conn.cursor()
-            cursor.execute("UPDATE notificacoes SET status = 'Pendente' WHERE status = 'Em Processamento'")
+            cursor.execute("""
+                UPDATE notificacoes
+                SET status = 'Pendente', rpa_status = 'PENDENTE'
+                WHERE status = 'Em Processamento'
+            """)
             if cursor.rowcount > 0:
                 logging.info(f"{cursor.rowcount} notificações 'Em Processamento' foram resetadas para 'Pendente'.")
-    except sqlite3.Error as e:
+    except Exception as e:
         logging.error(f"ERRO ao resetar status de notificações: {e}", exc_info=True)
 
 def resetar_erros_de_portal_antigos():
     """Verifica notificações com 'Erro_Portal' e as libera para nova tentativa se tiverem mais de 24 horas."""
     try:
-        with sqlite3.connect(DATABASE_PATH) as conn:
+        with db_adapter.connect_main() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             cursor.execute("SELECT id, data_processamento FROM notificacoes WHERE status = 'Erro_Portal'")
@@ -108,11 +163,11 @@ def resetar_erros_de_portal_antigos():
                     ids_para_resetar.append((tarefa['id'],))
 
             if ids_para_resetar:
-                cursor.executemany("UPDATE notificacoes SET status = 'Pendente' WHERE id = ?", ids_para_resetar)
+                db_adapter.executemany(conn, "UPDATE notificacoes SET status = 'Pendente' WHERE id = ?", ids_para_resetar)
                 conn.commit()
                 logging.info(f"{len(ids_para_resetar)} tarefa(s) com erro de portal foram liberadas para nova tentativa.")
 
-    except sqlite3.Error as e:
+    except Exception as e:
         logging.error(f"ERRO ao reprocessar erros de portal antigos: {e}", exc_info=True)
 
 def salvar_notificacoes(lista_notificacoes: list[dict]) -> int:
@@ -123,22 +178,65 @@ def salvar_notificacoes(lista_notificacoes: list[dict]) -> int:
             logging.warning(f"Notificação para o NPJ {n.get('NPJ')} ignorada por não ter data.")
             continue
         try:
-            with sqlite3.connect(DATABASE_PATH) as conn:
+            with db_adapter.connect_main() as conn:
                 cursor = conn.cursor()
                 cols = ', '.join(n.keys())
-                placeholders = ', '.join(['?'] * len(n))
-                query = f"INSERT OR IGNORE INTO notificacoes ({cols}) VALUES ({placeholders})"
-                cursor.execute(query, list(n.values()))
+                placeholders = db_adapter.placeholders(len(n))
+                if db_adapter.is_postgres():
+                    query = f"""
+                        INSERT INTO notificacoes ({cols})
+                        SELECT {placeholders}
+                        WHERE NOT EXISTS (
+                            SELECT 1 FROM notificacoes
+                            WHERE NPJ = ? AND tipo_notificacao = ? AND data_notificacao = ?
+                        )
+                    """
+                    cursor.execute(
+                        db_adapter._translate_placeholders(query),
+                        list(n.values()) + [n.get('NPJ'), n.get('tipo_notificacao'), n.get('data_notificacao')]
+                    )
+                else:
+                    query = f"INSERT OR IGNORE INTO notificacoes ({cols}) VALUES ({placeholders})"
+                    cursor.execute(query, list(n.values()))
                 if cursor.rowcount > 0:
                     salvas += 1
-        except sqlite3.Error as e:
+        except Exception as e:
             logging.error(f"ERRO ao salvar notificação para o NPJ {n.get('NPJ')}: {e}")
     return salvas
+
+def notificacoes_nao_persistidas(lista_notificacoes: list[dict]) -> list[dict]:
+    """Retorna notificações que ainda não existem no banco pela chave NPJ + tipo + data."""
+    chaves = {}
+    for n in lista_notificacoes:
+        chave = (n.get('NPJ'), n.get('tipo_notificacao'), n.get('data_notificacao'))
+        if all(chave):
+            chaves[chave] = n
+
+    faltantes = []
+    try:
+        with db_adapter.connect_main() as conn:
+            for chave, notificacao in chaves.items():
+                row = conn.execute(
+                    """
+                    SELECT 1
+                    FROM notificacoes
+                    WHERE NPJ = ? AND tipo_notificacao = ? AND data_notificacao = ?
+                    LIMIT 1
+                    """,
+                    chave,
+                ).fetchone()
+                if row is None:
+                    faltantes.append(notificacao)
+    except Exception as e:
+        logging.error(f"ERRO ao verificar persistência das notificações: {e}", exc_info=True)
+        return list(chaves.values())
+
+    return faltantes
 
 def buscar_lote_para_processamento(tamanho_lote: int) -> List[Dict]:
     """Obtém um lote de tarefas (NPJ + data) únicas e marca-as como 'Em Processamento'."""
     try:
-        with sqlite3.connect(DATABASE_PATH) as conn:
+        with db_adapter.connect_main() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             cursor.execute("""
@@ -154,23 +252,27 @@ def buscar_lote_para_processamento(tamanho_lote: int) -> List[Dict]:
                 return []
             for tarefa in tarefas:
                 conn.execute(
-                    "UPDATE notificacoes SET status = 'Em Processamento' WHERE NPJ = ? AND data_notificacao = ? AND status = 'Pendente'",
+                    """
+                    UPDATE notificacoes
+                    SET status = 'Em Processamento', rpa_status = 'EM_PROCESSAMENTO'
+                    WHERE NPJ = ? AND data_notificacao = ? AND status = 'Pendente'
+                    """,
                     (tarefa['NPJ'], tarefa['data_notificacao'])
                 )
             conn.commit()
             return tarefas
-    except sqlite3.Error as e:
+    except Exception as e:
         logging.error(f"ERRO ao obter lote de tarefas pendentes: {e}", exc_info=True)
         return []
 
 def contar_pendentes() -> int:
     """Conta quantas tarefas (grupos NPJ + data) únicas ainda estão pendentes."""
     try:
-        with sqlite3.connect(DATABASE_PATH) as conn:
+        with db_adapter.connect_main() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT COUNT(DISTINCT NPJ || data_notificacao) FROM notificacoes WHERE status = 'Pendente' AND data_notificacao IS NOT NULL")
+            cursor.execute(f"SELECT {db_adapter.distinct_npj_date_count_expr()} FROM notificacoes WHERE status = 'Pendente' AND data_notificacao IS NOT NULL")
             return cursor.fetchone()[0]
-    except sqlite3.Error as e:
+    except Exception as e:
         logging.error(f"ERRO ao contar tarefas pendentes: {e}", exc_info=True)
         return 0
 
@@ -180,7 +282,7 @@ def get_next_user(polo_da_tarefa: Optional[str]) -> str | None:
     e o polo da tarefa.
     """
     try:
-        with sqlite3.connect(DATABASE_PATH) as conn:
+        with db_adapter.connect_main() as conn:
             conn.row_factory = sqlite3.Row
             
             # 1. Obter todos os usuários e seus perfis
@@ -204,7 +306,7 @@ def get_next_user(polo_da_tarefa: Optional[str]) -> str | None:
                 return usuarios_gerais[0] if usuarios_gerais else None
 
             # 3. Descobrir o último usuário atribuído DENTRO DO POOL ELEGÍVEL
-            placeholders = ', '.join(['?'] * len(user_pool))
+            placeholders = db_adapter.placeholders(len(user_pool))
             last_assigned_raw = conn.execute(
                 f"SELECT responsavel FROM notificacoes WHERE responsavel IN ({placeholders}) ORDER BY data_processamento DESC LIMIT 1",
                 user_pool
@@ -224,7 +326,7 @@ def get_next_user(polo_da_tarefa: Optional[str]) -> str | None:
                 # O último usuário atribuído não está mais no pool (ex: perfil mudou), começa do início do pool
                 return user_pool[0]
                 
-    except sqlite3.Error as e:
+    except Exception as e:
         logging.error(f"ERRO ao buscar próximo usuário: {e}", exc_info=True)
         return None
 
@@ -232,21 +334,61 @@ def get_next_user(polo_da_tarefa: Optional[str]) -> str | None:
 def atualizar_notificacoes_processadas(npj, data, numero_processo, andamentos, documentos, data_processamento, responsavel, status='Processado', polo=None):
     """Atualiza as notificações de uma tarefa como 'Processado' ou 'Migrado' e adiciona o polo."""
     try:
-        with sqlite3.connect(DATABASE_PATH) as conn:
+        documentos_json = build_documents_json(documentos)
+        with db_adapter.connect_main() as conn:
             conn.execute("""
                 UPDATE notificacoes
                 SET status = ?, numero_processo = ?, andamentos = ?, documentos = ?,
                     data_processamento = ?, responsavel = ?, detalhes_erro = NULL, tentativas = 0,
-                    polo = ?
+                    polo = ?, rpa_status = 'PROCESSADO', documentos_json = ?
                 WHERE NPJ = ? AND data_notificacao = ? AND status = 'Em Processamento'
-            """, (status, numero_processo, json.dumps(andamentos), json.dumps(documentos), data_processamento, responsavel, polo, npj, data))
-    except sqlite3.Error as e:
+            """, (
+                status,
+                numero_processo,
+                json.dumps(andamentos, ensure_ascii=False),
+                json.dumps(documentos, ensure_ascii=False),
+                data_processamento,
+                responsavel,
+                polo,
+                json.dumps(documentos_json, ensure_ascii=False),
+                npj,
+                data,
+            ))
+    except Exception as e:
         logging.error(f"ERRO ao atualizar tarefa {npj}-{data} como processada: {e}")
+
+def marcar_ciencia_enviada(lista_notificacoes: list[dict]) -> int:
+    """Marca no banco que a ciência foi confirmada no Portal BB."""
+    chaves = {
+        (n.get("NPJ"), n.get("tipo_notificacao"), n.get("data_notificacao"))
+        for n in lista_notificacoes
+        if n.get("NPJ") and n.get("tipo_notificacao") and n.get("data_notificacao")
+    }
+    if not chaves:
+        return 0
+
+    atualizadas = 0
+    try:
+        with db_adapter.connect_main() as conn:
+            for npj, tipo, data in chaves:
+                cursor = conn.execute(
+                    """
+                    UPDATE notificacoes
+                    SET bb_ciencia_status = 'ENVIADA'
+                    WHERE NPJ = ? AND tipo_notificacao = ? AND data_notificacao = ?
+                    """,
+                    (npj, tipo, data),
+                )
+                atualizadas += cursor.rowcount or 0
+            conn.commit()
+    except Exception as e:
+        logging.error(f"ERRO ao marcar ciência enviada no banco: {e}", exc_info=True)
+    return atualizadas
 
 def marcar_tarefa_como_erro(npj, data, motivo, data_processamento, tipo_erro: str):
     """Marca as notificações de uma tarefa com um status de erro específico e controla as tentativas."""
     try:
-        with sqlite3.connect(DATABASE_PATH) as conn:
+        with db_adapter.connect_main() as conn:
             cursor = conn.cursor()
             
             cursor.execute("SELECT tentativas FROM notificacoes WHERE NPJ = ? AND data_notificacao = ? LIMIT 1", (npj, data))
@@ -257,29 +399,35 @@ def marcar_tarefa_como_erro(npj, data, motivo, data_processamento, tipo_erro: st
             
             if tipo_erro == 'permanente':
                 novo_status = 'Erro_Permanente'
+                novo_rpa_status = 'ERRO_PERMANENTE'
                 tentativas_atuais += 1
             
             elif tipo_erro == 'portal':
                 tentativas_atuais += 1
                 if tentativas_atuais >= MAX_TENTATIVAS_PORTAL:
                     novo_status = 'Requer_Atencao'
+                    novo_rpa_status = 'REQUER_ATENCAO'
                     logging.warning(f"Tarefa {npj} atingiu o limite de {MAX_TENTATIVAS_PORTAL} tentativas. Status alterado para 'Requer_Atencao'.")
                 else:
                     novo_status = 'Erro_Portal'
+                    novo_rpa_status = 'ERRO_PORTAL'
+            else:
+                novo_rpa_status = 'ERRO'
             
             cursor.execute("""
-                UPDATE notificacoes SET status = ?, detalhes_erro = ?, data_processamento = ?, tentativas = ?
+                UPDATE notificacoes
+                SET status = ?, rpa_status = ?, detalhes_erro = ?, data_processamento = ?, tentativas = ?
                 WHERE NPJ = ? AND data_notificacao = ? AND status = 'Em Processamento'
-            """, (novo_status, motivo, data_processamento, tentativas_atuais, npj, data))
-    except sqlite3.Error as e:
+            """, (novo_status, novo_rpa_status, motivo, data_processamento, tentativas_atuais, npj, data))
+    except Exception as e:
         logging.error(f"ERRO ao marcar tarefa {npj}-{data} como erro: {e}")
 
 def salvar_log_execucao(log_data: dict):
     """Salva um registro de log no banco de dados."""
     try:
-        with sqlite3.connect(DATABASE_PATH) as conn:
+        with db_adapter.connect_main() as conn:
             cols = ', '.join(log_data.keys())
-            placeholders = ', '.join(['?'] * len(log_data))
+            placeholders = db_adapter.placeholders(len(log_data))
             conn.execute(f"INSERT INTO logs_execucao ({cols}) VALUES ({placeholders})", list(log_data.values()))
-    except sqlite3.Error as e:
+    except Exception as e:
         logging.error(f"ERRO ao salvar log de execução: {e}", exc_info=True)
