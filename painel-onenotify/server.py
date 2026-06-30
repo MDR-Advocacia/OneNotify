@@ -213,10 +213,96 @@ def _decorate_document_links(documentos_json):
 
     return documentos_json
 
+def _document_text(item: dict) -> str:
+    extraction = item.get("extraction", {}) if isinstance(item, dict) else {}
+    pages = extraction.get("pages", []) if isinstance(extraction, dict) else []
+    texts = []
+    for page in pages:
+        if isinstance(page, dict) and page.get("text"):
+            texts.append(str(page["text"]))
+    return "\n\n".join(texts).strip()
+
+def _build_conteudo_payload(andamentos, documentos_json, documentos_originais):
+    fontes_texto = []
+    andamentos_lista = andamentos if isinstance(andamentos, list) else []
+
+    for index, andamento in enumerate(andamentos_lista, start=1):
+        if not isinstance(andamento, dict):
+            continue
+        texto = (andamento.get("detalhes") or andamento.get("descricao") or "").strip()
+        if texto:
+            fontes_texto.append({
+                "tipo": "andamento",
+                "ordem": index,
+                "data": andamento.get("data"),
+                "titulo": andamento.get("descricao"),
+                "texto": texto,
+            })
+
+    documentos_items = []
+    if isinstance(documentos_json, dict):
+        documentos_items = [item for item in documentos_json.get("items", []) if isinstance(item, dict)]
+
+    documentos_com_texto = 0
+    documentos_exigem_ocr = 0
+    documentos_links = []
+
+    for index, item in enumerate(documentos_items, start=1):
+        extraction = item.get("extraction", {}) if isinstance(item.get("extraction"), dict) else {}
+        ocr_required = bool(extraction.get("ocr_required"))
+        if ocr_required:
+            documentos_exigem_ocr += 1
+
+        texto_documento = _document_text(item)
+        if texto_documento:
+            documentos_com_texto += 1
+            fontes_texto.append({
+                "tipo": "documento",
+                "ordem": index,
+                "nome": item.get("nome"),
+                "classification": extraction.get("classification"),
+                "ocr_required": ocr_required,
+                "view_url": item.get("view_url"),
+                "download_url": item.get("download_url"),
+                "texto": texto_documento,
+            })
+
+        documentos_links.append({
+            "nome": item.get("nome"),
+            "relative_path": item.get("relative_path"),
+            "access_mode": item.get("access_mode"),
+            "classification": extraction.get("classification"),
+            "ocr_required": ocr_required,
+            "view_url": item.get("view_url"),
+            "download_url": item.get("download_url"),
+        })
+
+    if documentos_items:
+        total_documentos = len(documentos_items)
+    elif isinstance(documentos_originais, list):
+        total_documentos = len(documentos_originais)
+    else:
+        total_documentos = 0
+
+    return {
+        "tem_texto": bool(fontes_texto),
+        "tem_texto_andamentos": any(fonte["tipo"] == "andamento" for fonte in fontes_texto),
+        "tem_documentos": total_documentos > 0,
+        "tem_documentos_com_texto": documentos_com_texto > 0,
+        "tem_documentos_ocr_required": documentos_exigem_ocr > 0,
+        "total_andamentos": len(andamentos_lista),
+        "total_documentos": total_documentos,
+        "total_documentos_com_texto": documentos_com_texto,
+        "total_documentos_ocr_required": documentos_exigem_ocr,
+        "fontes_texto": fontes_texto,
+        "documentos_links": documentos_links,
+    }
+
 def _flow_group_to_payload(row, include_documents=False):
     row_dict = dict(row)
     andamentos = safe_json_loads(row_dict.get("andamentos"), fallback=[])
     documentos_json = safe_json_loads(row_dict.get("documentos_json"), fallback=None)
+    documentos_originais = safe_json_loads(row_dict.get("documentos"), fallback=[])
     if include_documents and not documentos_json:
         documentos_json = _empty_documents_payload()
     elif not include_documents:
@@ -226,6 +312,9 @@ def _flow_group_to_payload(row, include_documents=False):
 
     npj = row_dict.get("npj") or row_dict.get("NPJ")
     data_notificacao = row_dict.get("data_notificacao")
+    numero_processo = row_dict.get("numero_processo")
+    polo = row_dict.get("polo")
+    adverso_principal = row_dict.get("adverso_principal")
     ids = _split_agg(row_dict.get("ids"))
 
     return {
@@ -233,10 +322,17 @@ def _flow_group_to_payload(row, include_documents=False):
         "external_group_id": f"{npj}|{data_notificacao}",
         "ids": [int(i) for i in ids if str(i).isdigit()],
         "npj": npj,
+        "numero_processo_cnj": numero_processo,
         "data_notificacao": data_notificacao,
-        "numero_processo": row_dict.get("numero_processo"),
-        "polo": row_dict.get("polo"),
-        "adverso_principal": row_dict.get("adverso_principal"),
+        "numero_processo": numero_processo,
+        "polo": polo,
+        "adverso_principal": adverso_principal,
+        "processo": {
+            "npj": npj,
+            "numero_cnj": numero_processo,
+            "polo": polo,
+            "adverso_principal": adverso_principal,
+        },
         "tipos_notificacao": _split_agg(row_dict.get("tipos_notificacao")),
         "status_legacy": _split_agg(row_dict.get("status_legacy")),
         "rpa_status": _split_agg(row_dict.get("rpa_status")),
@@ -248,6 +344,7 @@ def _flow_group_to_payload(row, include_documents=False):
         "detalhes_erro": row_dict.get("detalhes_erro"),
         "andamentos": andamentos if isinstance(andamentos, list) else [],
         "documentos": documentos_json,
+        "conteudo": _build_conteudo_payload(andamentos, documentos_json, documentos_originais),
         "source": "ONENOTIFY_BB",
         "generated_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
     }

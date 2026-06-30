@@ -66,8 +66,15 @@ Resposta:
       "external_group_id": "2013/0167739-000|03/06/2026",
       "ids": [112118, 112232],
       "npj": "2013/0167739-000",
+      "numero_processo_cnj": "0027807-47.2013.8.14.0301",
       "data_notificacao": "03/06/2026",
       "numero_processo": "0027807-47.2013.8.14.0301",
+      "processo": {
+        "npj": "2013/0167739-000",
+        "numero_cnj": "0027807-47.2013.8.14.0301",
+        "polo": "Passivo",
+        "adverso_principal": "MARIA DE NAZARE NOGUEIRA GUIMARAES ROLIM"
+      },
       "polo": "Passivo",
       "tipos_notificacao": ["Inclusao de Documentos no NPJ"],
       "rpa_status": ["PROCESSADO"],
@@ -93,6 +100,42 @@ Resposta:
               "ocr_required": false,
               "pages": [{"page": 1, "text": "...", "char_count": 1000}]
             }
+          }
+        ]
+      },
+      "conteudo": {
+        "tem_texto": true,
+        "tem_texto_andamentos": true,
+        "tem_documentos": true,
+        "tem_documentos_com_texto": true,
+        "tem_documentos_ocr_required": false,
+        "total_andamentos": 1,
+        "total_documentos": 1,
+        "total_documentos_com_texto": 1,
+        "total_documentos_ocr_required": 0,
+        "fontes_texto": [
+          {
+            "tipo": "andamento",
+            "data": "02/06/2026",
+            "titulo": "PUBLICACAO DJ/DO",
+            "texto": "texto completo do andamento/publicacao..."
+          },
+          {
+            "tipo": "documento",
+            "nome": "arquivo.pdf",
+            "classification": "text_extractable",
+            "ocr_required": false,
+            "view_url": "https://onenotify.mdradvocacia.com/api/flow/documentos/view?path=/app/documentos/2013_0167739-000/arquivo.pdf",
+            "texto": "texto extraido das paginas do PDF..."
+          }
+        ],
+        "documentos_links": [
+          {
+            "nome": "arquivo.pdf",
+            "access_mode": "text_json",
+            "classification": "text_extractable",
+            "ocr_required": false,
+            "view_url": "https://onenotify.mdradvocacia.com/api/flow/documentos/view?path=/app/documentos/2013_0167739-000/arquivo.pdf"
           }
         ]
       },
@@ -131,6 +174,27 @@ dois cenarios:
 Nesses casos de imagem, o JSON nao e uma transcricao do documento. Ele e um
 envelope de referencia para o Flow saber que precisa abrir o PDF, mandar para OCR
 ou encaminhar para revisao humana.
+
+### Texto da notificacao e identificadores do processo
+
+Uma notificacao do OneNotify pode ter texto de andamento/publicacao, documentos,
+ou ambos. O Flow deve considerar:
+
+- `npj`: identificador interno do Portal BB.
+- `numero_processo_cnj`: numero CNJ do processo, quando a RPA ja processou o detalhe.
+- `processo.numero_cnj`: alias estruturado do mesmo CNJ.
+- `andamentos[]`: lista original de andamentos/publicacoes capturados.
+- `conteudo.fontes_texto[]`: lista unificada de textos que podem alimentar o intake.
+
+`conteudo.fontes_texto[]` pode conter:
+
+- `tipo: "andamento"` para textos vindos da aba/accordion de andamentos, incluindo
+  publicacoes DJ/DO.
+- `tipo: "documento"` para texto extraido de PDF/documento.
+
+Quando `include_documents=false`, a API ainda retorna textos de `andamentos`, mas
+nao duplica textos extraidos de PDFs. Para o intake completo com texto de PDF,
+chamar com `include_documents=true`.
 
 ### PDFs escaneados ou baseados em imagem
 
