@@ -22,6 +22,7 @@ LOGIN_MODE = os.getenv("ONELOG_LOGIN_MODE", "profile").strip().lower()
 ONELOG_LOGIN_TIMEOUT_MS = int(os.getenv("ONELOG_LOGIN_TIMEOUT_MS", "360000"))
 ONELOG_READY_SELECTOR = os.getenv("ONELOG_READY_SELECTOR", "#aPaginaInicial")
 PORTAL_URL_PREFIX = os.getenv("ONELOG_PORTAL_URL_PREFIX", "https://juridico.bb.com.br")
+PORTAL_HOST = urlparse(PORTAL_URL_PREFIX).netloc or PORTAL_URL_PREFIX.replace("https://", "").replace("http://", "").split("/")[0]
 FORCE_LEGACY_PROFILE_FLOW = os.getenv("ONELOG_FORCE_LEGACY_PROFILE_FLOW", "false").lower() == "true"
 
 
@@ -127,11 +128,63 @@ def _extension_id_from_url(extension_url: str) -> str | None:
         return None
 
 
+def _is_portal_url(url: str) -> bool:
+    if not url:
+        return False
+    try:
+        parsed = urlparse(url)
+        return parsed.netloc == PORTAL_HOST or parsed.netloc.endswith(f".{PORTAL_HOST}")
+    except Exception:
+        return PORTAL_HOST in url
+
+
 def _find_portal_page(context: BrowserContext) -> Page | None:
     for page in context.pages:
-        if not page.is_closed() and page.url.startswith(PORTAL_URL_PREFIX):
+        if not page.is_closed() and _is_portal_url(page.url):
+            print(f"[ONELOG] Portal detectado pela URL: {page.url}")
             return page
     return None
+
+
+def _wait_until_portal_ready(portal_page: Page, timeout_ms: int = 90000):
+    try:
+        portal_page.wait_for_load_state("domcontentloaded", timeout=60000)
+    except TimeoutError:
+        print("[ONELOG] domcontentloaded nao estabilizou; validando pela URL do portal.")
+
+    if ONELOG_READY_SELECTOR:
+        try:
+            print(f"[ONELOG] Aguardando seletor de confirmacao: {ONELOG_READY_SELECTOR}")
+            portal_page.locator(ONELOG_READY_SELECTOR).wait_for(state="visible", timeout=15000)
+            return
+        except TimeoutError:
+            print("[ONELOG] Seletor principal nao apareceu; usando confirmacao alternativa do portal.")
+
+    fallback_selectors = [
+        "text=Portal Jurídico",
+        "text=Página inicial",
+        "div.pendencias-card",
+        'table[id="tabelaTipoSubtipoGeral"]',
+    ]
+    deadline = time.time() + (timeout_ms / 1000)
+    while time.time() < deadline:
+        if _is_portal_url(portal_page.url):
+            for selector in fallback_selectors:
+                try:
+                    if portal_page.locator(selector).first.is_visible(timeout=1000):
+                        print(f"[ONELOG] Portal confirmado por fallback: {selector}")
+                        return
+                except Exception:
+                    pass
+            try:
+                portal_page.locator("body").wait_for(state="visible", timeout=1000)
+                print("[ONELOG] Portal confirmado por URL e body visivel.")
+                return
+            except Exception:
+                pass
+        time.sleep(1)
+
+    raise TimeoutError("Portal abriu, mas nao ficou pronto dentro do tempo limite.")
 
 
 def _wait_for_portal_page(context: BrowserContext, extension_page: Page, timeout_ms: int) -> Page:
@@ -207,11 +260,7 @@ def _trigger_onelog_login(context: BrowserContext) -> Page:
             ) from exc
 
     portal_page = _wait_for_portal_page(context, extension_page, ONELOG_LOGIN_TIMEOUT_MS)
-    portal_page.wait_for_load_state("domcontentloaded", timeout=60000)
-
-    if ONELOG_READY_SELECTOR:
-        print(f"[ONELOG] Aguardando seletor de confirmacao: {ONELOG_READY_SELECTOR}")
-        portal_page.locator(ONELOG_READY_SELECTOR).wait_for(state="visible", timeout=90000)
+    _wait_until_portal_ready(portal_page)
 
     try:
         portal_page.wait_for_load_state("networkidle", timeout=45000)
@@ -244,8 +293,7 @@ def _trigger_legacy_extension_login(context: BrowserContext) -> Page:
             extension_page.get_by_role("button", name="ACESSAR").click()
 
         portal_page = new_page_info.value
-        portal_page.wait_for_load_state("domcontentloaded", timeout=60000)
-        portal_page.locator("#aPaginaInicial").wait_for(state="visible", timeout=90000)
+        _wait_until_portal_ready(portal_page)
         portal_page.wait_for_load_state("networkidle", timeout=45000)
 
         if not extension_page.is_closed():
