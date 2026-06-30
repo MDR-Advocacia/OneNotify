@@ -6,6 +6,8 @@ TAMANHO_LOTE = 50
 TEMPO_LIMITE_EXTRACAO = 25 * 60 
 # Margem para confirmar parcialmente as notificações já salvas antes de renovar a sessão.
 MARGEM_CHECKPOINT_CIENCIA = 2 * 60
+# Confirma ciência em lotes pequenos para limitar perda caso o portal/OneLog falhe.
+PAGINAS_POR_CHECKPOINT_CIENCIA = 10
 
 # --- CONFIGURAÇÕES DE LOG ---
 LOG_LEVEL = logging.INFO

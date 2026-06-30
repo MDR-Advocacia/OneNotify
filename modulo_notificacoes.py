@@ -2,7 +2,7 @@ import logging
 import re
 import time
 from playwright.sync_api import Page, TimeoutError
-from config import MARGEM_CHECKPOINT_CIENCIA, TAREFAS_CONFIG
+from config import MARGEM_CHECKPOINT_CIENCIA, PAGINAS_POR_CHECKPOINT_CIENCIA, TAREFAS_CONFIG
 import database
 from datetime import datetime, timedelta 
 
@@ -66,7 +66,7 @@ def extrair_dados_e_dar_ciencia_em_lote(
     confirmar_ciencia: bool = True,
     salvar_banco: bool = True,
     max_paginas: int | None = None,
-) -> tuple[list[dict], int, bool, int]:
+) -> tuple[list[dict], int, bool, int, bool]:
     """
     Localiza uma tarefa, extrai dados página por página, e dá ciência, respeitando um limite de tempo.
     Retorna a lista de notificações, a contagem de ciências e um booleano indicando se o tempo esgotou.
@@ -80,6 +80,8 @@ def extrair_dados_e_dar_ciencia_em_lote(
     ciencia_confirmada = False
     bloqueio_ciencia = False
     motivo_interrupcao = ""
+    checkpoint_paginas = False
+    paginas_no_checkpoint = 0
     
     try:
         logging.info(f"--- Processando tarefa: {tarefa['nome']} ---")
@@ -89,13 +91,13 @@ def extrair_dados_e_dar_ciencia_em_lote(
         
         if linha_alvo.count() == 0:
             logging.warning(f"Tarefa '{tarefa['nome']}' não encontrada. Pulando.")
-            return [], 0, False, 0
+            return [], 0, False, 0, False
         
         contagem_texto = linha_alvo.locator("td").nth(2).inner_text().strip()
         quantidade = _quantidade_notificacoes(contagem_texto)
         if quantidade == 0:
             logging.info(f"Tarefa '{tarefa['nome']}' sem notificações pendentes.")
-            return [], 0, False, 0
+            return [], 0, False, 0, False
 
         logging.info(f"{contagem_texto} itens encontrados. Abrindo detalhes...")
         inicio_abertura = time.time()
@@ -256,8 +258,24 @@ def extrair_dados_e_dar_ciencia_em_lote(
                         len(notificacoes_da_pagina),
                     )
 
+                paginas_no_checkpoint += 1
+
             if max_paginas is not None and pagina_atual >= max_paginas:
                 logging.info(f"    - Limite de {max_paginas} página(s) atingido para execução limitada.")
+                break
+
+            if (
+                confirmar_ciencia
+                and max_paginas is None
+                and PAGINAS_POR_CHECKPOINT_CIENCIA > 0
+                and paginas_no_checkpoint >= PAGINAS_POR_CHECKPOINT_CIENCIA
+            ):
+                logging.warning(
+                    "Checkpoint de %s página(s) atingido. Confirmando ciência parcial antes de continuar.",
+                    paginas_no_checkpoint,
+                )
+                checkpoint_paginas = True
+                motivo_interrupcao = "checkpoint_por_paginas"
                 break
 
             tempo_restante = limite_tempo - (time.time() - start_time_ciclo)
@@ -301,6 +319,13 @@ def extrair_dados_e_dar_ciencia_em_lote(
                 logging.error(
                     "    - Bloqueando ciência: interrupção insegura (%s).",
                     motivo_interrupcao or "motivo_desconhecido",
+                )
+            elif checkpoint_paginas:
+                pode_confirmar_ciencia = True
+                ciencia_parcial = True
+                logging.warning(
+                    "    - Checkpoint por páginas: %s notificação(ões) marcadas foram persistidas e serão confirmadas.",
+                    len(notificacoes_para_salvar),
                 )
             elif tempo_esgotado:
                 pode_confirmar_ciencia = True
@@ -352,7 +377,8 @@ def extrair_dados_e_dar_ciencia_em_lote(
         tempo_esgotado = True # Sinaliza erro como tempo esgotado para forçar reinício do ciclo
 
     ciencias = total_marcados_para_ciencia if ciencia_confirmada else 0
-    return notificacoes_para_salvar, ciencias, tempo_esgotado, salvas_no_banco
+    repetir_tarefa = checkpoint_paginas and ciencia_confirmada
+    return notificacoes_para_salvar, ciencias, tempo_esgotado, salvas_no_banco, repetir_tarefa
 
 def executar_extracao_e_ciencia(
     page: Page,
@@ -390,7 +416,7 @@ def executar_extracao_e_ciencia(
                 tempo_esgotado = True
                 break
 
-            notificacoes, ciencias, tempo_esgotado_sub, salvas = extrair_dados_e_dar_ciencia_em_lote(
+            notificacoes, ciencias, tempo_esgotado_sub, salvas, repetir_tarefa = extrair_dados_e_dar_ciencia_em_lote(
                 page,
                 tarefa,
                 start_time_ciclo,
@@ -407,6 +433,13 @@ def executar_extracao_e_ciencia(
             if tempo_esgotado_sub:
                 tempo_esgotado = True
                 break
+
+            if repetir_tarefa:
+                logging.info(
+                    "Checkpoint confirmado para '%s'. Reabrindo a mesma tarefa na sequência, sem renovar a sessão.",
+                    tarefa["nome"],
+                )
+                return resultados, False, tarefas_restantes
 
             tarefas_restantes.pop(0)
         
