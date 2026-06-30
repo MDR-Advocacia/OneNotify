@@ -605,6 +605,13 @@ def get_notificacoes():
     responsavel_filter = request.args.get('responsavel')
     polo_filter = request.args.get('polo')
     data_filter = request.args.get('data') # Recebe a data no formato YYYY-MM-DD
+    search_filter = (request.args.get('search') or '').strip()
+    paginated = 'limit' in request.args or 'offset' in request.args
+    limit = min(max(int(request.args.get('limit', 25)), 1), 100)
+    offset = max(int(request.args.get('offset', 0)), 0)
+    sort_key = request.args.get('sort', 'data_notificacao')
+    sort_direction = request.args.get('direction', 'descending')
+    direction_sql = 'ASC' if sort_direction == 'ascending' else 'DESC'
     db = get_db()
     
     params = []
@@ -638,10 +645,52 @@ def get_notificacoes():
             # Ignora o filtro se a data for inválida
             app.logger.warning(f"Formato de data inválido recebido no filtro: {data_filter}")
 
+    if search_filter:
+        like_term = f"%{search_filter}%"
+        if db_adapter.is_postgres():
+            query += " AND (NPJ ILIKE ? OR numero_processo ILIKE ?)"
+        else:
+            query += " AND (LOWER(NPJ) LIKE LOWER(?) OR LOWER(numero_processo) LIKE LOWER(?))"
+        params.extend([like_term, like_term])
 
-    query += " GROUP BY NPJ, data_notificacao ORDER BY data_notificacao DESC, NPJ"
+    grouped_query = query + " GROUP BY NPJ, data_notificacao"
 
-    notificacoes_raw = db.execute(query, params).fetchall()
+    if sort_key == 'NPJ':
+        sort_expr = '"NPJ"' if db_adapter.is_postgres() else 'NPJ'
+    elif sort_key == 'responsavel':
+        sort_expr = 'responsavel'
+    elif sort_key == 'numero_processo':
+        sort_expr = 'numero_processo'
+    else:
+        sort_expr = (
+            "to_date(data_notificacao, 'DD/MM/YYYY')"
+            if db_adapter.is_postgres()
+            else "substr(data_notificacao, 7, 4) || substr(data_notificacao, 4, 2) || substr(data_notificacao, 1, 2)"
+        )
+
+    order_query = (
+        f' ORDER BY {sort_expr} {direction_sql}, data_notificacao DESC, "NPJ"'
+        if db_adapter.is_postgres()
+        else f" ORDER BY {sort_expr} {direction_sql}, data_notificacao DESC, NPJ"
+    )
+
+    if paginated:
+        total = db.execute(
+            f"SELECT COUNT(*) FROM ({grouped_query}) AS grouped_notificacoes",
+            params,
+        ).fetchone()[0]
+        notificacoes_raw = db.execute(
+            grouped_query + order_query + " LIMIT ? OFFSET ?",
+            params + [limit, offset],
+        ).fetchall()
+        return jsonify({
+            "items": [dict(row) for row in notificacoes_raw],
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+        })
+
+    notificacoes_raw = db.execute(grouped_query + order_query, params).fetchall()
     notificacoes = [dict(row) for row in notificacoes_raw]
     return jsonify(notificacoes)
 

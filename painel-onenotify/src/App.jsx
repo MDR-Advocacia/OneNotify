@@ -387,9 +387,11 @@ function App() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [filtroBusca, setFiltroBusca] = useState('');
+    const [debouncedFiltroBusca, setDebouncedFiltroBusca] = useState('');
     const [sortConfig, setSortConfig] = useState({ key: 'data_notificacao', direction: 'descending' });
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
     const [selectedIds, setSelectedIds] = useState([]);
     const [modalDetalhes, setModalDetalhes] = useState({ isOpen: false, item: null });
     const [showUserManagement, setShowUserManagement] = useState(false);
@@ -407,83 +409,74 @@ function App() {
     // ADICIONADO: Novo estado para o filtro de data
     const [dataFiltro, setDataFiltro] = useState('');
 
-    const fetchAllData = useCallback(async () => {
-        setLoading(true);
-        setError('');
-        setSelectedIds([]);
+    const fetchInitialData = useCallback(async () => {
         try {
             const [statsRes, usersRes, legalOneUsersRes, legalOneTasksRes] = await Promise.all([
-                fetch(`${API_URL}/stats`), 
+                fetch(`${API_URL}/stats`),
                 fetch(`${API_URL}/usuarios`),
                 fetch(`${API_URL}/legalone/users`),
                 fetch(`${API_URL}/legalone/tasks`),
             ]);
             if (!statsRes.ok || !usersRes.ok || !legalOneUsersRes.ok || !legalOneTasksRes.ok) throw new Error('Falha ao carregar dados iniciais');
 
-            const statsData = await statsRes.json();
-            const usersData = await usersRes.json();
-            const legalOneUsersData = await legalOneUsersRes.json();
-            const legalOneTasksData = await legalOneTasksRes.json();
+            setStats(await statsRes.json());
+            setListaUsuarios(await usersRes.json());
+            setLegalOneUsers(await legalOneUsersRes.json());
+            setLegalOneTasks(await legalOneTasksRes.json());
+        } catch (err) {
+            setError(err.message);
+        }
+    }, []);
 
-            setStats(statsData);
-            setListaUsuarios(usersData);
-            setLegalOneUsers(legalOneUsersData);
-            setLegalOneTasks(legalOneTasksData);
-
-            let url = `${API_URL}/notificacoes?status=${statusFiltro}`;
+    const fetchAllData = useCallback(async () => {
+        setLoading(true);
+        setError('');
+        setSelectedIds([]);
+        try {
+            const offset = (currentPage - 1) * itemsPerPage;
+            let url = `${API_URL}/notificacoes?status=${encodeURIComponent(statusFiltro)}&limit=${itemsPerPage}&offset=${offset}&sort=${encodeURIComponent(sortConfig.key)}&direction=${encodeURIComponent(sortConfig.direction)}`;
             if (responsavelFiltro !== 'Todos') url += `&responsavel=${encodeURIComponent(responsavelFiltro)}`;
             if (poloFiltro !== 'Todos') url += `&polo=${encodeURIComponent(poloFiltro)}`;
-            // ADICIONADO: Adiciona o filtro de data na URL se ele estiver preenchido
             if (dataFiltro) url += `&data=${dataFiltro}`;
+            if (debouncedFiltroBusca) url += `&search=${encodeURIComponent(debouncedFiltroBusca)}`;
 
             const notificacoesRes = await fetch(url);
             if (!notificacoesRes.ok) throw new Error('Falha ao carregar notificações');
 
-            const notificacoesData = await notificacoesRes.json();
-            setNotificacoes(notificacoesData);
-        } catch (err) { setError(err.message); } 
-        finally { setLoading(false); }
-    }, [statusFiltro, responsavelFiltro, poloFiltro, dataFiltro]); // ADICIONADO: dataFiltro como dependência
-
-    useEffect(() => { fetchAllData(); }, [fetchAllData]);
-    
-    const sortedItems = useMemo(() => {
-        let sortableItems = [...notificacoes];
-        if (sortConfig.key) {
-            sortableItems.sort((a, b) => {
-                let aValue = a[sortConfig.key] || '';
-                let bValue = b[sortConfig.key] || '';
-                if (sortConfig.key === 'NPJ') {
-                    aValue = a.NPJ || a.npj || '';
-                    bValue = b.NPJ || b.npj || '';
-                }
-                if (sortConfig.key === 'data_notificacao') {
-                    aValue = aValue.split('/').reverse().join('');
-                    bValue = bValue.split('/').reverse().join('');
-                }
-                if (aValue < bValue) return sortConfig.direction === 'ascending' ? -1 : 1;
-                if (aValue > bValue) return sortConfig.direction === 'ascending' ? 1 : -1;
-                return 0;
-            });
+            const payload = await notificacoesRes.json();
+            if (Array.isArray(payload)) {
+                setNotificacoes(payload);
+                setTotalItems(payload.length);
+            } else {
+                setNotificacoes(payload.items || []);
+                setTotalItems(payload.total || 0);
+            }
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
         }
-        return sortableItems;
-    }, [notificacoes, sortConfig]);
+    }, [statusFiltro, responsavelFiltro, poloFiltro, dataFiltro, debouncedFiltroBusca, currentPage, itemsPerPage, sortConfig]);
 
-    const filteredItems = useMemo(() => sortedItems.filter(item =>
-        // AJUSTADO: Busca agora inclui NPJ e Número do Processo
-        ((item.NPJ || item.npj)?.toLowerCase() || '').includes(filtroBusca.toLowerCase()) ||
-        (item.numero_processo?.toLowerCase() || '').includes(filtroBusca.toLowerCase())
-    ), [sortedItems, filtroBusca]);
+    useEffect(() => { fetchInitialData(); }, [fetchInitialData]);
+    useEffect(() => { fetchAllData(); }, [fetchAllData]);
 
-    const currentTableData = useMemo(() => {
-        const firstPageIndex = (currentPage - 1) * itemsPerPage;
-        return filteredItems.slice(firstPageIndex, firstPageIndex + itemsPerPage);
-    }, [filteredItems, currentPage, itemsPerPage]);
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedFiltroBusca(filtroBusca.trim()), 350);
+        return () => clearTimeout(timer);
+    }, [filtroBusca]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [responsavelFiltro, poloFiltro, dataFiltro, debouncedFiltroBusca]);
+    
+    const currentTableData = notificacoes;
 
     const requestSort = (key) => {
         let direction = 'ascending';
         if (sortConfig.key === key && sortConfig.direction === 'ascending') direction = 'descending';
         setSortConfig({ key, direction });
+        setCurrentPage(1);
     };
 
     const handleStatusChange = (newStatus) => {
@@ -511,6 +504,7 @@ function App() {
            const errorData = await response.json().catch(() => ({}));
            throw new Error(errorData.error || "Falha ao executar ação.");
          }
+         fetchInitialData();
          fetchAllData();
          return true;
         } catch (err) {
@@ -726,10 +720,10 @@ function App() {
                     </div>
     
                     <Paginacao
-                        currentPage={currentPage} totalPages={Math.ceil(filteredItems.length / itemsPerPage)}
+                        currentPage={currentPage} totalPages={Math.ceil(totalItems / itemsPerPage)}
                         onPageChange={setCurrentPage} itemsPerPage={itemsPerPage}
                         onItemsPerPageChange={(value) => { setItemsPerPage(value); setCurrentPage(1); }}
-                        totalItems={filteredItems.length}
+                        totalItems={totalItems}
                     />
                 </div>
             </>
