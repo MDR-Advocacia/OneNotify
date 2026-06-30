@@ -417,7 +417,8 @@ def executar_extracao_e_ciencia(
         page.wait_for_selector(tabela_principal_selector, state='visible', timeout=30000)
         
         tarefas_restantes = list(tarefas_a_processar)
-        for tarefa in tarefas_a_processar:
+        while tarefas_restantes:
+            tarefa = tarefas_restantes[0]
             if time.time() - start_time_ciclo > limite_tempo:
                 logging.warning("Limite de tempo de extração atingido antes de iniciar nova tarefa. O ciclo será interrompido.")
                 tempo_esgotado = True
@@ -443,10 +444,10 @@ def executar_extracao_e_ciencia(
 
             if repetir_tarefa:
                 logging.info(
-                    "Checkpoint confirmado para '%s'. Reabrindo a mesma tarefa na sequência, sem renovar a sessão.",
+                    "Checkpoint confirmado para '%s'. Continuando a mesma tarefa na tela atual, sem reiniciar navegação.",
                     tarefa["nome"],
                 )
-                return resultados, False, tarefas_restantes
+                continue
 
             tarefas_restantes.pop(0)
         
