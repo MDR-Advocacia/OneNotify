@@ -71,15 +71,128 @@ def _aguardar_overlay_ajax_sumir(page: Page, contexto: str, timeout_sumir: int =
 
     raise TimeoutError(f"Overlay AJAX nao liberou em {contexto} dentro do tempo esperado.")
 
-def _ler_total_paginas_detalhes(page: Page, tabela_detalhes_selector: str) -> int | None:
+def _ler_paginacao_detalhes(page: Page, tabela_detalhes_selector: str) -> tuple[int | None, int | None]:
     try:
         rodape = page.locator(tabela_detalhes_selector).locator("tfoot").inner_text(timeout=5000)
-        match = re.search(r"/\s*(\d+)\s*p", rodape, re.IGNORECASE)
+        match = re.search(r"(\d+)\s*/\s*(\d+)\s*p", rodape, re.IGNORECASE)
         if match:
-            return int(match.group(1))
+            return int(match.group(1)), int(match.group(2))
     except Exception:
-        return None
-    return None
+        return None, None
+    return None, None
+
+def _ler_total_paginas_detalhes(page: Page, tabela_detalhes_selector: str) -> int | None:
+    _, total_paginas = _ler_paginacao_detalhes(page, tabela_detalhes_selector)
+    return total_paginas
+
+def _garantir_primeira_pagina_detalhes(
+    page: Page,
+    tabela_detalhes_selector: str,
+    modal_carregando,
+    contexto: str,
+    timeout_ms: int = 180000,
+) -> int | None:
+    pagina_atual, total_paginas = _ler_paginacao_detalhes(page, tabela_detalhes_selector)
+    if pagina_atual is None:
+        logging.warning("    - Não consegui ler a página atual da grade em %s.", contexto)
+        return total_paginas
+
+    if pagina_atual <= 1:
+        logging.info("    - Grade de detalhes já está na página 1/%s em %s.", total_paginas or "?", contexto)
+        return total_paginas
+
+    logging.info(
+        "    - Grade de detalhes está na página %s/%s em %s; voltando para a primeira página.",
+        pagina_atual,
+        total_paginas or "?",
+        contexto,
+    )
+    _aguardar_modal_sumir_se_visivel(modal_carregando, f"antes de voltar para primeira página em {contexto}")
+    _aguardar_overlay_ajax_sumir(page, f"antes de voltar para primeira página em {contexto}", timeout_sumir=300000)
+
+    paginador = page.locator(tabela_detalhes_selector).locator("tfoot")
+    clicou = paginador.evaluate(
+        """
+        tfoot => {
+            const botoes = Array.from(tfoot.querySelectorAll('td.rich-datascr-button:not(.dsbld)'));
+            const primeira = botoes.find(el => (el.getAttribute('onclick') || '').includes("page': 'first'"));
+            if (!primeira) return false;
+            primeira.click();
+            return true;
+        }
+        """
+    )
+    if not clicou:
+        logging.warning("    - Botão de primeira página não estava disponível em %s.", contexto)
+        return total_paginas
+
+    _esperar_modal_se_aparecer(
+        modal_carregando,
+        f"volta para primeira página em {contexto}",
+        timeout_aparecer=1000,
+        timeout_sumir=300000,
+        log_ausente=False,
+    )
+    _aguardar_overlay_ajax_sumir(page, f"após voltar para primeira página em {contexto}", timeout_sumir=300000)
+
+    deadline = time.time() + (timeout_ms / 1000)
+    while time.time() < deadline:
+        pagina_atual, total_paginas = _ler_paginacao_detalhes(page, tabela_detalhes_selector)
+        if pagina_atual == 1:
+            logging.info("    - Grade de detalhes reposicionada para página 1/%s.", total_paginas or "?")
+            return total_paginas
+        time.sleep(1)
+
+    raise TimeoutError(f"Grade de detalhes não voltou para a página 1 em {contexto}.")
+
+def _abrir_detalhes_tarefa_pela_seta_superior(
+    page: Page,
+    tarefa_nome: str,
+    tabela_principal_selector: str,
+    tabela_detalhes_selector: str,
+    modal_carregando,
+    contexto: str,
+    tentativas: int = 3,
+) -> None:
+    for tentativa in range(1, tentativas + 1):
+        logging.info(
+            "    - Abrindo detalhes pela seta superior (%s, tentativa %s/%s)...",
+            contexto,
+            tentativa,
+            tentativas,
+        )
+        _aguardar_overlay_ajax_sumir(page, f"antes da seta superior em {contexto}", timeout_sumir=300000)
+        linha_alvo = page.locator(f"{tabela_principal_selector} tr:has-text(\"{tarefa_nome}\")")
+        linha_alvo.locator('td').last.locator('input[type="button"]').click(timeout=60000)
+        page.wait_for_selector(tabela_detalhes_selector, state='visible', timeout=120000)
+        _esperar_modal_se_aparecer(
+            modal_carregando,
+            f"abertura pela seta superior em {contexto}",
+            timeout_aparecer=1000,
+            timeout_sumir=300000,
+            log_ausente=False,
+        )
+        _aguardar_overlay_ajax_sumir(page, f"após seta superior em {contexto}", timeout_sumir=300000)
+
+        pagina_atual, total_paginas = _ler_paginacao_detalhes(page, tabela_detalhes_selector)
+        if pagina_atual == 1:
+            logging.info(
+                "    - Seta superior carregou a grade na página 1/%s.",
+                total_paginas or "?",
+            )
+            return
+
+        logging.warning(
+            "    - Seta superior ainda deixou a grade na página %s/%s em %s.",
+            pagina_atual or "?",
+            total_paginas or "?",
+            contexto,
+        )
+        time.sleep(2)
+
+    raise TimeoutError(
+        f"Seta superior nao reposicionou a grade de '{tarefa_nome}' para a pagina 1 em {contexto}."
+    )
 
 def _aguardar_consolidacao_ciencia(
     page: Page,
@@ -246,10 +359,16 @@ def extrair_dados_e_dar_ciencia_em_lote(
 
         logging.info(f"{contagem_texto} itens encontrados. Abrindo detalhes...")
         inicio_abertura = time.time()
-        _aguardar_overlay_ajax_sumir(page, "antes de abrir detalhes da tarefa", timeout_sumir=120000)
-        linha_alvo.locator('td').last.locator('input[type="button"]').click(timeout=60000)
 
         tabela_detalhes_selector = '[id*=":dataTabletableNotificacoesNaoLidas"]'
+        _abrir_detalhes_tarefa_pela_seta_superior(
+            page,
+            tarefa["nome"],
+            tabela_principal_selector,
+            tabela_detalhes_selector,
+            modal_carregando,
+            "início do lote",
+        )
 
         logging.info("Aguardando o carregamento da tabela de detalhes (isso pode demorar devido ao volume)...")
         page.wait_for_selector(tabela_detalhes_selector, state='visible', timeout=120000)
