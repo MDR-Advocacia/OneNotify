@@ -40,9 +40,13 @@ while true; do
   log_msg "Executando ${SCRIPT_PRINCIPAL}. Log do ciclo: ${log_ciclo}" | tee -a "$log_ciclo"
 
   set +e
-  python "$SCRIPT_PRINCIPAL" 2>&1 | tee -a "$log_ciclo"
-  exit_code="${PIPESTATUS[0]}"
+  python "$SCRIPT_PRINCIPAL" >>"$log_ciclo" 2>&1
+  exit_code="$?"
   set +e
+
+  log_msg "Ultimas linhas do ciclo:" | tee -a "$log_ciclo"
+  tail -n 80 "$log_ciclo" || true
+  encerrar_chrome_residual | tee -a "$log_ciclo"
 
   if [[ "$exit_code" -eq 0 ]]; then
     log_msg "Ciclo finalizado com SUCESSO. Proximo ciclo em ${PAUSA_SUCESSO_SEGUNDOS}s." | tee -a "$log_ciclo"
