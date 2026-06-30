@@ -349,7 +349,14 @@ def extrair_dados_e_dar_ciencia_em_lote(
             else:
                 logging.info("    - Confirmando a ciência...")
             _aguardar_modal_sumir_se_visivel(modal_carregando, "antes de confirmar ciência")
-            page.locator('input[type="image"][src*="btConfirmar.gif"]').click()
+            page.locator('input[type="image"][src*="btConfirmar.gif"]').click(timeout=15000, no_wait_after=True)
+            _esperar_modal_se_aparecer(
+                modal_carregando,
+                "confirmação de ciência",
+                timeout_aparecer=5000,
+                timeout_sumir=120000,
+            )
+            page.wait_for_selector('table[id="tabelaTipoSubtipoGeral"]', state='visible', timeout=120000)
             ciencia_confirmada = True
         elif houve_marcacao and confirmar_ciencia_ao_final:
             tempo_esgotado = True
