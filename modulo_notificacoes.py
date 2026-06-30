@@ -38,6 +38,82 @@ def _aguardar_modal_sumir_se_visivel(modal_carregando, contexto: str, timeout_su
         logging.warning("    - Modal não liberou em %s dentro do tempo esperado.", contexto)
         raise
 
+def _aguardar_contagem_tarefa_diminuir(page: Page, tarefa_nome: str, quantidade_anterior: int, timeout_ms: int = 300000) -> int:
+    tabela_principal_selector = 'table[id="tabelaTipoSubtipoGeral"]'
+    deadline = time.time() + (timeout_ms / 1000)
+    ultima_quantidade = quantidade_anterior
+    ultimo_log = 0.0
+
+    logging.info(
+        "    - Aguardando o portal consolidar a ciência de '%s' (%s pendente(s) antes do clique)...",
+        tarefa_nome,
+        quantidade_anterior,
+    )
+
+    while time.time() < deadline:
+        try:
+            page.wait_for_selector(tabela_principal_selector, state='visible', timeout=5000)
+            linha_alvo = page.locator(f"{tabela_principal_selector} tr:has-text(\"{tarefa_nome}\")")
+            if linha_alvo.count() == 0:
+                time.sleep(2)
+                continue
+
+            contagem_texto = linha_alvo.locator("td").nth(2).inner_text(timeout=5000).strip()
+            ultima_quantidade = _quantidade_notificacoes(contagem_texto)
+            if ultima_quantidade < quantidade_anterior:
+                logging.info(
+                    "    - Contagem do portal atualizada para '%s': %s -> %s.",
+                    tarefa_nome,
+                    quantidade_anterior,
+                    ultima_quantidade,
+                )
+                return ultima_quantidade
+        except Exception:
+            pass
+
+        agora = time.time()
+        if agora - ultimo_log >= 15:
+            logging.info(
+                "    - Contagem ainda não atualizou para '%s' (%s -> %s). Aguardando...",
+                tarefa_nome,
+                quantidade_anterior,
+                ultima_quantidade,
+            )
+            ultimo_log = agora
+        time.sleep(2)
+
+    raise TimeoutError(
+        f"Contagem da tarefa '{tarefa_nome}' nao diminuiu após ciência "
+        f"({quantidade_anterior} -> {ultima_quantidade})."
+    )
+
+def _confirmar_ciencia_com_monitoramento(page: Page) -> None:
+    botao_confirmar = page.locator('input[type="image"][src*="btConfirmar.gif"]')
+
+    try:
+        with page.expect_response(
+            lambda response: (
+                response.request.method == "POST"
+                and (
+                    "notificacoesPendencias" in response.url
+                    or "centralNotificacoesPendencias" in response.url
+                )
+            ),
+            timeout=30000,
+        ) as resposta_confirmacao:
+            botao_confirmar.click(timeout=15000, no_wait_after=True)
+
+        resposta = resposta_confirmacao.value
+        logging.info(
+            "    - Requisição de confirmação enviada ao BB: HTTP %s (%s).",
+            resposta.status,
+            resposta.url,
+        )
+    except TimeoutError:
+        logging.warning(
+            "    - Não capturei a resposta HTTP da confirmação; seguindo pela validação visual/contagem do portal."
+        )
+
 def _marcar_checkboxes_visiveis(corpo_da_tabela) -> int:
     checkboxes = corpo_da_tabela.locator('input[type="checkbox"][id*=":darCiencia"]')
     if checkboxes.count() == 0:
@@ -349,14 +425,15 @@ def extrair_dados_e_dar_ciencia_em_lote(
             else:
                 logging.info("    - Confirmando a ciência...")
             _aguardar_modal_sumir_se_visivel(modal_carregando, "antes de confirmar ciência")
-            page.locator('input[type="image"][src*="btConfirmar.gif"]').click(timeout=15000, no_wait_after=True)
+            _confirmar_ciencia_com_monitoramento(page)
             _esperar_modal_se_aparecer(
                 modal_carregando,
                 "confirmação de ciência",
                 timeout_aparecer=5000,
-                timeout_sumir=120000,
+                timeout_sumir=300000,
             )
             page.wait_for_selector('table[id="tabelaTipoSubtipoGeral"]', state='visible', timeout=120000)
+            _aguardar_contagem_tarefa_diminuir(page, tarefa["nome"], quantidade)
             ciencia_confirmada = True
         elif houve_marcacao and confirmar_ciencia_ao_final:
             tempo_esgotado = True
