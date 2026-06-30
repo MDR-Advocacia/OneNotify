@@ -44,6 +44,25 @@ def _relative_path(path: Path, base_dir: Path | None) -> str | None:
         return None
 
 
+def _resolve_document_path(raw_path: Any, base_dir: Path | None) -> Path | None:
+    if not raw_path:
+        return None
+
+    raw = str(raw_path)
+    if base_dir is not None:
+        normalized = raw.replace("/", "\\")
+        windows_prefix = "C:\\OneNotify\\documentos"
+        if normalized.lower().startswith(windows_prefix.lower()):
+            relative = normalized[len(windows_prefix):].lstrip("\\")
+            return base_dir / Path(*relative.split("\\"))
+
+        if raw.startswith("documentos\\") or raw.startswith("documentos/"):
+            relative = raw.split("\\", 1)[-1] if "\\" in raw else raw.split("/", 1)[-1]
+            return base_dir / Path(*relative.replace("/", "\\").split("\\"))
+
+    return Path(raw)
+
+
 def _image_count_for_page(page: Any) -> int:
     try:
         return len(page.images)
@@ -168,14 +187,15 @@ def _extract_pdf_text(path: Path, max_text_chars: int) -> dict[str, Any]:
 
 def document_to_json(document: dict[str, Any], base_dir: str | Path | None = None) -> dict[str, Any]:
     raw_path = document.get("caminho") or document.get("path") or document.get("arquivo")
-    path = Path(raw_path) if raw_path else None
     base_path = Path(base_dir) if base_dir else None
+    path = _resolve_document_path(raw_path, base_path)
     exists = bool(path and path.exists())
     suffix = path.suffix.lower() if path else ""
 
     payload: dict[str, Any] = {
         "nome": document.get("nome") or (path.name if path else None),
-        "original_path": str(path) if path else None,
+        "original_path": str(raw_path) if raw_path else None,
+        "resolved_path": str(path) if path else None,
         "relative_path": _relative_path(path, base_path) if path else None,
         "exists": exists,
         "size_bytes": path.stat().st_size if exists else None,
