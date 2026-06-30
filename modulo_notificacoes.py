@@ -10,15 +10,33 @@ def _quantidade_notificacoes(texto: str) -> int:
     somente_digitos = re.sub(r"\D", "", texto or "")
     return int(somente_digitos) if somente_digitos else 0
 
-def _esperar_modal_se_aparecer(modal_carregando, contexto: str, timeout_aparecer: int = 1500, timeout_sumir: int = 45000) -> bool:
+def _esperar_modal_se_aparecer(
+    modal_carregando,
+    contexto: str,
+    timeout_aparecer: int = 1500,
+    timeout_sumir: int = 45000,
+    log_ausente: bool = True,
+) -> bool:
     try:
         modal_carregando.wait_for(state='visible', timeout=timeout_aparecer)
     except TimeoutError:
-        logging.info(f"    - Modal de carregamento não apareceu em {contexto}; seguindo sem espera extra.")
+        if log_ausente:
+            logging.info(f"    - Modal de carregamento não apareceu em {contexto}; seguindo sem espera extra.")
         return False
 
     modal_carregando.wait_for(state='hidden', timeout=timeout_sumir)
     return True
+
+def _aguardar_modal_sumir_se_visivel(modal_carregando, contexto: str, timeout_sumir: int = 60000) -> bool:
+    try:
+        if not modal_carregando.is_visible(timeout=150):
+            return False
+        logging.info("    - Modal visível em %s; aguardando liberação...", contexto)
+        modal_carregando.wait_for(state='hidden', timeout=timeout_sumir)
+        return True
+    except TimeoutError:
+        logging.warning("    - Modal não liberou em %s dentro do tempo esperado.", contexto)
+        raise
 
 def _marcar_checkboxes_visiveis(corpo_da_tabela) -> int:
     checkboxes = corpo_da_tabela.locator('input[type="checkbox"][id*=":darCiencia"]')
@@ -135,6 +153,7 @@ def extrair_dados_e_dar_ciencia_em_lote(
             inicio_checkboxes = time.time()
             notificacoes_da_pagina = []
             marcados_na_pagina = 0
+            _aguardar_modal_sumir_se_visivel(modal_carregando, "início da página")
             
             for linha in corpo_da_tabela.locator("tr").all():
                 try:
@@ -178,8 +197,20 @@ def extrair_dados_e_dar_ciencia_em_lote(
                             logging.warning(f"      - NPJ {npj} sem checkbox de ciência; item não será salvo para ciência.")
                             continue
 
+                        _aguardar_modal_sumir_se_visivel(modal_carregando, f"antes de marcar NPJ {npj}")
                         if not checkbox.is_checked(timeout=1000):
-                            checkbox.check(timeout=5000)
+                            try:
+                                checkbox.check(timeout=5000)
+                            except TimeoutError:
+                                _aguardar_modal_sumir_se_visivel(modal_carregando, f"retry de marcação do NPJ {npj}")
+                                checkbox.check(timeout=8000)
+                            _esperar_modal_se_aparecer(
+                                modal_carregando,
+                                f"marcação do NPJ {npj}",
+                                timeout_aparecer=300,
+                                timeout_sumir=60000,
+                                log_ausente=False,
+                            )
 
                         if checkbox.is_checked(timeout=1000):
                             notificacoes_da_pagina.append(notificacao)
@@ -228,6 +259,21 @@ def extrair_dados_e_dar_ciencia_em_lote(
             if max_paginas is not None and pagina_atual >= max_paginas:
                 logging.info(f"    - Limite de {max_paginas} página(s) atingido para execução limitada.")
                 break
+
+            tempo_restante = limite_tempo - (time.time() - start_time_ciclo)
+            if (
+                confirmar_ciencia
+                and max_paginas is None
+                and houve_marcacao
+                and tempo_restante <= MARGEM_CHECKPOINT_CIENCIA
+            ):
+                logging.warning(
+                    "Restam %.0fs no ciclo antes da próxima página. Fazendo checkpoint de ciência.",
+                    tempo_restante,
+                )
+                tempo_esgotado = True
+                motivo_interrupcao = "checkpoint_pre_paginacao"
+                break
             
             paginador = tabela_detalhes.locator("tfoot")
             botao_proxima = paginador.locator('td.rich-datascr-button:not(.dsbld)[onclick*="page\': \'next\'"]')
@@ -237,6 +283,7 @@ def extrair_dados_e_dar_ciencia_em_lote(
                 break
             
             logging.info("    - Navegando para a próxima página de detalhes...")
+            _aguardar_modal_sumir_se_visivel(modal_carregando, "antes da paginação")
             botao_proxima.click()
             _esperar_modal_se_aparecer(modal_carregando, "paginação")
             
@@ -276,17 +323,21 @@ def extrair_dados_e_dar_ciencia_em_lote(
                 logging.info("    - Confirmando ciência parcial segura...")
             else:
                 logging.info("    - Confirmando a ciência...")
+            _aguardar_modal_sumir_se_visivel(modal_carregando, "antes de confirmar ciência")
             page.locator('input[type="image"][src*="btConfirmar.gif"]').click()
             ciencia_confirmada = True
         elif houve_marcacao and confirmar_ciencia_ao_final:
             tempo_esgotado = True
             logging.warning("    - Ciência NÃO confirmada. Voltando para a lista de tarefas.")
+            _aguardar_modal_sumir_se_visivel(modal_carregando, "antes de voltar sem ciência")
             page.locator('input[type="image"][src*="btVoltar.gif"]').click()
         elif houve_marcacao:
             logging.info("    - Dry-run: checkboxes marcados apenas para teste. Voltando sem confirmar ciência.")
+            _aguardar_modal_sumir_se_visivel(modal_carregando, "antes de voltar no dry-run")
             page.locator('input[type="image"][src*="btVoltar.gif"]').click()
         else:
             logging.info("    - Nenhuma ciência marcada. Voltando para a lista de tarefas.")
+            _aguardar_modal_sumir_se_visivel(modal_carregando, "antes de voltar sem marcações")
             page.locator('input[type="image"][src*="btVoltar.gif"]').click()
 
         _esperar_modal_se_aparecer(modal_carregando, "retorno/confirmacao")
