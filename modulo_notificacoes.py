@@ -2,7 +2,7 @@ import logging
 import re
 import time
 from playwright.sync_api import Page, TimeoutError
-from config import TAREFAS_CONFIG
+from config import MARGEM_CHECKPOINT_CIENCIA, TAREFAS_CONFIG
 import database
 from datetime import datetime, timedelta 
 
@@ -60,6 +60,8 @@ def extrair_dados_e_dar_ciencia_em_lote(
     tempo_esgotado = False
     salvas_no_banco = 0
     ciencia_confirmada = False
+    bloqueio_ciencia = False
+    motivo_interrupcao = ""
     
     try:
         logging.info(f"--- Processando tarefa: {tarefa['nome']} ---")
@@ -103,10 +105,25 @@ def extrair_dados_e_dar_ciencia_em_lote(
             salvar_banco = False
 
         while True:
-            # CHECAGEM DE TEMPO A CADA PÁGINA
-            if time.time() - start_time_ciclo > limite_tempo:
-                logging.warning(f"Limite de tempo de extração atingido durante a paginação. O processamento desta tarefa será interrompido.")
+            tempo_restante = limite_tempo - (time.time() - start_time_ciclo)
+            if tempo_restante <= 0:
+                logging.warning("Limite de tempo de extração atingido durante a paginação. O processamento desta tarefa será interrompido.")
                 tempo_esgotado = True
+                motivo_interrupcao = "tempo_limite"
+                break
+
+            if (
+                confirmar_ciencia
+                and max_paginas is None
+                and houve_marcacao
+                and tempo_restante <= MARGEM_CHECKPOINT_CIENCIA
+            ):
+                logging.warning(
+                    "Restam %.0fs no ciclo. Fazendo checkpoint de ciência antes da renovação de sessão.",
+                    tempo_restante,
+                )
+                tempo_esgotado = True
+                motivo_interrupcao = "checkpoint_pre_renovacao"
                 break
 
             if max_paginas is not None and pagina_atual > max_paginas:
@@ -194,6 +211,8 @@ def extrair_dados_e_dar_ciencia_em_lote(
                             len(faltantes),
                             pagina_atual,
                         )
+                        bloqueio_ciencia = True
+                        motivo_interrupcao = "persistencia_incompleta"
                         tempo_esgotado = True
                         break
 
@@ -224,14 +243,25 @@ def extrair_dados_e_dar_ciencia_em_lote(
             pagina_atual += 1
 
         pode_confirmar_ciencia = False
+        ciencia_parcial = False
         confirmar_ciencia_ao_final = confirmar_ciencia and max_paginas is None
         if houve_marcacao and confirmar_ciencia_ao_final:
             if not salvar_banco:
                 logging.error("    - Bloqueando ciência: confirmar_ciencia=True exige salvar_banco=True.")
             elif not notificacoes_para_salvar:
                 logging.error("    - Bloqueando ciência: checkboxes marcados, mas nenhuma notificação foi extraída.")
+            elif bloqueio_ciencia:
+                logging.error(
+                    "    - Bloqueando ciência: interrupção insegura (%s).",
+                    motivo_interrupcao or "motivo_desconhecido",
+                )
             elif tempo_esgotado:
-                logging.error("    - Bloqueando ciência: a extração foi interrompida antes de concluir a tarefa.")
+                pode_confirmar_ciencia = True
+                ciencia_parcial = True
+                logging.warning(
+                    "    - Checkpoint parcial: %s notificação(ões) marcadas foram persistidas e serão confirmadas antes da renovação.",
+                    len(notificacoes_para_salvar),
+                )
             elif not pagina_final_alcancada:
                 logging.error("    - Bloqueando ciência: paginação não chegou ao fim da tarefa.")
             else:
@@ -242,7 +272,10 @@ def extrair_dados_e_dar_ciencia_em_lote(
                 )
 
         if houve_marcacao and confirmar_ciencia_ao_final and pode_confirmar_ciencia:
-            logging.info("    - Confirmando a ciência...")
+            if ciencia_parcial:
+                logging.info("    - Confirmando ciência parcial segura...")
+            else:
+                logging.info("    - Confirmando a ciência...")
             page.locator('input[type="image"][src*="btConfirmar.gif"]').click()
             ciencia_confirmada = True
         elif houve_marcacao and confirmar_ciencia_ao_final:
@@ -319,12 +352,12 @@ def executar_extracao_e_ciencia(
                 resultados["notificacoes_salvas"] += salvas
                 resultados["ciencias_registradas"] += ciencias
                 logging.info(f"Tarefa '{tarefa['nome']}' finalizada. {salvas} novas notificações salvas. {ciencias} ciências registradas.")
-            
-            tarefas_restantes.pop(0)
 
             if tempo_esgotado_sub:
                 tempo_esgotado = True
                 break
+
+            tarefas_restantes.pop(0)
         
         return resultados, tempo_esgotado, tarefas_restantes
 
