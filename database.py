@@ -254,17 +254,29 @@ def buscar_lote_para_processamento(tamanho_lote: int) -> List[Dict]:
             tarefas = [dict(row) for row in cursor.fetchall()]
             if not tarefas:
                 return []
+            tarefas_normalizadas = []
             for tarefa in tarefas:
+                npj = tarefa.get('NPJ') or tarefa.get('npj')
+                data_notificacao = tarefa.get('data_notificacao')
+                if not npj or not data_notificacao:
+                    logging.warning(
+                        "Lote ignorou tarefa sem NPJ/data válidos: %s",
+                        tarefa,
+                    )
+                    continue
+                tarefa['NPJ'] = npj
+                tarefa['data_notificacao'] = data_notificacao
+                tarefas_normalizadas.append(tarefa)
                 conn.execute(
                     """
                     UPDATE notificacoes
                     SET status = 'Em Processamento', rpa_status = 'EM_PROCESSAMENTO'
                     WHERE NPJ = ? AND data_notificacao = ? AND status = 'Pendente'
                     """,
-                    (tarefa['NPJ'], tarefa['data_notificacao'])
+                    (npj, data_notificacao)
                 )
             conn.commit()
-            return tarefas
+            return tarefas_normalizadas
     except Exception as e:
         logging.error(f"ERRO ao obter lote de tarefas pendentes: {e}", exc_info=True)
         return []

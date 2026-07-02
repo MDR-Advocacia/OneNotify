@@ -85,6 +85,48 @@ def _ler_total_paginas_detalhes(page: Page, tabela_detalhes_selector: str) -> in
     _, total_paginas = _ler_paginacao_detalhes(page, tabela_detalhes_selector)
     return total_paginas
 
+def _ler_total_registros_detalhes(page: Page, tabela_detalhes_selector: str) -> int | None:
+    try:
+        texto = page.locator(tabela_detalhes_selector).inner_text(timeout=3000)
+        match = re.search(r"total\s+de\s*(\d+)", texto or "", re.IGNORECASE)
+        if match:
+            return int(match.group(1))
+    except Exception:
+        return None
+    return None
+
+def _grade_detalhes_sem_notificacoes(page: Page, tabela_detalhes_selector: str) -> bool:
+    try:
+        tabela = page.locator(tabela_detalhes_selector)
+        texto = tabela.inner_text(timeout=2000) if tabela.count() > 0 else ""
+        if not re.search(r"nenhuma\s+notifica", texto or "", re.IGNORECASE):
+            texto = page.locator("body").inner_text(timeout=2000)
+        if not re.search(r"nenhuma\s+notifica", texto or "", re.IGNORECASE):
+            return False
+
+        checkboxes = page.locator('input[type="checkbox"][id*=":darCiencia"]')
+        botoes_confirmar = page.locator('input[type="image"][src*="btConfirmar.gif"]')
+        return checkboxes.count() == 0 and botoes_confirmar.count() == 0
+    except Exception:
+        return False
+
+def _grade_detalhes_carregada_sem_paginacao(page: Page, tabela_detalhes_selector: str) -> bool:
+    try:
+        tabela = page.locator(tabela_detalhes_selector)
+        if tabela.count() == 0:
+            return False
+
+        if _grade_detalhes_sem_notificacoes(page, tabela_detalhes_selector):
+            return True
+
+        if _ler_total_registros_detalhes(page, tabela_detalhes_selector) is not None:
+            return True
+
+        checkboxes = tabela.locator('input[type="checkbox"][id*=":darCiencia"]')
+        return checkboxes.count() > 0
+    except Exception:
+        return False
+
 def _garantir_primeira_pagina_detalhes(
     page: Page,
     tabela_detalhes_selector: str,
@@ -181,6 +223,13 @@ def _abrir_detalhes_tarefa_pela_seta_superior(
                 total_paginas or "?",
             )
             return
+        if pagina_atual is None and _grade_detalhes_carregada_sem_paginacao(page, tabela_detalhes_selector):
+            total_registros = _ler_total_registros_detalhes(page, tabela_detalhes_selector)
+            logging.info(
+                "    - Seta superior carregou grade sem paginação (%s registro(s)); tratando como página única.",
+                total_registros or "total desconhecido",
+            )
+            return
 
         logging.warning(
             "    - Seta superior atualizou a consulta, mas preservou a grade na página %s/%s em %s.",
@@ -199,6 +248,13 @@ def _abrir_detalhes_tarefa_pela_seta_superior(
             logging.info(
                 "    - Consulta reaberta e grade reposicionada para página 1/%s.",
                 total_reposicionado or "?",
+            )
+            return
+        if pagina_reposicionada is None and _grade_detalhes_carregada_sem_paginacao(page, tabela_detalhes_selector):
+            total_registros = _ler_total_registros_detalhes(page, tabela_detalhes_selector)
+            logging.info(
+                "    - Consulta reaberta em grade sem paginação (%s registro(s)); tratando como página única.",
+                total_registros or "total desconhecido",
             )
             return
         time.sleep(2)
@@ -220,6 +276,7 @@ def _aguardar_consolidacao_ciencia(
     ultima_quantidade = quantidade_anterior
     ultimo_total_paginas = total_paginas_anterior
     ultimo_log = 0.0
+    registros_estimados_antes = (total_paginas_anterior * 10) if total_paginas_anterior else quantidade_anterior
 
     logging.info(
         "    - Aguardando o portal consolidar a ciência de '%s' (%s pendente(s), %s página(s) antes do clique)...",
@@ -248,6 +305,27 @@ def _aguardar_consolidacao_ciencia(
                 return ultima_quantidade, ultimo_total_paginas
         except Exception:
             pass
+
+        if _grade_detalhes_sem_notificacoes(page, tabela_detalhes_selector):
+            logging.info(
+                "    - Grade de detalhes ficou vazia após a confirmação de '%s'; ciência considerada consolidada.",
+                tarefa_nome,
+            )
+            return ultima_quantidade, 0
+
+        total_registros_atual = _ler_total_registros_detalhes(page, tabela_detalhes_selector)
+        if (
+            total_registros_atual is not None
+            and registros_estimados_antes is not None
+            and total_registros_atual < registros_estimados_antes
+        ):
+            logging.info(
+                "    - Total de registros da grade atualizado para '%s': ~%s -> %s.",
+                tarefa_nome,
+                registros_estimados_antes,
+                total_registros_atual,
+            )
+            return ultima_quantidade, ultimo_total_paginas
 
         total_paginas_atual = _ler_total_paginas_detalhes(page, tabela_detalhes_selector)
         if total_paginas_atual is not None:
@@ -392,6 +470,13 @@ def extrair_dados_e_dar_ciencia_em_lote(
         if total_paginas_inicial is None and quantidade > 0:
             total_paginas_inicial = (quantidade + 9) // 10
         logging.info("    - Total de páginas da grade no início da tarefa: %s.", total_paginas_inicial or "desconhecido")
+
+        if _grade_detalhes_sem_notificacoes(page, tabela_detalhes_selector):
+            logging.info(
+                "    - Grade de detalhes de '%s' está vazia apesar da contagem do resumo. Considerando tarefa já consolidada.",
+                tarefa["nome"],
+            )
+            return [], 0, False, 0, False
         
         corpo_da_tabela = tabela_detalhes.locator('tbody[id$=":tb"]')
         corpo_da_tabela.locator("tr").first.wait_for(state="visible", timeout=20000)
