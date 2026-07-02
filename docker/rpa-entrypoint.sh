@@ -8,11 +8,42 @@ NOVNC_PORT="${NOVNC_PORT:-6080}"
 
 mkdir -p /tmp/onenotify-rpa
 
+display_number="${DISPLAY#:}"
+display_number="${display_number%%.*}"
+x_lock="/tmp/.X${display_number}-lock"
+x_socket="/tmp/.X11-unix/X${display_number}"
+
+cleanup_stale_display() {
+  if xdpyinfo -display "$DISPLAY" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if [[ -e "$x_lock" || -S "$x_socket" ]]; then
+    echo "Cleaning stale X display artifacts for ${DISPLAY}" >&2
+    rm -f "$x_lock" "$x_socket"
+  fi
+}
+
+wait_for_display() {
+  for _ in $(seq 1 30); do
+    if xdpyinfo -display "$DISPLAY" >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 0.5
+  done
+
+  echo "X display ${DISPLAY} did not become ready" >&2
+  tail -n 80 /tmp/onenotify-rpa/xvfb.log >&2 || true
+  return 1
+}
+
 if ! xdpyinfo -display "$DISPLAY" >/dev/null 2>&1; then
+  cleanup_stale_display
   Xvfb "$DISPLAY" -screen 0 "$SCREEN_GEOMETRY" -ac +extension RANDR \
     >/tmp/onenotify-rpa/xvfb.log 2>&1 &
-  sleep 1
 fi
+
+wait_for_display
 
 if command -v fluxbox >/dev/null 2>&1; then
   fluxbox >/tmp/onenotify-rpa/fluxbox.log 2>&1 &
