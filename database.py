@@ -121,6 +121,11 @@ def garantir_indices_postgres():
                 CREATE INDEX IF NOT EXISTS ix_notificacoes_rpa_status
                 ON notificacoes (rpa_status)
             """)
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS ix_notificacoes_data_notificacao_date
+                ON notificacoes ((to_date(data_notificacao, 'DD/MM/YYYY')))
+                WHERE data_notificacao ~ '^[0-9]{2}/[0-9]{2}/[0-9]{4}$'
+            """)
             conn.commit()
             logging.info("Índice único ux_notificacoes_npj_tipo_data verificado no PostgreSQL.")
     except Exception as e:

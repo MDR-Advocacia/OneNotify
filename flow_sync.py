@@ -364,6 +364,17 @@ def list_candidate_groups(
         condition, condition_params = _flow_pending_condition(retry_errors)
         where.append(condition)
         params.extend(condition_params)
+    if days is not None:
+        if db_adapter.is_postgres():
+            where.append("data_notificacao ~ '^[0-9]{2}/[0-9]{2}/[0-9]{4}$'")
+            where.append("to_date(data_notificacao, 'DD/MM/YYYY') >= CURRENT_DATE - (? * INTERVAL '1 day')")
+            params.append(days)
+        else:
+            where.append("""
+                date(substr(data_notificacao, 7, 4) || '-' || substr(data_notificacao, 4, 2) || '-' || substr(data_notificacao, 1, 2))
+                >= date('now', ?)
+            """)
+            params.append(f"-{days} days")
 
     query = f"""
         {_group_select_sql()}
@@ -378,11 +389,7 @@ def list_candidate_groups(
     with db_adapter.connect_main() as conn:
         rows = [_row_to_dict(row) for row in conn.execute(query, params).fetchall()]
 
-    if days is None:
-        return rows
-
-    cutoff = datetime.now() - timedelta(days=days)
-    return [row for row in rows if (parsed := _parse_date(row.get("data_notificacao"))) and parsed >= cutoff]
+    return rows
 
 
 def fetch_group(npj: str, data_notificacao: str) -> dict[str, Any] | None:
