@@ -27,7 +27,11 @@ COPY requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 COPY . /app
-RUN chmod +x /app/docker/start-chrome-cdp.sh /app/docker/rpa-entrypoint.sh /app/docker/rpa-loop.sh
+RUN sed -i 's/\r$//' \
+        /app/docker/start-chrome-cdp.sh \
+        /app/docker/rpa-entrypoint.sh \
+        /app/docker/rpa-loop.sh \
+    && chmod +x /app/docker/start-chrome-cdp.sh /app/docker/rpa-entrypoint.sh /app/docker/rpa-loop.sh
 
 EXPOSE 5900 6080
 
