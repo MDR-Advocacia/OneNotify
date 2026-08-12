@@ -269,13 +269,16 @@ def _aguardar_consolidacao_ciencia(
     quantidade_anterior: int,
     total_paginas_anterior: int | None,
     tabela_detalhes_selector: str,
-    timeout_ms: int = 300000,
+    modal_carregando=None,
+    timeout_ms: int = 120000,
 ) -> tuple[int, int | None]:
     tabela_principal_selector = 'table[id="tabelaTipoSubtipoGeral"]'
     deadline = time.time() + (timeout_ms / 1000)
+    reload_deadline = time.time() + min(45, timeout_ms / 2000)
     ultima_quantidade = quantidade_anterior
     ultimo_total_paginas = total_paginas_anterior
     ultimo_log = 0.0
+    tentou_reabrir = False
     registros_estimados_antes = (total_paginas_anterior * 10) if total_paginas_anterior else quantidade_anterior
 
     logging.info(
@@ -338,6 +341,49 @@ def _aguardar_consolidacao_ciencia(
                     total_paginas_atual,
                 )
                 return ultima_quantidade, total_paginas_atual
+
+        if not tentou_reabrir and time.time() >= reload_deadline:
+            tentou_reabrir = True
+            logging.warning(
+                "    - Portal demorou a consolidar '%s'. Reabrindo detalhes pela seta superior para forçar atualização.",
+                tarefa_nome,
+            )
+            try:
+                _abrir_detalhes_tarefa_pela_seta_superior(
+                    page,
+                    tarefa_nome,
+                    tabela_principal_selector,
+                    tabela_detalhes_selector,
+                    modal_carregando,
+                    "revalidação pós-ciência",
+                    tentativas=1,
+                )
+                if _grade_detalhes_sem_notificacoes(page, tabela_detalhes_selector):
+                    logging.info(
+                        "    - Grade de detalhes ficou vazia após reabrir '%s'; ciência considerada consolidada.",
+                        tarefa_nome,
+                    )
+                    return ultima_quantidade, 0
+
+                total_reaberto = _ler_total_registros_detalhes(page, tabela_detalhes_selector)
+                if (
+                    total_reaberto is not None
+                    and registros_estimados_antes is not None
+                    and total_reaberto < registros_estimados_antes
+                ):
+                    logging.info(
+                        "    - Total de registros atualizado após reabrir '%s': ~%s -> %s.",
+                        tarefa_nome,
+                        registros_estimados_antes,
+                        total_reaberto,
+                    )
+                    return ultima_quantidade, _ler_total_paginas_detalhes(page, tabela_detalhes_selector)
+            except Exception as exc:
+                logging.warning(
+                    "    - Não consegui reabrir detalhes para revalidar '%s' após ciência: %s",
+                    tarefa_nome,
+                    exc,
+                )
 
         agora = time.time()
         if agora - ultimo_log >= 15:
@@ -738,6 +784,7 @@ def extrair_dados_e_dar_ciencia_em_lote(
                 quantidade,
                 total_paginas_inicial,
                 tabela_detalhes_selector,
+                modal_carregando,
             )
             _aguardar_overlay_ajax_sumir(page, "após consolidação de ciência", timeout_sumir=300000)
             ciencia_confirmada = True
