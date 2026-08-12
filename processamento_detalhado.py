@@ -7,6 +7,17 @@ import database
 from pathlib import Path
 from session import SessionExpiredError
 
+LOADER_SELECTOR = 'plt-carregando div.loader.is-loading'
+
+
+def aguardar_loader_opcional(page: Page, timeout: int = 5000) -> None:
+    """Espera loaders reais do portal sem travar quando eles nao aparecem."""
+    try:
+        page.locator(LOADER_SELECTOR).wait_for(state='hidden', timeout=timeout)
+    except TimeoutError:
+        logging.warning("      - Loader ainda visivel apos espera curta; seguindo com os seletores da etapa.")
+
+
 def extrair_numero_processo(page: Page) -> Optional[str]:
     """Extrai o número do processo da página de detalhes."""
     try:
@@ -49,7 +60,7 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str, is_migracao: b
             if 'mi--keyboard-arrow-down' in (andamentos_title.locator('i').get_attribute('class') or ''):
                 logging.info("      - Seção 'Andamentos' está fechada, clicando para expandir.")
                 andamentos_title.click()
-                page.wait_for_timeout(1000)
+                aguardar_loader_opcional(page)
         else:
             logging.info("      - Layout de Abas detectado para Andamentos.")
             page.locator('li:has-text("Andamentos")').click(timeout=10000)
@@ -101,12 +112,12 @@ def extrair_andamentos(page: Page, data_notificacao_recente: str, is_migracao: b
                         page.wait_for_selector(modal_selector, state='visible', timeout=10000)
                         
                         leia_mais_btn = page.locator(f'{modal_selector} button:has-text("Leia mais")')
+                        texto_completo_selector = page.locator(f'{modal_selector} texto-grande-detalhar')
                         if leia_mais_btn.count() > 0:
                             logging.info("         - Botão 'Leia mais' encontrado. Expandindo texto...")
                             leia_mais_btn.click(timeout=5000)
-                            page.wait_for_timeout(500)
+                            texto_completo_selector.wait_for(state='attached', timeout=5000)
 
-                        texto_completo_selector = page.locator(f'{modal_selector} texto-grande-detalhar')
                         detalhes = texto_completo_selector.get_attribute('conteudo-texto') or ""
                         
                         page.keyboard.press("Escape")
@@ -141,7 +152,7 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_mi
             if 'mi--keyboard-arrow-down' in (titulo_principal.locator('i').get_attribute('class') or ''):
                   logging.info("      - Seção principal 'DOCUMENTOS' está fechada, clicando para expandir.")
                   titulo_principal.click()
-                  page.wait_for_timeout(1000)
+                  aguardar_loader_opcional(page)
 
             sub_secao = secao_container.locator(seletor_layout_antigo)
             if sub_secao.count() > 0:
@@ -149,7 +160,7 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_mi
                 if 'mi--keyboard-arrow-down' in (titulo_sub_secao.locator('i').get_attribute('class') or ''):
                     logging.info("      - Sub-seção 'Documentos' está fechada, clicando para expandir.")
                     titulo_sub_secao.click()
-                    page.wait_for_timeout(1000)
+                    aguardar_loader_opcional(page)
 
         elif page.locator(seletor_layout_antigo).count() > 0:
             logging.info("      - Layout Antigo (simples) de documentos detectado.")
@@ -158,7 +169,7 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_mi
             if 'mi--keyboard-arrow-down' in (titulo_secao.locator('i').get_attribute('class') or ''):
                 logging.info("      - Seção 'Documentos' está fechada, clicando para expandir.")
                 titulo_secao.click()
-                page.wait_for_timeout(1000)
+                aguardar_loader_opcional(page)
         
         if not secao_container:
             logging.info("      - Nenhuma seção de documentos encontrada para este NPJ. Pulando a etapa de download.")
@@ -212,7 +223,7 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_mi
                     except Error:
                         if "GED indisponível" in page.content():
                             logging.error(f"         - ERRO DE PORTAL: GED indisponível para o arquivo '{nome_arquivo}'.")
-                            page.go_back(wait_until="networkidle")
+                            page.go_back(wait_until="domcontentloaded")
                             raise ValueError("GED indisponível")
                         else:
                             logging.warning(f"         - Timeout ou outra falha no download do arquivo '{nome_arquivo}'.")
@@ -231,7 +242,7 @@ def baixar_documentos(page: Page, data_notificacao_recente: str, npj: str, is_mi
     finally:
         logging.info("      - Verificando se o loader da página está ativo antes de prosseguir...")
         try:
-            page.locator('plt-carregando div.loader.is-loading').wait_for(state='hidden', timeout=20000)
+            page.locator(LOADER_SELECTOR).wait_for(state='hidden', timeout=5000)
             logging.info("      - Loader desapareceu. Prosseguindo...")
         except TimeoutError:
             logging.warning("      - O loader não desapareceu no tempo esperado, mas a execução continuará.")
@@ -251,7 +262,7 @@ def navegar_para_detalhes_do_npj(page: Page, npj: str):
     url_final = f"https://juridico.bb.com.br/paj/app/paj-cadastro/spas/processo/consulta/processo-consulta.app.html#/editar/{id_processo_url}/0/1"
     
     logging.info(f"    - Navegando para a URL de detalhe...")
-    page.goto(url_final, wait_until="networkidle", timeout=60000)
+    page.goto(url_final, wait_until="domcontentloaded", timeout=60000)
     
     npj_formatado = f"{ano}/{numero}-000"
     chip_npj_selector = f'div[bb-title="NPJ"] span.chip__desc:has-text("{npj_formatado}")'

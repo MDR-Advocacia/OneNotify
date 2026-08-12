@@ -1,0 +1,104 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: onenotify-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-onenotify}
+      POSTGRES_USER: ${POSTGRES_USER:-onenotify}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-onenotify}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - onenotify_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: onenotify-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-onenotify}:${POSTGRES_PASSWORD:-onenotify}@postgres:5432/${POSTGRES_DB:-onenotify}
+      DOCUMENTOS_PATH: /app/documentos
+      TAREFAS_CRIADAS_PATH: /app/tarefas_criadas
+      ONENOTIFY_FLOW_API_KEY: ${ONENOTIFY_FLOW_API_KEY:-}
+      ONENOTIFY_PUBLIC_BASE_URL: ${ONENOTIFY_PUBLIC_BASE_URL:-https://onenotify.mdradvocacia.com}
+      ONENOTIFY_PDF_MAX_TEXT_CHARS: ${ONENOTIFY_PDF_MAX_TEXT_CHARS:-200000}
+      FLOW_ONENOTIFY_BB_INTAKE_URL: ${FLOW_ONENOTIFY_BB_INTAKE_URL:-}
+      FLOW_ONENOTIFY_BB_INTAKE_API_KEY: ${FLOW_ONENOTIFY_BB_INTAKE_API_KEY:-}
+      FLOW_SYNC_ENABLED: ${FLOW_SYNC_ENABLED:-false}
+      FLOW_SYNC_BATCH_SIZE: ${FLOW_SYNC_BATCH_SIZE:-100}
+      FLOW_SYNC_TIMEOUT_SECONDS: ${FLOW_SYNC_TIMEOUT_SECONDS:-30}
+    ports:
+      - "${API_PORT:-5000}:5000"
+    volumes:
+      - ./documentos:/app/documentos
+      - ./tarefas_criadas:/app/tarefas_criadas
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: onenotify-frontend
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+
+  rpa:
+    build:
+      context: .
+      dockerfile: Dockerfile.rpa
+    container_name: onenotify-rpa
+    restart: unless-stopped
+    profiles:
+      - rpa
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-onenotify}:${POSTGRES_PASSWORD:-onenotify}@postgres:5432/${POSTGRES_DB:-onenotify}
+      CHROME_CDP_ENDPOINT: http://127.0.0.1:9222
+      BROWSER_START_COMMAND: /app/docker/start-chrome-cdp.sh
+      CHROME_PROFILE_DIR: /app/chrome-profile
+      ONELOG_LOGIN_MODE: ${ONELOG_LOGIN_MODE:-profile}
+      ONELOG_API_URL: ${ONELOG_API_URL:-https://api-onelog.mdradvocacia.com}
+      ONELOG_EXTENSION_DIR: /app/docker/onelog-extension
+      ONELOG_LOAD_BUNDLED_EXTENSION: ${ONELOG_LOAD_BUNDLED_EXTENSION:-true}
+      ONELOG_USERNAME: ${ONELOG_USERNAME:-}
+      ONELOG_PASSWORD: ${ONELOG_PASSWORD:-}
+      ONELOG_LOGIN_TIMEOUT_MS: ${ONELOG_LOGIN_TIMEOUT_MS:-360000}
+      ONENOTIFY_PDF_MAX_TEXT_CHARS: ${ONENOTIFY_PDF_MAX_TEXT_CHARS:-200000}
+      ONENOTIFY_PUBLIC_BASE_URL: ${ONENOTIFY_PUBLIC_BASE_URL:-https://onenotify.mdradvocacia.com}
+      FLOW_ONENOTIFY_BB_INTAKE_URL: ${FLOW_ONENOTIFY_BB_INTAKE_URL:-}
+      FLOW_ONENOTIFY_BB_INTAKE_API_KEY: ${FLOW_ONENOTIFY_BB_INTAKE_API_KEY:-}
+      FLOW_SYNC_ENABLED: ${FLOW_SYNC_ENABLED:-false}
+      FLOW_SYNC_BATCH_SIZE: ${FLOW_SYNC_BATCH_SIZE:-100}
+      FLOW_SYNC_TIMEOUT_SECONDS: ${FLOW_SYNC_TIMEOUT_SECONDS:-30}
+      RPA_PAUSA_SUCESSO_SEGUNDOS: ${RPA_PAUSA_SUCESSO_SEGUNDOS:-1800}
+      RPA_PAUSA_FALHA_SEGUNDOS: ${RPA_PAUSA_FALHA_SEGUNDOS:-120}
+      DISPLAY: :99
+      SCREEN_GEOMETRY: 1920x1080x24
+      VNC_PORT: 5900
+      NOVNC_PORT: 6080
+    ports:
+      - "${RPA_NOVNC_PORT:-6080}:6080"
+      - "${RPA_VNC_PORT:-5900}:5900"
+    volumes:
+      - ./documentos:/app/documentos
+      - ./downloads:/app/downloads
+      - ./logs:/app/logs
+      - ./chrome-profile-onenotify:/app/chrome-profile
+
+volumes:
+  onenotify_pgdata:

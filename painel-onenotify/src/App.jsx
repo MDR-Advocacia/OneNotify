@@ -204,12 +204,15 @@ const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus }) => {
     const [activeAndamento, setActiveAndamento] = useState(null);
     const [detalhes, setDetalhes] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [actionError, setActionError] = useState('');
     
-    const { NPJ: npj, data_notificacao, numero_processo, ids, status, responsavel, data_processamento, detalhes_erro } = item || {};
+    const { NPJ: npjUpper, npj: npjLower, data_notificacao, numero_processo, ids, responsavel, data_processamento, detalhes_erro } = item || {};
+    const npj = npjUpper || npjLower || '';
 
     useEffect(() => {
         if (isOpen) {
             setStep('details');
+            setActionError('');
             if (npj && data_notificacao) {
                 setLoading(true);
                 setActiveAndamento(null);
@@ -230,9 +233,16 @@ const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus }) => {
     
     if (!isOpen || !item) return null;
 
+    const documentViewUrl = (path) => `${API_URL}/documentos/view?path=${encodeURIComponent(path)}`;
+    const documentDownloadUrl = (path) => `${API_URL}/download?path=${encodeURIComponent(path)}`;
+
+    const handleViewDocument = (path) => {
+        window.open(documentViewUrl(path), '_blank', 'noopener,noreferrer');
+    };
+
     const handleDownload = async (path) => {
         try {
-            const response = await fetch(`${API_URL}/download?path=${encodeURIComponent(path)}`);
+            const response = await fetch(documentDownloadUrl(path));
             if (!response.ok) throw new Error('Falha no download');
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
@@ -245,9 +255,14 @@ const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus }) => {
         } catch (error) { console.error("Erro no download:", error); }
     };
 
-    const handleFinalizar = (gerouTarefa) => {
-        executeUpdateStatus([ids], 'Tratada', gerouTarefa);
-        onClose();
+    const handleFinalizar = async (gerouTarefa) => {
+        setActionError('');
+        const updated = await executeUpdateStatus([ids], 'Tratada', gerouTarefa);
+        if (updated) {
+            onClose();
+        } else {
+            setActionError('Não foi possível marcar como tratada. Recarregue a lista e tente novamente.');
+        }
     };
     
     const renderContent = () => {
@@ -257,6 +272,7 @@ const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus }) => {
                     <div className="p-6 text-center flex-grow flex flex-col justify-center">
                         <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">A finalização desta notificação gerou uma tarefa?</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">Isso registrará se a tarefa foi criada manualmente no Legal One.</p>
+                        {actionError && <p className="mt-3 text-sm text-red-600 dark:text-red-400">{actionError}</p>}
                         <div className="flex justify-center gap-4 mt-6">
                             <button onClick={() => handleFinalizar(1)} className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-semibold">Sim</button>
                             <button onClick={() => handleFinalizar(0)} className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-semibold">Não</button>
@@ -292,9 +308,17 @@ const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus }) => {
                                     <div className="border rounded-md p-2 overflow-y-auto flex-grow h-96 dark:border-gray-700">
                                        {detalhes?.documentos?.length > 0 ? (
                                             detalhes.documentos.map((doc, index) => (
-                                                <button key={index} onClick={() => handleDownload(doc.caminho)} className="w-full text-left p-2 border-b last:border-b-0 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center text-sm text-blue-600 dark:text-blue-400">
-                                                    <DownloadIcon /> {doc.nome}
-                                                </button>
+                                                <div key={index} className="p-2 border-b last:border-b-0 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm">
+                                                    <div className="text-gray-800 dark:text-gray-200 break-all mb-2">{doc.nome}</div>
+                                                    <div className="flex flex-wrap gap-3">
+                                                        <button onClick={() => handleViewDocument(doc.caminho)} className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline">
+                                                            <EyeIcon /> <span className="ml-1">Visualizar</span>
+                                                        </button>
+                                                        <button onClick={() => handleDownload(doc.caminho)} className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline">
+                                                            <DownloadIcon /> Baixar
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             ))
                                        ) : <p className="text-sm text-gray-500 dark:text-gray-400 p-2">Nenhum documento baixado.</p>}
                                     </div>
@@ -363,9 +387,11 @@ function App() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [filtroBusca, setFiltroBusca] = useState('');
+    const [debouncedFiltroBusca, setDebouncedFiltroBusca] = useState('');
     const [sortConfig, setSortConfig] = useState({ key: 'data_notificacao', direction: 'descending' });
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
     const [selectedIds, setSelectedIds] = useState([]);
     const [modalDetalhes, setModalDetalhes] = useState({ isOpen: false, item: null });
     const [showUserManagement, setShowUserManagement] = useState(false);
@@ -383,79 +409,74 @@ function App() {
     // ADICIONADO: Novo estado para o filtro de data
     const [dataFiltro, setDataFiltro] = useState('');
 
-    const fetchAllData = useCallback(async () => {
-        setLoading(true);
-        setError('');
-        setSelectedIds([]);
+    const fetchInitialData = useCallback(async () => {
         try {
             const [statsRes, usersRes, legalOneUsersRes, legalOneTasksRes] = await Promise.all([
-                fetch(`${API_URL}/stats`), 
+                fetch(`${API_URL}/stats`),
                 fetch(`${API_URL}/usuarios`),
                 fetch(`${API_URL}/legalone/users`),
                 fetch(`${API_URL}/legalone/tasks`),
             ]);
             if (!statsRes.ok || !usersRes.ok || !legalOneUsersRes.ok || !legalOneTasksRes.ok) throw new Error('Falha ao carregar dados iniciais');
 
-            const statsData = await statsRes.json();
-            const usersData = await usersRes.json();
-            const legalOneUsersData = await legalOneUsersRes.json();
-            const legalOneTasksData = await legalOneTasksRes.json();
+            setStats(await statsRes.json());
+            setListaUsuarios(await usersRes.json());
+            setLegalOneUsers(await legalOneUsersRes.json());
+            setLegalOneTasks(await legalOneTasksRes.json());
+        } catch (err) {
+            setError(err.message);
+        }
+    }, []);
 
-            setStats(statsData);
-            setListaUsuarios(usersData);
-            setLegalOneUsers(legalOneUsersData);
-            setLegalOneTasks(legalOneTasksData);
-
-            let url = `${API_URL}/notificacoes?status=${statusFiltro}`;
+    const fetchAllData = useCallback(async () => {
+        setLoading(true);
+        setError('');
+        setSelectedIds([]);
+        try {
+            const offset = (currentPage - 1) * itemsPerPage;
+            let url = `${API_URL}/notificacoes?status=${encodeURIComponent(statusFiltro)}&limit=${itemsPerPage}&offset=${offset}&sort=${encodeURIComponent(sortConfig.key)}&direction=${encodeURIComponent(sortConfig.direction)}`;
             if (responsavelFiltro !== 'Todos') url += `&responsavel=${encodeURIComponent(responsavelFiltro)}`;
             if (poloFiltro !== 'Todos') url += `&polo=${encodeURIComponent(poloFiltro)}`;
-            // ADICIONADO: Adiciona o filtro de data na URL se ele estiver preenchido
             if (dataFiltro) url += `&data=${dataFiltro}`;
+            if (debouncedFiltroBusca) url += `&search=${encodeURIComponent(debouncedFiltroBusca)}`;
 
             const notificacoesRes = await fetch(url);
             if (!notificacoesRes.ok) throw new Error('Falha ao carregar notificações');
 
-            const notificacoesData = await notificacoesRes.json();
-            setNotificacoes(notificacoesData);
-        } catch (err) { setError(err.message); } 
-        finally { setLoading(false); }
-    }, [statusFiltro, responsavelFiltro, poloFiltro, dataFiltro]); // ADICIONADO: dataFiltro como dependência
-
-    useEffect(() => { fetchAllData(); }, [fetchAllData]);
-    
-    const sortedItems = useMemo(() => {
-        let sortableItems = [...notificacoes];
-        if (sortConfig.key) {
-            sortableItems.sort((a, b) => {
-                let aValue = a[sortConfig.key] || '';
-                let bValue = b[sortConfig.key] || '';
-                if (sortConfig.key === 'data_notificacao') {
-                    aValue = aValue.split('/').reverse().join('');
-                    bValue = bValue.split('/').reverse().join('');
-                }
-                if (aValue < bValue) return sortConfig.direction === 'ascending' ? -1 : 1;
-                if (aValue > bValue) return sortConfig.direction === 'ascending' ? 1 : -1;
-                return 0;
-            });
+            const payload = await notificacoesRes.json();
+            if (Array.isArray(payload)) {
+                setNotificacoes(payload);
+                setTotalItems(payload.length);
+            } else {
+                setNotificacoes(payload.items || []);
+                setTotalItems(payload.total || 0);
+            }
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
         }
-        return sortableItems;
-    }, [notificacoes, sortConfig]);
+    }, [statusFiltro, responsavelFiltro, poloFiltro, dataFiltro, debouncedFiltroBusca, currentPage, itemsPerPage, sortConfig]);
 
-    const filteredItems = useMemo(() => sortedItems.filter(item =>
-        // AJUSTADO: Busca agora inclui NPJ e Número do Processo
-        (item.NPJ?.toLowerCase() || '').includes(filtroBusca.toLowerCase()) ||
-        (item.numero_processo?.toLowerCase() || '').includes(filtroBusca.toLowerCase())
-    ), [sortedItems, filtroBusca]);
+    useEffect(() => { fetchInitialData(); }, [fetchInitialData]);
+    useEffect(() => { fetchAllData(); }, [fetchAllData]);
 
-    const currentTableData = useMemo(() => {
-        const firstPageIndex = (currentPage - 1) * itemsPerPage;
-        return filteredItems.slice(firstPageIndex, firstPageIndex + itemsPerPage);
-    }, [filteredItems, currentPage, itemsPerPage]);
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedFiltroBusca(filtroBusca.trim()), 350);
+        return () => clearTimeout(timer);
+    }, [filtroBusca]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [responsavelFiltro, poloFiltro, dataFiltro, debouncedFiltroBusca]);
+    
+    const currentTableData = notificacoes;
 
     const requestSort = (key) => {
         let direction = 'ascending';
         if (sortConfig.key === key && sortConfig.direction === 'ascending') direction = 'descending';
         setSortConfig({ key, direction });
+        setCurrentPage(1);
     };
 
     const handleStatusChange = (newStatus) => {
@@ -468,7 +489,7 @@ function App() {
     };
 
     const executeUpdateStatus = async (ids, novo_status, gerou_tarefa) => {
-        const flatIds = ids.flatMap(idStr => idStr.split(';'));
+        const flatIds = ids.flatMap(idStr => String(idStr).split(';')).filter(Boolean);
         try {
          const body = { ids: flatIds, novo_status };
          if (novo_status === 'Tratada') {
@@ -479,12 +500,20 @@ function App() {
            headers: { 'Content-Type': 'application/json' },
            body: JSON.stringify(body),
          });
-         if (!response.ok) throw new Error("Falha ao executar ação.");
+         if (!response.ok) {
+           const errorData = await response.json().catch(() => ({}));
+           throw new Error(errorData.error || "Falha ao executar ação.");
+         }
+         fetchInitialData();
          fetchAllData();
+         return true;
         } catch (err) {
          console.error(err);
+         setError(err.message);
+         return false;
+        } finally {
+         setConfirmationModal({ isOpen: false, onConfirm: () => {}, message: '' });
         }
-        setConfirmationModal({ isOpen: false, onConfirm: () => {}, message: '' });
     };
 
     const handleAction = (ids, action) => {
@@ -644,7 +673,8 @@ function App() {
                                 {loading ? <tr><td colSpan="8" className="text-center p-4 dark:text-gray-300">Carregando...</td></tr> :
                                  error ? <tr><td colSpan="8" className="text-center p-4 text-red-500">{error}</td></tr> :
                                  currentTableData.map(item => {
-                                    const itemKey = item.NPJ + item.data_notificacao;
+                                    const itemNpj = item.NPJ || item.npj || '';
+                                    const itemKey = itemNpj + item.data_notificacao;
                                     return (
                                     <tr key={itemKey} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                         <td className="p-4">
@@ -652,7 +682,7 @@ function App() {
                                         </td>
                                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{item.data_notificacao}</td>
                                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                                            {item.NPJ}
+                                            {itemNpj}
                                             {item.gerou_tarefa === 1 && <TaskIcon />}
                                         </td>
                                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300 truncate">{item.numero_processo || '-'}</td>
@@ -690,10 +720,10 @@ function App() {
                     </div>
     
                     <Paginacao
-                        currentPage={currentPage} totalPages={Math.ceil(filteredItems.length / itemsPerPage)}
+                        currentPage={currentPage} totalPages={Math.ceil(totalItems / itemsPerPage)}
                         onPageChange={setCurrentPage} itemsPerPage={itemsPerPage}
                         onItemsPerPageChange={(value) => { setItemsPerPage(value); setCurrentPage(1); }}
-                        totalItems={filteredItems.length}
+                        totalItems={totalItems}
                     />
                 </div>
             </>
