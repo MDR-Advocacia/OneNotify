@@ -15,11 +15,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         chrome.storage.local.remove(['onelog_user', 'onelog_active_setor']);
         updateState(false, "", "");
         chrome.alarms.clear("renew_session");
-        
+
         limparCookiesAntigos().then(() => {
             sendResponse({status: "logout"});
         });
-        return true; 
+        return true;
     } else if (request.action === "START_HEARTBEAT") {
         console.log("Marcapasso iniciado! Renovação agendada para 20 minutos.");
         chrome.alarms.create("renew_session", { delayInMinutes: 20, periodInMinutes: 20 });
@@ -44,7 +44,7 @@ async function performFullLogin(user, pass) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username: user, password: pass, user_agent: navigator.userAgent })
         });
-        
+
         if (res.status === 401 || res.status === 403) {
             const err = await res.json();
             return updateState(false, "", err.mensagem || "Acesso Negado pelo AD.");
@@ -53,15 +53,15 @@ async function performFullLogin(user, pass) {
         if (res.status === 400) {
             return updateState(false, "", "Erro de dados. Tente sair da conta e entrar de novo.");
         }
-        
+
         const data = await res.json();
         const setor = data.setor;
-        
+
         chrome.storage.local.set({ "onelog_user": { username: user, password: pass, setor: setor } });
-        
+
         if (data.status === "sucesso") await finalizeLogin(data.cookies, false);
         else if (data.status === "queued") await pollStatusUntilDone(false);
-        
+
     } catch (e) {
         updateState(false, "", "Erro de rede ao conectar no servidor.");
     }
@@ -75,9 +75,9 @@ async function performRenewLogin(isBackground = false) {
                 chrome.storage.local.remove(['onelog_user']);
                 return updateState(false, "", "Sessão desatualizada. Faça login novamente.");
             }
-            
+
             const payload = { ...res.onelog_user, user_agent: navigator.userAgent };
-            const req = await fetch(`${API_URL}/api/zerocore/renew`, { 
+            const req = await fetch(`${API_URL}/api/zerocore/renew`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -103,33 +103,33 @@ async function pollStatusUntilDone(isBackground = false) {
 
         let polling = true;
         let fallbackTimer = 0;
-        
+
         while (polling) {
             await new Promise(r => setTimeout(r, 2000));
             fallbackTimer++;
             try {
                 const res = await fetch(`${API_URL}/api/zerocore/status?setor=${setor}`);
                 const data = await res.json();
-                
+
                 if (data.mensagem) updateState(true, data.mensagem);
-                
-                if (data.erro || fallbackTimer > 150) { 
+
+                if (data.erro || fallbackTimer > 150) {
                     updateState(false, "", "Falha no robô. Tente acessar novamente.");
                     return;
                 }
-                
+
                 if (data.concluido) {
                     polling = false;
                     updateState(true, "Robô finalizou! Baixando sessão segura...");
-                    
+
                     const resSessao = await fetch(`${API_URL}/api/zerocore/session`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(userObj)
                     });
-                    
+
                     const sessionData = await resSessao.json();
-                    
+
                     if (sessionData.status === "sucesso") await finalizeLogin(sessionData.cookies, isBackground);
                     else updateState(false, "", "Erro ao recuperar cookies da sessão nova.");
                 }
@@ -158,31 +158,31 @@ async function limparCookiesAntigos() {
 async function finalizeLogin(cookies, isBackground = false) {
     updateState(true, "Limpando resíduos antigos...");
     await limparCookiesAntigos();
-    
+
     updateState(true, "Injetando blindagem...");
-    
-    // A extensão agora é "burra": injeta tudo que a API mandar. 
+
+    // A extensão agora é "burra": injeta tudo que a API mandar.
     // A inteligência de limpar os cookies tóxicos fica 100% no worker.py do servidor.
     const cookiePromises = cookies.map(cookie => {
         return new Promise((resolve) => {
             let cleanDomain = cookie.domain.startsWith('.') ? cookie.domain.substring(1) : cookie.domain;
-            chrome.cookies.set({ 
-                url: "https://" + cleanDomain + cookie.path, 
-                name: cookie.name, value: cookie.value, domain: cookie.domain, 
-                path: cookie.path, secure: true, sameSite: "no_restriction" 
+            chrome.cookies.set({
+                url: "https://" + cleanDomain + cookie.path,
+                name: cookie.name, value: cookie.value, domain: cookie.domain,
+                path: cookie.path, secure: true, sameSite: "no_restriction"
             }, resolve);
         });
     });
 
     await Promise.all(cookiePromises);
-    
+
     chrome.alarms.create("renew_session", { delayInMinutes: 20, periodInMinutes: 20 });
-    
+
     if (!isBackground) {
         updateState(true, "Abrindo Portal...");
         setTimeout(() => {
             chrome.tabs.create({ url: "https://juridico.bb.com.br/wfj" });
-            updateState(false, "", ""); 
+            updateState(false, "", "");
         }, 1000);
     } else {
         console.log("🔄 Sessão renovada silenciosamente em background.");

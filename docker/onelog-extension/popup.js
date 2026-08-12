@@ -42,7 +42,7 @@ document.getElementById('btn-login').addEventListener('click', () => {
     const user = document.getElementById('username').value;
     const pass = document.getElementById('password').value;
     if (!user || !pass) return showError("Preencha usuário e senha.");
-    
+
     errorMsg.style.display = "none";
     chrome.runtime.sendMessage({ action: "START_FULL_LOGIN", user, pass });
 });
@@ -52,10 +52,10 @@ document.getElementById('btn-access').addEventListener('click', () => {
         if(res.onelog_user) {
             errorMsg.style.display = "none";
             // CORREÇÃO MESTRA: Agora o botão chama FULL_LOGIN em vez de RENEW, permitindo pegar o cache rápido!
-            chrome.runtime.sendMessage({ 
-                action: "START_FULL_LOGIN", 
-                user: res.onelog_user.username, 
-                pass: res.onelog_user.password 
+            chrome.runtime.sendMessage({
+                action: "START_FULL_LOGIN",
+                user: res.onelog_user.username,
+                pass: res.onelog_user.password
             });
         }
     });

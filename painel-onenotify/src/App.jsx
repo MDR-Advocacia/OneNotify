@@ -105,7 +105,7 @@ const MigrationModal = ({ isOpen, onClose, onMigrationComplete }) => {
         setUploading(true);
         setMessage('Enviando arquivo...');
         setIsError(false);
-        
+
         const formData = new FormData();
         formData.append('file', file);
 
@@ -122,11 +122,11 @@ const MigrationModal = ({ isOpen, onClose, onMigrationComplete }) => {
             if (!response.ok) {
                 throw new Error(data.error || 'Erro desconhecido');
             }
-            
+
             setMessage(data.message);
             setIsError(false);
             onMigrationComplete();
-            setTimeout(() => { 
+            setTimeout(() => {
                 onClose();
             }, 3000);
 
@@ -137,7 +137,7 @@ const MigrationModal = ({ isOpen, onClose, onMigrationComplete }) => {
             setUploading(false);
         }
     };
-    
+
     useEffect(() => {
         if (!isOpen) {
             setFile(null);
@@ -174,14 +174,14 @@ const MigrationModal = ({ isOpen, onClose, onMigrationComplete }) => {
                         </div>
                     </div>
                     <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
-                      {migrationMode === 'adicionar' 
+                      {migrationMode === 'adicionar'
                         ? 'Selecione uma planilha (.xlsx ou .csv) com "npj" e "data" para adicionar novas notificações como pendentes.'
                         : 'Selecione uma planilha (.xlsx ou .csv) com "npj" e "data" para encontrar notificações existentes e marcá-las como "Tratada".'
                       }
                     </p>
-                    <input 
-                        type="file" 
-                        onChange={handleFileChange} 
+                    <input
+                        type="file"
+                        onChange={handleFileChange}
                         accept=".xlsx, .csv"
                         className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     />
@@ -205,7 +205,7 @@ const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus }) => {
     const [detalhes, setDetalhes] = useState(null);
     const [loading, setLoading] = useState(false);
     const [actionError, setActionError] = useState('');
-    
+
     const { NPJ: npjUpper, npj: npjLower, data_notificacao, numero_processo, ids, responsavel, data_processamento, detalhes_erro } = item || {};
     const npj = npjUpper || npjLower || '';
 
@@ -223,14 +223,14 @@ const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus }) => {
                         if (!res.ok) throw new Error('Falha ao buscar detalhes');
                         const data = await res.json();
                         setDetalhes(data);
-                    } catch (err) { console.error("Erro ao buscar detalhes:", err); } 
+                    } catch (err) { console.error("Erro ao buscar detalhes:", err); }
                     finally { setLoading(false); }
                 };
                 fetchDetalhes();
             }
         }
     }, [isOpen, npj, data_notificacao]);
-    
+
     if (!isOpen || !item) return null;
 
     const documentViewUrl = (path) => `${API_URL}/documentos/view?path=${encodeURIComponent(path)}`;
@@ -264,7 +264,7 @@ const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus }) => {
             setActionError('Não foi possível marcar como tratada. Recarregue a lista e tente novamente.');
         }
     };
-    
+
     const renderContent = () => {
         switch (step) {
             case 'decision':
@@ -329,7 +329,7 @@ const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus }) => {
                 );
         }
     };
-    
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4" onClick={onClose}>
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col relative" onClick={e => e.stopPropagation()}>
@@ -346,14 +346,14 @@ const ModalDetalhes = ({ isOpen, onClose, item, executeUpdateStatus }) => {
                         {data_processamento && <span className="text-xs text-gray-500 dark:text-gray-400 mt-1"><strong>Processado em:</strong> {data_processamento}</span>}
                     </div>
                 </header>
-                
+
                 {detalhes_erro && (
                     <div className="p-4 bg-red-50 dark:bg-red-900 border-b border-t border-red-200 dark:border-red-800">
                         <h3 className="font-bold text-red-800 dark:text-red-200 mb-2">Detalhes do Erro</h3>
                         <pre className="text-xs text-red-700 dark:text-red-300 whitespace-pre-wrap font-mono bg-transparent p-0">{detalhes_erro}</pre>
                     </div>
                 )}
-                
+
                 {renderContent()}
 
                 {step === 'details' && (
@@ -405,7 +405,7 @@ function App() {
 
     const [legalOneUsers, setLegalOneUsers] = useState([]);
     const [legalOneTasks, setLegalOneTasks] = useState([]);
-    
+
     // ADICIONADO: Novo estado para o filtro de data
     const [dataFiltro, setDataFiltro] = useState('');
 
@@ -469,7 +469,7 @@ function App() {
     useEffect(() => {
         setCurrentPage(1);
     }, [responsavelFiltro, poloFiltro, dataFiltro, debouncedFiltroBusca]);
-    
+
     const currentTableData = notificacoes;
 
     const requestSort = (key) => {
@@ -518,7 +518,7 @@ function App() {
 
     const handleAction = (ids, action) => {
         if (!ids || ids.length === 0) return;
-        
+
         if (action === 'Tratada') {
             setConfirmationModal({
                 isOpen: true,
@@ -529,7 +529,7 @@ function App() {
             executeUpdateStatus(ids, action);
         }
     };
-    
+
     const handleSelectAll = (e) => {
         if (e.target.checked) {
          const allIdsOnPage = currentTableData.map(item => item.ids);
@@ -538,7 +538,7 @@ function App() {
          setSelectedIds([]);
         }
     };
-    
+
     const handleSelectOne = (e, ids) => {
         if (e.target.checked) {
          setSelectedIds(prev => [...prev, ids]);
@@ -547,24 +547,24 @@ function App() {
         }
     };
 
-    const allOnPageSelected = useMemo(() => 
+    const allOnPageSelected = useMemo(() =>
         currentTableData.length > 0 && currentTableData.every(item => selectedIds.includes(item.ids)),
         [currentTableData, selectedIds]
     );
-     
-    const someOnPageSelected = useMemo(() => 
+
+    const someOnPageSelected = useMemo(() =>
         currentTableData.some(item => selectedIds.includes(item.ids)),
         [currentTableData, selectedIds]
     );
-    
+
     const masterCheckboxRef = useRef(null);
     useEffect(() => {
         if (masterCheckboxRef.current) {
          masterCheckboxRef.current.indeterminate = someOnPageSelected && !allOnPageSelected;
         }
     }, [someOnPageSelected, allOnPageSelected]);
-    
-    
+
+
     useEffect(() => {
         const handleClickOutside = (event) => {
          if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -591,7 +591,7 @@ function App() {
                 </button>
             </div>
           </header>
-    
+
           {showUserManagement ? ( <UserManagement users={listaUsuarios} onUserChange={fetchAllData} /> ) : (
             <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4 mb-6">
@@ -611,7 +611,7 @@ function App() {
                     <StatusTab status="Erro" label="Erro" activeStatus={statusFiltro} setActiveStatus={handleStatusChange} count={stats.erro} />
                     <StatusTab status="Arquivado" label="Arquivados" activeStatus={statusFiltro} setActiveStatus={handleStatusChange} count={stats.arquivado} />
                 </div>
-                
+
                 <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md">
                     <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
                         <div className="flex items-center gap-2 md:gap-4 flex-wrap">
@@ -639,7 +639,7 @@ function App() {
                         </div>
                         <div className="relative" ref={menuRef}>
                             <button onClick={() => setActiveActionMenu(activeActionMenu === 'batch' ? null : 'batch')} disabled={selectedIds.length === 0} className="bg-blue-500 text-white font-bold py-2 px-4 rounded-md text-sm disabled:bg-gray-400 dark:disabled:bg-gray-600 flex items-center gap-2">
-                               <GearIcon /> 
+                               <GearIcon />
                                <span>({selectedIds.length})</span>
                             </button>
                             {activeActionMenu === 'batch' && (
@@ -651,7 +651,7 @@ function App() {
                             )}
                         </div>
                     </div>
-    
+
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-fixed">
                             <thead className="bg-gray-50 dark:bg-gray-700">
@@ -718,7 +718,7 @@ function App() {
                             </tbody>
                         </table>
                     </div>
-    
+
                     <Paginacao
                         currentPage={currentPage} totalPages={Math.ceil(totalItems / itemsPerPage)}
                         onPageChange={setCurrentPage} itemsPerPage={itemsPerPage}
@@ -728,7 +728,7 @@ function App() {
                 </div>
             </>
           )}
-          
+
           <MigrationModal
             isOpen={showMigrationModal}
             onClose={() => setShowMigrationModal(false)}
@@ -740,8 +740,8 @@ function App() {
             onConfirm={confirmationModal.onConfirm}
             message={confirmationModal.message}
           />
-          <ModalDetalhes 
-            isOpen={modalDetalhes.isOpen} 
+          <ModalDetalhes
+            isOpen={modalDetalhes.isOpen}
             onClose={() => setModalDetalhes({ isOpen: false, item: null })}
             item={modalDetalhes.item}
             executeUpdateStatus={executeUpdateStatus}
@@ -777,7 +777,7 @@ const UserManagement = ({ users, onUserChange }) => {
             onUserChange();
         } catch (err) { setError(err.message); }
     };
-    
+
     const handleDeleteUser = async (userId) => {
         try {
             const response = await fetch(`${API_URL}/usuarios/${userId}`, { method: 'DELETE' });

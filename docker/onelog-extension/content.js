@@ -10,13 +10,13 @@ function destrancarEditorBB() {
     // 2. Acesso direto ao TinyMCE (Agora funciona graças ao 'world: MAIN' no manifest)
     if (typeof tinyMCE !== 'undefined') {
         var txtArea = document.getElementById('editorTextoForm:editorNovoTextArea');
-        
+
         if (txtArea && txtArea.dataset.zerocore !== 'destravado') {
             try {
                 tinyMCE.execCommand('mceRemoveControl', false, 'editorTextoForm:editorNovoTextArea');
                 setTimeout(function() {
                     tinyMCE.execCommand('mceAddControl', false, 'editorTextoForm:editorNovoTextArea');
-                    txtArea.dataset.zerocore = 'destravado'; 
+                    txtArea.dataset.zerocore = 'destravado';
                     console.log('ZeroCore: Editor TinyMCE reiniciado e destravado!');
                 }, 300);
             } catch(e) {}
