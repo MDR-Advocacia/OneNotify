@@ -348,6 +348,7 @@ def _flow_group_to_payload(row, include_documents=False):
         "ids": [int(i) for i in ids if str(i).isdigit()],
         "npj": npj,
         "numero_processo_cnj": numero_processo,
+        "cnj_principal_notify": numero_processo,
         "data_notificacao": data_notificacao,
         "numero_processo": numero_processo,
         "polo": polo,
@@ -972,7 +973,7 @@ def flow_update_sync_status():
 
     payload = request.json or {}
     flow_status = payload.get("flow_status")
-    allowed = {"NAO_ENVIADO", "ENVIADO", "ACEITO", "REJEITADO", "SINCRONIZADO", "ERRO"}
+    allowed = {"NAO_ENVIADO", "ENVIANDO", "ENVIADO", "ACEITO", "REJEITADO", "SINCRONIZADO", "ERRO", "ERRO_ENVIO"}
     if flow_status not in allowed:
         return jsonify({"error": f"flow_status inválido. Use um de: {sorted(allowed)}"}), 400
 
@@ -1025,4 +1026,3 @@ def serve(path):
     if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
         return send_from_directory(app.static_folder, path)
     return send_from_directory(app.static_folder, 'index.html')
-

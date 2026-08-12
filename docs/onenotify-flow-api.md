@@ -38,6 +38,64 @@ Esse arquivo nao deve ser versionado. Para validar a chave no Windows:
 Get-Content C:\OneNotify\.env | Where-Object { $_ -like 'ONENOTIFY_FLOW_API_KEY=*' }
 ```
 
+## Envio automatico para o intake do Flow
+
+O OneNotify tambem pode enviar os grupos processados diretamente para o Flow,
+sem depender de o Flow consultar a API do Notify. Esse e o modo recomendado para
+o intake novo.
+
+No `C:\OneNotify\.env`, configurar:
+
+```env
+FLOW_ONENOTIFY_BB_INTAKE_URL=https://flow.dunatecnologia.com/api/v1/onenotify-bb/intake
+FLOW_ONENOTIFY_BB_INTAKE_API_KEY=<mesma chave configurada no Flow em ONENOTIFY_BB_INTAKE_API_KEY>
+FLOW_SYNC_ENABLED=true
+FLOW_SYNC_BATCH_SIZE=100
+FLOW_SYNC_TIMEOUT_SECONDS=30
+ONENOTIFY_PUBLIC_BASE_URL=https://onenotify.mdradvocacia.com
+```
+
+Importante:
+
+- `ONENOTIFY_FLOW_API_KEY` protege a API publica do Notify para leitura/status.
+- `FLOW_ONENOTIFY_BB_INTAKE_API_KEY` e a chave que o Notify usa para postar no Flow.
+- No servidor do Flow, a mesma chave precisa estar em `ONENOTIFY_BB_INTAKE_API_KEY`.
+- Se URL ou chave nao estiverem configuradas, a RPA continua rodando e apenas
+  registra que a sincronizacao foi ignorada.
+
+Quando a RPA termina um lote de processamento detalhado, ela envia grupos
+`NPJ + data_notificacao` com `rpa_status=PROCESSADO` e `flow_status` pendente.
+O envio e idempotente no Flow por `external_group_id`.
+
+Status locais usados no OneNotify:
+
+- `NAO_ENVIADO`: grupo pronto para envio.
+- `ENVIANDO`: lote em envio.
+- `ENVIADO`: Flow recebeu o payload.
+- `ERRO_ENVIO`: tentativa falhou; o ciclo seguinte pode tentar novamente.
+
+O frontend do OneNotify continua ativo. Essa integracao nao desliga nem substitui
+o painel atual.
+
+### Backfill dos ultimos 60 dias
+
+Para forcar o envio dos ultimos 60 dias ja processados:
+
+```powershell
+cd C:\OneNotify
+docker compose --profile rpa run --rm rpa python scripts/sync_onenotify_to_flow.py --days 60 --force --batch-size 100
+```
+
+Para validar antes, sem enviar:
+
+```powershell
+cd C:\OneNotify
+docker compose --profile rpa run --rm rpa python scripts/sync_onenotify_to_flow.py --days 60 --force --dry-run --limit 5 --dry-run-output logs/flow-backfill-dry-run.json
+```
+
+O `--force` reenvia tambem grupos que ja estavam como `ENVIADO`. Sem `--force`,
+o script manda apenas grupos ainda pendentes.
+
 ## Listar grupos prontos para intake
 
 ```http
@@ -296,8 +354,10 @@ Content-Type: application/json
 `flow_status` aceitos:
 
 - `NAO_ENVIADO`
+- `ENVIANDO`
 - `ENVIADO`
 - `ACEITO`
 - `REJEITADO`
 - `SINCRONIZADO`
 - `ERRO`
+- `ERRO_ENVIO`

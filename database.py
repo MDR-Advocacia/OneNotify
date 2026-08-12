@@ -356,7 +356,8 @@ def atualizar_notificacoes_processadas(npj, data, numero_processo, andamentos, d
                 UPDATE notificacoes
                 SET status = ?, numero_processo = ?, andamentos = ?, documentos = ?,
                     data_processamento = ?, responsavel = ?, detalhes_erro = NULL, tentativas = 0,
-                    polo = ?, rpa_status = 'PROCESSADO', documentos_json = ?
+                    polo = ?, rpa_status = 'PROCESSADO', documentos_json = ?,
+                    flow_status = 'NAO_ENVIADO', flow_last_error = NULL
                 WHERE NPJ = ? AND data_notificacao = ? AND status = 'Em Processamento'
             """, (
                 status,

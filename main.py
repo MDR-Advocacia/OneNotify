@@ -8,6 +8,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright, Error as PlaywrightError
 
 import database
+import flow_sync
 from config import LOG_FORMAT, LOG_LEVEL, TAMANHO_LOTE, TAREFAS_CONFIG, TEMPO_LIMITE_EXTRACAO
 from autologin import realizar_login_automatico
 from modulo_notificacoes import executar_extracao_e_ciencia
@@ -128,6 +129,8 @@ def main():
                         stats_processamento["falha"] += stats_lote["falha"]
                         stats_processamento["andamentos"] += stats_lote["andamentos"]
                         stats_processamento["documentos"] += stats_lote["documentos"]
+
+                        flow_sync.sync_after_rpa_batch()
                         
                         pendentes_restantes = database.contar_pendentes()
                         logging.info(f"Lote finalizado. Restam {pendentes_restantes} tarefas pendentes.")
@@ -136,6 +139,8 @@ def main():
                         logging.warning("Exceção de sessão capturada no loop de processamento. Forçando renovação imediata.")
                         session_start_time = 0 
                         continue
+
+                flow_sync.sync_after_rpa_batch()
                 
             finally:
                 logging.info("Finalizando a sessão do navegador e processos relacionados.")
@@ -188,4 +193,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
