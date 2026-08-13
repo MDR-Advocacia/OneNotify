@@ -27,6 +27,16 @@ def main() -> int:
     parser.add_argument("--retry-errors", action="store_true", help="Inclui grupos com ERRO_ENVIO.")
     parser.add_argument("--dry-run", action="store_true", help="Nao envia nem atualiza status; apenas monta payloads.")
     parser.add_argument(
+        "--only-publicacao",
+        action="store_true",
+        help="Seleciona apenas grupos com tipo de notificacao de publicacao.",
+    )
+    parser.add_argument(
+        "--exclude-document-groups",
+        action="store_true",
+        help="Remove grupos que tambem tenham notificacao de documento na mesma data/NPJ.",
+    )
+    parser.add_argument(
         "--no-documents",
         action="store_true",
         help="Nao inclui JSON de documentos no payload. Use apenas para diagnostico.",
@@ -44,6 +54,8 @@ def main() -> int:
         force=args.force,
         retry_errors=args.retry_errors,
         limit=None,
+        only_publicacao=args.only_publicacao,
+        exclude_document_groups=args.exclude_document_groups,
     )
     if args.limit is not None:
         groups = groups[:args.limit]
@@ -57,6 +69,8 @@ def main() -> int:
                 "retry_errors": args.retry_errors,
                 "dry_run": args.dry_run,
                 "include_documents": not args.no_documents,
+                "only_publicacao": args.only_publicacao,
+                "exclude_document_groups": args.exclude_document_groups,
             },
             ensure_ascii=False,
         )

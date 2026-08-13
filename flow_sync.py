@@ -354,6 +354,8 @@ def list_candidate_groups(
     force: bool = False,
     retry_errors: bool = False,
     limit: int | None = None,
+    only_publicacao: bool = False,
+    exclude_document_groups: bool = False,
 ) -> list[dict[str, Any]]:
     where = [
         "data_notificacao IS NOT NULL",
@@ -376,10 +378,23 @@ def list_candidate_groups(
             """)
             params.append(f"-{days} days")
 
+    having: list[str] = []
+    if only_publicacao:
+        if db_adapter.is_postgres():
+            having.append("BOOL_OR(COALESCE(tipo_notificacao::text, '') ILIKE '%%publica%%')")
+        else:
+            having.append("SUM(CASE WHEN lower(COALESCE(tipo_notificacao, '')) LIKE '%publica%' THEN 1 ELSE 0 END) > 0")
+    if exclude_document_groups:
+        if db_adapter.is_postgres():
+            having.append("NOT BOOL_OR(COALESCE(tipo_notificacao::text, '') ILIKE '%%doc%%')")
+        else:
+            having.append("SUM(CASE WHEN lower(COALESCE(tipo_notificacao, '')) LIKE '%doc%' THEN 1 ELSE 0 END) = 0")
+
     query = f"""
         {_group_select_sql()}
         WHERE {" AND ".join(where)}
         GROUP BY NPJ, data_notificacao
+        {"HAVING " + " AND ".join(having) if having else ""}
         ORDER BY MAX(data_criacao) DESC, MAX(id) DESC
     """
     if limit:
@@ -545,6 +560,8 @@ def sync_pending(
     force: bool = False,
     retry_errors: bool = True,
     dry_run: bool = False,
+    only_publicacao: bool = False,
+    exclude_document_groups: bool = False,
 ) -> dict[str, Any]:
     selected_limit = limit or FLOW_SYNC_BATCH_SIZE
     groups = list_candidate_groups(
@@ -552,6 +569,8 @@ def sync_pending(
         force=force,
         retry_errors=retry_errors,
         limit=selected_limit,
+        only_publicacao=only_publicacao,
+        exclude_document_groups=exclude_document_groups,
     )
     return sync_groups(groups, include_documents=include_documents, dry_run=dry_run)
 
