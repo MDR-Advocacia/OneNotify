@@ -22,7 +22,7 @@ class ReviewCasesTest(unittest.TestCase):
         )
         andamentos = json.dumps([{"data": "24/09/2026", "descricao": "PUBLICACAO DJ/DO", "detalhes": "Texto da publicação"}])
         documentos = json.dumps([{"nome": "documento.pdf", "caminho": "/app/documentos/documento.pdf"}])
-        enriched = json.dumps({"items": [{"extraction": {"classification": "text_extractable", "pages": [{"text": "Texto do PDF"}]}}]})
+        enriched = json.dumps({"items": [{"mime_type": "application/pdf", "extraction": {"classification": "text_extractable", "pages": [{"text": "Texto do PDF"}]}}]})
         self.conn.executemany(
             "INSERT INTO notificacoes VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             [
@@ -47,6 +47,7 @@ class ReviewCasesTest(unittest.TestCase):
         self.assertEqual(len(item["andamentos"]), 1)
         self.assertEqual(len(item["documentos"]), 1)
         self.assertEqual(item["documentos"][0]["text_preview"], "Texto do PDF")
+        self.assertEqual(item["documentos"][0]["mime_type"], "application/pdf")
 
     def test_only_curated_cases_are_opened(self):
         self.assertEqual(self.client.get("/api/revisao/casos/167233").status_code, 404)

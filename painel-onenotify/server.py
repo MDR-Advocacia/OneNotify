@@ -767,6 +767,7 @@ def _review_case(db, notification_id):
             'index': index,
             'nome': document.get('nome', ''),
             'caminho': document.get('caminho', ''),
+            'mime_type': item.get('mime_type'),
             'classification': extraction.get('classification'),
             'text_preview': extracted_text[:12000],
             'text_preview_truncated': len(extracted_text) > 12000 or bool(extraction.get('truncated')),
