@@ -716,6 +716,101 @@ def get_detalhes():
         })
     return jsonify({'andamentos': [], 'documentos': []})
 
+
+# Amostra dirigida para entender as decisões da operação. Os IDs apontam para
+# notificações já processadas; o dossiê continua sendo NPJ + data e inclui a
+# janela documental inteira. A seleção não afirma que os itens são equivalentes.
+REVIEW_CASE_IDS = (164455, 164118, 163811, 167236, 168581)
+
+
+def _review_case(db, notification_id):
+    anchor = db.execute(
+        'SELECT NPJ AS npj, data_notificacao FROM notificacoes WHERE id = ?',
+        (notification_id,),
+    ).fetchone()
+    if anchor is None:
+        return None
+
+    rows = db.execute(
+        '''SELECT id, tipo_notificacao, numero_processo, andamentos,
+                  documentos, documentos_json
+           FROM notificacoes
+           WHERE NPJ = ? AND data_notificacao = ? ORDER BY id''',
+        (anchor['npj'], anchor['data_notificacao']),
+    ).fetchall()
+    source = next(
+        (row for row in rows if row['andamentos'] or row['documentos']),
+        rows[0],
+    )
+    andamentos = safe_json_loads(source['andamentos'], [])
+    documentos = safe_json_loads(source['documentos'], [])
+    enriched = safe_json_loads(source['documentos_json'], {})
+    items = enriched.get('items', []) if isinstance(enriched, dict) else []
+    if not isinstance(andamentos, list):
+        andamentos = []
+    if not isinstance(documentos, list):
+        documentos = []
+    if not isinstance(items, list):
+        items = []
+
+    result_docs = []
+    for index, document in enumerate(documentos):
+        if not isinstance(document, dict):
+            continue
+        item = items[index] if index < len(items) and isinstance(items[index], dict) else {}
+        extraction = item.get('extraction') or {}
+        pages = extraction.get('pages') or []
+        extracted_text = '\n\n'.join(
+            page.get('text', '') for page in pages if isinstance(page, dict)
+        )
+        result_docs.append({
+            'index': index,
+            'nome': document.get('nome', ''),
+            'caminho': document.get('caminho', ''),
+            'classification': extraction.get('classification'),
+            'text_preview': extracted_text[:12000],
+            'text_preview_truncated': len(extracted_text) > 12000 or bool(extraction.get('truncated')),
+        })
+
+    return {
+        'id': notification_id,
+        'npj': anchor['npj'],
+        'data_notificacao': anchor['data_notificacao'],
+        'numero_processo': source['numero_processo'],
+        'notificacoes': [
+            {'id': row['id'], 'tipo': row['tipo_notificacao']} for row in rows
+        ],
+        'andamentos': andamentos,
+        'documentos': result_docs,
+    }
+
+
+@app.route('/api/revisao/casos')
+def get_review_cases():
+    db = get_db()
+    cases = []
+    for notification_id in REVIEW_CASE_IDS:
+        item = _review_case(db, notification_id)
+        cases.append({
+            'id': notification_id,
+            'available': item is not None,
+            'data_notificacao': item['data_notificacao'] if item else None,
+            'npj': item['npj'] if item else None,
+            'andamentos': len(item['andamentos']) if item else 0,
+            'documentos': len(item['documentos']) if item else 0,
+        })
+    return jsonify(cases)
+
+
+@app.route('/api/revisao/casos/<int:notification_id>')
+def get_review_case(notification_id):
+    if notification_id not in REVIEW_CASE_IDS:
+        return jsonify({'error': 'Caso fora da amostra'}), 404
+    item = _review_case(get_db(), notification_id)
+    if item is None:
+        return jsonify({'error': 'Caso não encontrado'}), 404
+    return jsonify(item)
+
 @app.route('/api/download')
 def download_file():
     caminho = request.args.get('path')
