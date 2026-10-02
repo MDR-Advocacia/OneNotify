@@ -161,7 +161,9 @@ Notify”, com referência externa e motivo registrados. Quando só há tarefa d
 mesmo processo, a cobertura ainda é hipótese. Um pedido/retorno de subsídio
 pertence ao seu ciclo próprio; um PDF isolado não prova esse vínculo.
 
-Próxima validação: ler os 11 positivos da triagem e uma amostra de negativos,
-inspecionar os dois PDFs documentais ligados ao Flow, testar resolução de TXT
-e medir o que continua sem texto. Até lá, os números são cobertura potencial,
-não taxa de acerto da automação.
+Próxima validação: obter revisão operacional dos 11 positivos já conferidos
+tecnicamente, examinar os 15 candidatos com identificador comum e guardas
+textuais, testar resolução de TXT e medir o que continua sem texto. O destino
+por item deve registrar se há trabalho novo no Notify ou cobertura demonstrada
+em outro fluxo. Até lá, os números são cobertura potencial, não taxa de acerto
+da automação.
