@@ -114,6 +114,19 @@ class PublicationTriageTest(unittest.TestCase):
         self.assertEqual(result["ids_notificacoes"], [1, 2])
         self.assertEqual(result["status"], "PUBLICACAO_ISOLADA")
 
+    def test_document_can_contain_judicial_act_without_publication_movement(self):
+        text = "Processo 1234567-89.2026.8.01.0001\nSENTENÇA\nJulgo procedente o pedido."
+        result = analisar_dossie([], document(text))
+        self.assertEqual(result["status"], "POSSIVEL_ATO_EM_DOCUMENTO")
+        self.assertEqual(result["documentos"][0]["relacao"], "ATO_JUDICIAL_CANDIDATO")
+        self.assertFalse(result["apto_para_etapa_publicacao"])
+
+    def test_internal_document_is_not_assumed_to_be_a_publication(self):
+        text = "Comunicado interno do banco sobre indicação de preposto para processo administrativo."
+        result = analisar_dossie([], document(text))
+        self.assertEqual(result["status"], "SEM_ANDAMENTO_PUBLICACAO")
+        self.assertFalse(result["apto_para_etapa_publicacao"])
+
 
 if __name__ == "__main__":
     unittest.main()

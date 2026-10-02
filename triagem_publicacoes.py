@@ -42,6 +42,17 @@ def _document_text(document: dict[str, Any]) -> str:
     ).strip()
 
 
+def _document_has_judicial_act(text: str) -> bool:
+    """Sinal para investigação; uma peça judicial não prova publicação oficial."""
+    normalized = unicodedata.normalize("NFKD", text.casefold())
+    normalized = "".join(char for char in normalized if not unicodedata.combining(char))
+    heading = re.search(
+        r"(?m)^\s*(?:sentenca|decisao|despacho|intimacao|citacao|acordao|ato ordinatorio)\b",
+        normalized,
+    )
+    return bool(heading and CNJ_PATTERN.search(text))
+
+
 def _deadline_signatures(value: str) -> set[str]:
     tokens = _tokens(value)
     return {
@@ -147,7 +158,7 @@ def analisar_dossie(
         text = _document_text(item)
         tokens = _tokens(text)
         relation = "NAO_ANALISADO"
-        reason = "sem_publicacao_unica"
+        reason = "sem_andamento_publicacao_unico"
         evidence = None
         if reference_tokens:
             if not item or extraction.get("status") != "ok" or extraction.get("truncated") or extraction.get("ocr_required"):
@@ -166,6 +177,8 @@ def analisar_dossie(
                     relation, reason = "CANDIDATO_MESMO_ATO", "trecho_longo_em_comum_sem_equivalencia_integral"
                 else:
                     relation, reason = "INCONCLUSIVO", "conteudo_nao_equivalente"
+        elif _document_has_judicial_act(text):
+            relation, reason = "ATO_JUDICIAL_CANDIDATO", "peca_judicial_no_documento_sem_andamento_dj_do"
         documents.append({
             "indice": index,
             "nome": item.get("nome") or original.get("nome"),
@@ -177,7 +190,7 @@ def analisar_dossie(
 
     reasons = []
     if not publication_list:
-        reasons.append("sem_publicacao_dj_do")
+        reasons.append("sem_andamento_publicacao_dj_do")
     elif len(publication_list) > 1:
         reasons.append("multiplas_publicacoes_distintas")
     elif not publication_list[0]["texto_util"]:
@@ -188,8 +201,10 @@ def analisar_dossie(
         reasons.append("documentos_sem_equivalencia_comprovada")
 
     automatic = not reasons
-    if not publication_list:
-        status = "SEM_PUBLICACAO"
+    if not publication_list and any(doc["relacao"] == "ATO_JUDICIAL_CANDIDATO" for doc in documents):
+        status = "POSSIVEL_ATO_EM_DOCUMENTO"
+    elif not publication_list:
+        status = "SEM_ANDAMENTO_PUBLICACAO"
     elif automatic and documents:
         status = "PUBLICACAO_COM_REPETICOES_COMPROVADAS"
     elif automatic:

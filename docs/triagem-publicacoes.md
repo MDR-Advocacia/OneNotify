@@ -20,6 +20,11 @@ atual de intake do Flow continua agrupado por `NPJ + data_notificacao`.
 - TXT de erro ou link, PDF sem texto, OCR pendente, extração truncada, texto
   longo demais, outro andamento e vários atos distintos permanecem em revisão.
   Um hash igual entre dois arquivos não prova que sejam a publicação.
+- Sem andamento DJ/DO, um PDF ainda pode trazer sentença, decisão ou intimação.
+  Título de ato judicial junto de CNJ no texto produz
+  `POSSIVEL_ATO_EM_DOCUMENTO`, sempre para investigação; não prova publicação
+  oficial. Os demais ficam em `SEM_ANDAMENTO_PUBLICACAO`, que também **não**
+  afirma ausência de publicação em outra fonte.
 - O resultado preserva índices dos andamentos, nome/hash dos arquivos e motivos
   de revisão. O arquivo original continua acessível no dossiê.
 
@@ -30,16 +35,17 @@ da janela pertençam à notificação que gerou o grupo.
 ## Medição de 02/10/2026
 
 Consulta somente leitura no PostgreSQL produtivo do Notify, sobre os **1.000
-grupos processados mais recentes** criados dentro dos últimos 30 dias. O mesmo
+grupos processados mais recentes** criados de 02/09 até 02/10 às 18h UTC. O mesmo
 código de triagem foi transmitido para execução em memória no container da API;
 nenhum arquivo ou status produtivo foi alterado.
 
 | Resultado | Grupos |
 | --- | ---: |
-| Publicação isolada | 549 |
+| Publicação isolada | 547 |
 | Publicação com repetição textual forte | 11 |
-| Revisão necessária | 346 |
-| Sem publicação DJ/DO no dossiê | 94 |
+| Revisão necessária | 348 |
+| Possível ato judicial em documento, sem andamento DJ/DO | 37 |
+| Sem andamento DJ/DO nem sinal forte no texto documental | 57 |
 
 Entre os documentos, 13 passaram no critério de núcleo final idêntico e CNJ
 igual. Os 11 grupos correspondentes ainda não tiveram validação individual de
@@ -62,5 +68,7 @@ python scripts/preview_triagem_publicacoes.py --npj 'NPJ' --data 'DD/MM/AAAA'
 O comando só imprime totais agregados e não envia ao Flow. Para avançar da
 prévia à operação: conferir uma amostra dos 11 casos e dos candidatos rejeitados,
 registrar a decisão por documento, e definir no Flow a entrega de um item por
-ato com suas origens. A sincronização atual por grupo não consome esta triagem;
-ativá-la ou liberar backfill agora repetiria a lacuna de granularidade.
+ato com suas origens. Antes disso, o Notify precisa testar a identificação de
+atos em documentos, resolver TXT com link quando possível e confrontar o
+histórico de tratamento com evidências externas. A sincronização atual por grupo
+não consome esta triagem.
