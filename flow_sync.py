@@ -10,7 +10,7 @@ from urllib.request import Request, urlopen
 
 import db_adapter
 from document_payload import build_documents_json, safe_json_loads
-from triagem_publicacoes import analisar_dossie
+from triagem_publicacoes import analisar_dossie, reunir_linhas_notificacao
 
 
 DOCUMENTOS_PATH = os.getenv(
@@ -314,6 +314,15 @@ def build_triage_preview(row: Any) -> dict[str, Any]:
     result["ids_notificacoes"] = [
         int(item) for item in _split_agg(source.get("ids")) if str(item).isdigit()
     ]
+    result["tipos_notificacao_recebidos"] = source.get("tipos_notificacao_recebidos") or _split_agg(source.get("tipos_notificacao"))
+    result["notificacoes_origem"] = source.get("notificacoes_origem") or []
+    result["vistos_nas_notificacoes"] = source.get("vistos_nas_notificacoes") or {}
+    result["referencias_documentos"] = source.get("referencias_documentos") or []
+    result["erros_json"] = source.get("erros_json") or []
+    if result["erros_json"]:
+        result["motivos_revisao"].append("json_invalido_em_linha_do_dossie")
+        result["apto_para_etapa_publicacao"] = False
+        result["status"] = "REVISAO_NECESSARIA"
     return result
 
 
@@ -433,6 +442,36 @@ def fetch_group(npj: str, data_notificacao: str) -> dict[str, Any] | None:
     with db_adapter.connect_main() as conn:
         row = conn.execute(query, (npj, data_notificacao)).fetchone()
         return _row_to_dict(row) if row else None
+
+
+def _triage_rows_for_keys(keys: list[tuple[str, str]]) -> list[dict[str, Any]]:
+    if not keys:
+        return []
+    query = """
+        SELECT id, NPJ AS npj, data_notificacao, tipo_notificacao, data_criacao,
+               andamentos, documentos, documentos_json
+        FROM notificacoes
+        WHERE
+    """ + " OR ".join("(NPJ = ? AND data_notificacao = ?)" for _ in keys) + " ORDER BY id"
+    params = [part for key in keys for part in key]
+    with db_adapter.connect_main() as conn:
+        return [_row_to_dict(row) for row in conn.execute(query, params).fetchall()]
+
+
+def list_triage_groups(days: int | None = None, limit: int = 500) -> list[dict[str, Any]]:
+    """Seleciona chaves como a prévia antiga, mas reúne todas as linhas de cada dossiê."""
+    candidates = list_candidate_groups(days=days, force=True, limit=limit)
+    keys = [(str(row["npj"]), str(row["data_notificacao"])) for row in candidates]
+    by_key: dict[tuple[str, str], list[dict[str, Any]]] = {key: [] for key in keys}
+    for start in range(0, len(keys), 100):
+        for row in _triage_rows_for_keys(keys[start:start + 100]):
+            by_key[(str(row["npj"]), str(row["data_notificacao"]))].append(row)
+    return [reunir_linhas_notificacao(by_key[key]) for key in keys if by_key[key]]
+
+
+def fetch_triage_group(npj: str, data_notificacao: str) -> dict[str, Any] | None:
+    rows = _triage_rows_for_keys([(npj, data_notificacao)])
+    return reunir_linhas_notificacao(rows) if rows else None
 
 
 def _mark_groups(groups: list[dict[str, Any]], status: str, external_id: str | None = None, error: str | None = None) -> int:

@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from flow_sync import build_triage_preview, fetch_group, list_candidate_groups  # noqa: E402
+from flow_sync import build_triage_preview, fetch_triage_group, list_triage_groups  # noqa: E402
 
 
 def main() -> None:
@@ -27,10 +27,10 @@ def main() -> None:
         parser.error("--days deve ser >= 0 e --limit deve ser >= 1")
 
     if args.npj:
-        group = fetch_group(args.npj, args.data)
+        group = fetch_triage_group(args.npj, args.data)
         groups = [group] if group else []
     else:
-        groups = list_candidate_groups(days=args.days, force=True, limit=args.limit)
+        groups = list_triage_groups(days=args.days, limit=args.limit)
 
     statuses: Counter[str] = Counter()
     reasons: Counter[str] = Counter()

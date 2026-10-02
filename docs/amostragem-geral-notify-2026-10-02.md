@@ -35,11 +35,11 @@ Nos 1.000 grupos processados mais recentes criados entre 02/09 e **02/10 às
 
 | Resultado | Grupos |
 | --- | ---: |
-| Publicação isolada | 547 |
+| Publicação isolada | 546 |
 | Publicação com documento de correspondência textual forte | 11 |
-| Publicação com conteúdo ainda em revisão | 348 |
-| Possível ato judicial em documento, sem andamento DJ/DO | 37 |
-| Sem andamento DJ/DO nem sinal forte no texto documental | 57 |
+| Publicação com conteúdo ainda em revisão | 350 |
+| Possível ato judicial em documento, sem andamento DJ/DO | 44 |
+| Sem andamento DJ/DO nem sinal forte no texto documental | 49 |
 
 O sinal documental procura um título de sentença, decisão, despacho,
 intimação, citação, acórdão ou ato ordinatório junto de CNJ no PDF extraído.
@@ -47,13 +47,29 @@ intimação, citação, acórdão ou ato ordinatório junto de CNJ no PDF extra�
 providência. Os 11 documentos com correspondência forte também precisam de
 conferência de amostra antes de qualquer consolidação automática.
 
-Ainda nesse recorte, 92 grupos continham mais de um texto distinto de
-andamento de publicação. Em 113 documentos, a comparação encontrou um trecho
-longo em comum com a publicação, mas não a equivalência estrita exigida pela
-prévia. Esses dois conjuntos mostram por que a separação por ato e a leitura
-dos candidatos rejeitados são necessárias. O sinal de título + CNJ dos 37
-documentos é deliberadamente estreito; não mede quantos atos documentais a
-regra deixou de encontrar.
+A prévia agora reúne os andamentos e arquivos de **todas as linhas** do mesmo
+NPJ/data. A medição anterior (547/11/348/37/57) escolhia o JSON de uma linha
+por `MAX` lexicográfico e podia omitir uma publicação presente em outra. Dos
+44 dossiês com possível ato no documento, **43 receberam somente tipos de
+notificação documentais**; um recebeu tipo “andamento de publicação”, mas o
+andamento efetivo era de contestação, sem `PUBLICACAO DJ/DO`. Inversamente,
+há grupos cujo tipo recebido é documental e a janela contém um andamento de
+publicação. Tipo do aviso e conteúdo capturado devem permanecer separados;
+esses 44 não formam automaticamente a fila da operadora especializada.
+
+Ainda nesse recorte, há grupos com mais de um texto distinto de andamento de
+publicação. Em **117 documentos**, a comparação reuniu trecho longo em comum
+com a publicação, mas não a equivalência estrita exigida pela prévia. Em 81
+deles, a publicação e o PDF contêm o mesmo identificador longo do documento
+original. Só **15/117** também reuniram CNJ único igual, termos críticos e
+prazo preservados e cobertura textual de pelo menos 0,8 em ambos os sentidos.
+São candidatos para a próxima validação, não autorização para juntar todos os
+outros arquivos da janela. Os 11 positivos foram revisitados no dossiê
+completo: cada um contém uma publicação e um PDF com corpo do ato coincidente,
+com diferenças de cabeçalho, rodapé ou formatação; essa é conferência técnica,
+sem validação jurídica. O sinal de
+título + CNJ dos 44 documentos é deliberadamente estreito; não mede quantos
+atos documentais a regra deixou de encontrar.
 
 ## O que “Tratada” permite reconstruir
 
@@ -97,6 +113,26 @@ motivo: essa comparação não comprova tratamento de cada notificação. O Flow
 tem cobertura a partir de 2026, mas esse recorte antigo é de fevereiro a
 abril e não serve para medir a conciliação dos meses recentes.
 
+### Os 44 possíveis atos em documento, confrontados com o Flow
+
+Na mesma fotografia, esses 44 dossiês continham 54 documentos sinalizados
+como possíveis atos. Busca de registros do Flow por CNJ e data ±7 dias encontrou
+candidatos para **19 documentos**; a contenção textual de fragmentos de cinco
+palavras ≥0,8, com pelo menos 20 fragmentos comuns, encontrou **12 documentos
+em 10 dossiês**. Seis documentos tinham mais de um CNJ no texto e não foram
+associados automaticamente a um processo.
+
+Nos 12 pares textuais, o melhor registro Flow estava `CLASSIFICADO` em cinco,
+`IGNORADO` em cinco, `AGENDADO` em um e `DESCARTADO_DUPLICADA` em um. Apenas o
+`AGENDADO` tinha auditoria direta de tarefa, mas o respectivo dossiê Notify
+continha **três documentos** e só um teve correspondência forte. Os três
+registros `IGNORADO` distintos tinham razões `informativa` ou `parte_adversa`;
+um dos dossiês ainda tinha terceiro documento sem correspondência. O registro
+descartado como duplicado precisa ser ligado ao registro vivo antes de herdar
+qualquer decisão. Portanto os dez dossiês são **candidatos a reduzir trabalho
+por item**, não dez dossiês encerrados. `CLASSIFICADO` indica que o Flow ainda
+não registra providência concluída nesse item.
+
 ## Decisões que a análise permite testar no Notify
 
 1. Classificar **cada andamento e cada arquivo**, mantendo sua origem e a
@@ -104,14 +140,26 @@ abril e não serve para medir a conciliação dos meses recentes.
    documento; comunicação interna/subsídio; link não resolvido; imagem sem
    texto; conteúdo indeterminado.
 2. Para publicação ou possível ato documental, procurar candidatos históricos
-   por CNJ/data e comparar texto. Só considerar “já coberto” quando o mesmo
-   ato e a decisão registrada estiverem ligados; `IGNORADO` significa decisão
-   de não agir, não identidade por si só.
+   por CNJ/data e comparar texto. O objetivo é saber se o trabalho necessário
+   **já tem cobertura em outro fluxo**. Uma tarefa do mesmo processo é sinal
+   de busca, não vínculo suficiente; um registro Flow ligado ao mesmo ato e à
+   providência ou à decisão de não agir pode justificar “sem trabalho novo no
+   Notify”. Isso não quer dizer que alguém tratou a notificação no Notify.
+   `IGNORADO` é decisão de não agir, não prova de identidade por si só.
 3. Dividir a fila por idade. Casos antigos não devem gerar tarefas retroativas
    em massa nem uma auditoria automática de prazos; podem receber destino
    histórico após reconciliação e critérios operacionais explícitos. Documento
    antigo com obrigação ainda atual exige análise própria. O corte de idade e
    o destino dos resíduos seguem **sem decisão**.
+
+Para roteamento, separar **tipo de notificação recebido**, **conteúdo do
+andamento/arquivo** e **cobertura de outro fluxo**. Um documento com decisão
+judicial não entra automaticamente na fila de Jesebel. Se o mesmo ato já tem
+providência ou decisão identificável no Flow/Legal One e o arquivo não traz
+assunto adicional, a conclusão operacional candidata é “sem trabalho novo no
+Notify”, com referência externa e motivo registrados. Quando só há tarefa do
+mesmo processo, a cobertura ainda é hipótese. Um pedido/retorno de subsídio
+pertence ao seu ciclo próprio; um PDF isolado não prova esse vínculo.
 
 Próxima validação: ler os 11 positivos da triagem e uma amostra de negativos,
 inspecionar os dois PDFs documentais ligados ao Flow, testar resolução de TXT

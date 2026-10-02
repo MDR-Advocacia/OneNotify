@@ -4,6 +4,10 @@ O módulo `triagem_publicacoes.py` lê um dossiê `NPJ + data_notificacao` já
 capturado pelo Notify e produz um plano de leitura. Ele não muda o estado das
 notificações, não descarta documentos e não envia itens ao Flow. O contrato
 atual de intake do Flow continua agrupado por `NPJ + data_notificacao`.
+Para a prévia, todas as linhas do mesmo NPJ/data são reunidas; escolher o
+`MAX(andamentos)` do grupo pode esconder uma publicação presente em outra
+linha. O resultado mantém os tipos de notificação recebidos e as referências
+de cada arquivo nas linhas, sem inferir qual aviso causou sua inclusão.
 
 ## Regras implementadas
 
@@ -25,6 +29,11 @@ atual de intake do Flow continua agrupado por `NPJ + data_notificacao`.
   `POSSIVEL_ATO_EM_DOCUMENTO`, sempre para investigação; não prova publicação
   oficial. Os demais ficam em `SEM_ANDAMENTO_PUBLICACAO`, que também **não**
   afirma ausência de publicação em outra fonte.
+- O tipo da **notificação recebida** e o conteúdo do arquivo são sinais
+  diferentes. Um aviso documental com peça judicial não vira automaticamente
+  trabalho da operadora especializada; um aviso chamado “andamento de
+  publicação” também pode conter somente outro tipo de andamento. A rota
+  operacional exige verificar o ato e sua cobertura em outros fluxos.
 - O resultado preserva índices dos andamentos, nome/hash dos arquivos e motivos
   de revisão. O arquivo original continua acessível no dossiê.
 
@@ -41,11 +50,21 @@ nenhum arquivo ou status produtivo foi alterado.
 
 | Resultado | Grupos |
 | --- | ---: |
-| Publicação isolada | 547 |
+| Publicação isolada | 546 |
 | Publicação com repetição textual forte | 11 |
-| Revisão necessária | 348 |
-| Possível ato judicial em documento, sem andamento DJ/DO | 37 |
-| Sem andamento DJ/DO nem sinal forte no texto documental | 57 |
+| Revisão necessária | 350 |
+| Possível ato judicial em documento, sem andamento DJ/DO | 44 |
+| Sem andamento DJ/DO nem sinal forte no texto documental | 49 |
+
+Esta medição reúne todas as linhas de cada dossiê. A leitura anterior por
+`MAX` no JSON apontava 547/11/348/37/57; ela perdeu andamentos e documentos
+que estavam em outras linhas da janela. Dos 44 possíveis atos em documento,
+43 pertencem a grupos cujos tipos de aviso recebidos são documentais e um a
+um grupo com tipo “andamento de publicação” mas sem `PUBLICACAO DJ/DO` no
+conteúdo capturado. Não encaminhar esses 44 em bloco à mesma fila.
+O replay em memória executou também `build_triage_preview` completo nos 1.000
+grupos produtivos; os cinco totais acima se mantiveram, sem divergência causada
+por eventual atualização da extração dos arquivos.
 
 Entre os documentos, 13 passaram no critério de núcleo final idêntico e CNJ
 igual. Os 11 grupos correspondentes ainda não tiveram validação individual de
@@ -67,8 +86,8 @@ python scripts/preview_triagem_publicacoes.py --npj 'NPJ' --data 'DD/MM/AAAA'
 
 O comando só imprime totais agregados e não envia ao Flow. Para avançar da
 prévia à operação: conferir uma amostra dos 11 casos e dos candidatos rejeitados,
-registrar a decisão por documento, e definir no Flow a entrega de um item por
-ato com suas origens. Antes disso, o Notify precisa testar a identificação de
-atos em documentos, resolver TXT com link quando possível e confrontar o
-histórico de tratamento com evidências externas. A sincronização atual por grupo
-não consome esta triagem.
+registrar a decisão por documento e testar se o mesmo ato já tem providência ou
+decisão em outro fluxo. Esse vínculo pode tornar o aviso **sem trabalho novo no
+Notify**, sem afirmar que a notificação foi tratada ali. O Notify ainda precisa
+resolver TXT com link quando possível e decidir a rota de atos documentais sem
+cobertura externa. A sincronização atual por grupo não consome esta triagem.

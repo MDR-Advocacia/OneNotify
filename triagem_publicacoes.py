@@ -7,6 +7,7 @@ nessa janela não pertence necessariamente à notificação de publicação.
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 import unicodedata
 from collections import Counter
@@ -25,6 +26,143 @@ CRITICAL_WORDS = {
     "concedo", "revogo", "suspensao", "arquivamento",
     "cinco", "dez", "quinze", "trinta", "sessenta", "noventa", "prazo", "dias",
 }
+
+
+def _json_value(value: Any, fallback: Any) -> Any:
+    if isinstance(value, (list, dict)):
+        return value
+    if not isinstance(value, str):
+        return fallback
+    try:
+        return json.loads(value)
+    except ValueError:
+        return fallback
+
+
+def _document_key(item: dict[str, Any], original: dict[str, Any], row_id: Any, index: int) -> tuple[Any, ...]:
+    digest = item.get("sha256") or original.get("sha256")
+    if digest:
+        return ("sha256", str(digest))
+    path = item.get("relative_path") or item.get("original_path") or original.get("caminho")
+    if path:
+        return ("path", str(path).replace("\\", "/").casefold())
+    # Sem identificador seguro, manter referências distintas.
+    return ("unknown", row_id, index)
+
+
+def _extraction_quality(item: dict[str, Any]) -> tuple[int, int]:
+    extraction = item.get("extraction") or {}
+    if not isinstance(extraction, dict):
+        return (0, 0)
+    chars = sum(
+        len(str(page.get("text") or ""))
+        for page in extraction.get("pages") or []
+        if isinstance(page, dict)
+    )
+    complete = (
+        extraction.get("status") == "ok"
+        and not extraction.get("truncated")
+        and not extraction.get("ocr_required")
+    )
+    return (int(bool(complete)), chars)
+
+
+def reunir_linhas_notificacao(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Reúne capturas do mesmo NPJ/data sem escolher JSON por MAX lexicográfico.
+
+    `vistos_nas_notificacoes` é proveniência de cópia da janela, não prova que a
+    notificação específica tenha causado a inclusão do arquivo/andamento.
+    """
+    if not rows:
+        return {}
+    ordered = sorted(rows, key=lambda row: int(row.get("id") or 0))
+    first = ordered[0]
+    movements: list[dict[str, Any]] = []
+    movement_sources: list[list[int]] = []
+    movement_index: dict[tuple[str, str, str], int] = {}
+    documents: list[dict[str, Any]] = []
+    originals: list[dict[str, Any]] = []
+    document_sources: list[list[int]] = []
+    document_references: list[list[dict[str, int]]] = []
+    document_index: dict[tuple[Any, ...], int] = {}
+    types: set[str] = set()
+    notifications = []
+    parse_errors: list[dict[str, Any]] = []
+
+    def parsed(row: dict[str, Any], field: str, fallback: Any) -> Any:
+        raw = row.get(field)
+        sentinel = object()
+        value = _json_value(raw, sentinel)
+        if value is sentinel:
+            if isinstance(raw, str) and raw.strip():
+                parse_errors.append({"id_notificacao": int(row["id"]), "campo": field})
+            return fallback
+        return value
+
+    for row in ordered:
+        row_id = int(row["id"])
+        kind = str(row.get("tipo_notificacao") or "").strip()
+        if kind:
+            types.add(kind)
+        notifications.append({
+            "id": row_id,
+            "tipo_notificacao": kind,
+            "data_criacao": str(row["data_criacao"]) if row.get("data_criacao") else None,
+        })
+        raw_movements = parsed(row, "andamentos", [])
+        for movement in raw_movements if isinstance(raw_movements, list) else []:
+            if not isinstance(movement, dict):
+                continue
+            key = tuple(str(movement.get(field) or "").strip() for field in ("data", "descricao", "detalhes"))
+            position = movement_index.get(key)
+            if position is None:
+                position = len(movements)
+                movement_index[key] = position
+                movements.append(movement)
+                movement_sources.append([])
+            if row_id not in movement_sources[position]:
+                movement_sources[position].append(row_id)
+
+        envelope = parsed(row, "documentos_json", {})
+        items = envelope.get("items") if isinstance(envelope, dict) else []
+        items = items if isinstance(items, list) else []
+        raw_originals = parsed(row, "documentos", [])
+        raw_originals = raw_originals if isinstance(raw_originals, list) else []
+        for index in range(max(len(items), len(raw_originals))):
+            item = items[index] if index < len(items) and isinstance(items[index], dict) else {}
+            original = (
+                raw_originals[index]
+                if index < len(raw_originals) and isinstance(raw_originals[index], dict)
+                else {}
+            )
+            key = _document_key(item, original, row_id, index)
+            position = document_index.get(key)
+            if position is None:
+                position = len(documents)
+                document_index[key] = position
+                documents.append(item)
+                originals.append(original)
+                document_sources.append([])
+                document_references.append([])
+            elif _extraction_quality(item) > _extraction_quality(documents[position]):
+                documents[position], originals[position] = item, original
+            if row_id not in document_sources[position]:
+                document_sources[position].append(row_id)
+            document_references[position].append({"id_notificacao": row_id, "indice_documento": index})
+
+    return {
+        "npj": first.get("npj") or first.get("NPJ"),
+        "data_notificacao": first.get("data_notificacao"),
+        "ids": ";".join(str(row["id"]) for row in ordered),
+        "tipos_notificacao_recebidos": sorted(types),
+        "notificacoes_origem": notifications,
+        "andamentos": movements,
+        "documentos_json": {"schema_version": "onenotify.documents.v1", "items": documents},
+        "documentos": originals,
+        "vistos_nas_notificacoes": {"andamentos": movement_sources, "documentos": document_sources},
+        "referencias_documentos": document_references,
+        "erros_json": parse_errors,
+    }
 
 
 def _tokens(value: Any) -> list[str]:

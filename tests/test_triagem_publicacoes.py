@@ -2,7 +2,7 @@ import unittest
 import json
 
 from flow_sync import build_triage_preview
-from triagem_publicacoes import analisar_dossie
+from triagem_publicacoes import analisar_dossie, reunir_linhas_notificacao
 
 
 PUBLICATION = {
@@ -126,6 +126,72 @@ class PublicationTriageTest(unittest.TestCase):
         result = analisar_dossie([], document(text))
         self.assertEqual(result["status"], "SEM_ANDAMENTO_PUBLICACAO")
         self.assertFalse(result["apto_para_etapa_publicacao"])
+
+    def test_group_union_keeps_publication_from_another_notification_row(self):
+        cnj = "1234567-89.2026.8.01.0001"
+        pdf = document(f"Processo {cnj}\nSENTENÇA\nJulgo procedente o pedido.")
+        rows = [
+            {"id": 10, "npj": "NPJ-1", "data_notificacao": "24/09/2026",
+             "tipo_notificacao": "Inclusão de Documentos no NPJ",
+             "andamentos": json.dumps([{"descricao": "OUTRO", "detalhes": "movimento"}]),
+             "documentos_json": json.dumps(pdf), "documentos": "[]"},
+            {"id": 11, "npj": "NPJ-1", "data_notificacao": "24/09/2026",
+             "tipo_notificacao": "Andamento de publicação em processo de condução terceirizada",
+             "andamentos": json.dumps([PUBLICATION]),
+             "documentos_json": json.dumps(pdf), "documentos": "[]"},
+        ]
+        merged = reunir_linhas_notificacao(rows)
+        result = build_triage_preview(merged)
+        self.assertEqual(len(result["publicacoes"]), 1)
+        self.assertEqual(len(result["documentos"]), 1)
+        self.assertEqual(result["ids_notificacoes"], [10, 11])
+        self.assertEqual(result["vistos_nas_notificacoes"]["documentos"], [[10, 11]])
+        self.assertEqual(result["referencias_documentos"], [[
+            {"id_notificacao": 10, "indice_documento": 0},
+            {"id_notificacao": 11, "indice_documento": 0},
+        ]])
+        self.assertEqual(result["status"], "REVISAO_NECESSARIA")
+
+    def test_notification_type_does_not_invent_publication_movement(self):
+        rows = [{"id": 20, "npj": "NPJ-2", "data_notificacao": "24/09/2026",
+                 "tipo_notificacao": "Andamento de publicação em processo de condução terceirizada",
+                 "andamentos": json.dumps([{"descricao": "CONTESTACAO/DEFESA", "detalhes": "Petição juntada"}]),
+                 "documentos_json": json.dumps(document("Processo 1234567-89.2026.8.01.0001\nSENTENÇA\nJulgo o pedido.")),
+                 "documentos": "[]"}]
+        result = build_triage_preview(reunir_linhas_notificacao(rows))
+        self.assertEqual(result["status"], "POSSIVEL_ATO_EM_DOCUMENTO")
+        self.assertIn("Andamento de publicação em processo de condução terceirizada", result["tipos_notificacao_recebidos"])
+        self.assertFalse(result["apto_para_etapa_publicacao"])
+
+    def test_same_file_twice_keeps_both_window_references(self):
+        item = document("Texto do mesmo arquivo.")["items"][0]
+        merged = reunir_linhas_notificacao([{
+            "id": 30, "npj": "NPJ-3", "data_notificacao": "24/09/2026",
+            "tipo_notificacao": "Inclusão de Documentos no NPJ",
+            "andamentos": "[]", "documentos": "[]",
+            "documentos_json": json.dumps({"items": [item, item]}),
+        }])
+        self.assertEqual(len(merged["documentos_json"]["items"]), 1)
+        self.assertEqual(merged["referencias_documentos"], [[
+            {"id_notificacao": 30, "indice_documento": 0},
+            {"id_notificacao": 30, "indice_documento": 1},
+        ]])
+
+    def test_invalid_json_in_one_row_prevents_automatic_result(self):
+        rows = [
+            {"id": 40, "npj": "NPJ-4", "data_notificacao": "24/09/2026",
+             "tipo_notificacao": "Andamento de publicação em processo de condução terceirizada",
+             "andamentos": json.dumps([PUBLICATION]), "documentos": "[]",
+             "documentos_json": json.dumps({"items": []})},
+            {"id": 41, "npj": "NPJ-4", "data_notificacao": "24/09/2026",
+             "tipo_notificacao": "Inclusão de Documentos no NPJ",
+             "andamentos": "[invalid", "documentos": "[]",
+             "documentos_json": json.dumps({"items": []})},
+        ]
+        result = build_triage_preview(reunir_linhas_notificacao(rows))
+        self.assertEqual(result["status"], "REVISAO_NECESSARIA")
+        self.assertFalse(result["apto_para_etapa_publicacao"])
+        self.assertEqual(result["erros_json"], [{"id_notificacao": 41, "campo": "andamentos"}])
 
 
 if __name__ == "__main__":
