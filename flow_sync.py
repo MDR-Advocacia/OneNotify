@@ -10,6 +10,7 @@ from urllib.request import Request, urlopen
 
 import db_adapter
 from document_payload import build_documents_json, safe_json_loads
+from triagem_publicacoes import analisar_dossie
 
 
 DOCUMENTOS_PATH = os.getenv(
@@ -298,6 +299,22 @@ def build_flow_payload(row: Any, include_documents: bool = True) -> dict[str, An
         "source": "ONENOTIFY_BB",
         "generated_at": _now_iso(),
     }
+
+
+def build_triage_preview(row: Any) -> dict[str, Any]:
+    """Avalia um grupo sem enviá-lo nem alterar seu status no Notify."""
+    source = _row_to_dict(row)
+    andamentos = safe_json_loads(source.get("andamentos"), fallback=[])
+    originais = safe_json_loads(source.get("documentos"), fallback=[])
+    enriched = safe_json_loads(source.get("documentos_json"), fallback=None)
+    if _documents_payload_needs_refresh(enriched, originais):
+        enriched = build_documents_json(originais, base_dir=DOCUMENTOS_PATH)
+    result = analisar_dossie(andamentos, enriched, originais)
+    result["external_group_id"] = f"{source.get('npj') or source.get('NPJ')}|{source.get('data_notificacao')}"
+    result["ids_notificacoes"] = [
+        int(item) for item in _split_agg(source.get("ids")) if str(item).isdigit()
+    ]
+    return result
 
 
 def _group_select_sql() -> str:
