@@ -113,6 +113,9 @@ def reunir_linhas_notificacao(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "id": row_id,
             "tipo_notificacao": kind,
             "data_criacao": str(row["data_criacao"]) if row.get("data_criacao") else None,
+            "rpa_status": row.get("rpa_status"),
+            "status": row.get("status"),
+            "origem": row.get("origem"),
         })
         raw_movements = parsed(row, "andamentos", [])
         for movement in raw_movements if isinstance(raw_movements, list) else []:
@@ -158,6 +161,9 @@ def reunir_linhas_notificacao(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "npj": first.get("npj") or first.get("NPJ"),
         "data_notificacao": first.get("data_notificacao"),
+        "numero_processo": next((row.get("numero_processo") for row in ordered if row.get("numero_processo")), None),
+        "polo": next((row.get("polo") for row in ordered if row.get("polo")), None),
+        "adverso_principal": next((row.get("adverso_principal") for row in ordered if row.get("adverso_principal")), None),
         "ids": ";".join(str(row["id"]) for row in ordered),
         "tipos_notificacao_recebidos": sorted(types),
         "notificacoes_origem": notifications,

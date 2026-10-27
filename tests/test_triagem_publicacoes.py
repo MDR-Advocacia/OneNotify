@@ -9,7 +9,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from flow_sync import (
-    build_triage_preview, fetch_triage_group, list_candidate_groups,
+    build_publication_intake_preview, build_triage_preview, fetch_triage_group, list_candidate_groups,
     list_triage_groups, materialize_triage_group,
 )
 from triagem_publicacoes import analisar_dossie, reunir_linhas_notificacao
@@ -212,6 +212,52 @@ class PublicationTriageTest(unittest.TestCase):
         self.assertEqual(result["ids_notificacoes"], [1, 2])
         self.assertEqual(result["status"], "PUBLICACAO_ISOLADA")
 
+    def test_v2_publication_intake_keeps_only_confirmed_repeat(self):
+        cnj = "1234567-89.2026.8.01.0001"
+        publication = dict(PUBLICATION, detalhes=f"Processo {cnj}. " + PUBLICATION["detalhes"])
+        pdf = document(publication["detalhes"])
+        group = reunir_linhas_notificacao([{
+            "id": 100, "npj": "NPJ-100", "data_notificacao": "25/09/2026",
+            "tipo_notificacao": "Andamento de publicação em processo de condução terceirizada",
+            "rpa_status": "PROCESSADO", "origem": "portal_bb",
+            "numero_processo": cnj, "andamentos": json.dumps([publication]),
+            "documentos": json.dumps([{"nome": "ato.pdf", "caminho": "documentos/ato.pdf"}]),
+            "documentos_json": json.dumps(pdf),
+        }])
+        prepared = build_publication_intake_preview(group, refresh_documents=False)
+        self.assertTrue(prepared["ready"])
+        item = prepared["items"][0]
+        self.assertEqual(item["schema_version"], "onenotify.flow-intake.v2")
+        self.assertEqual(item["item_kind"], "PUBLICACAO")
+        self.assertEqual(item["source_group_id"], "NPJ-100|25/09/2026")
+        self.assertEqual(item["external_group_id"], "NPJ-100|25/09/2026")
+        self.assertEqual(item["cnj_publicacao"], cnj)
+        self.assertEqual(item["triagem"]["indices_documentos_repetidos"], [0])
+        self.assertEqual(item["conteudo"]["total_documentos"], 1)
+        self.assertEqual([source["tipo"] for source in item["conteudo"]["fontes_texto"]], ["andamento"])
+        self.assertEqual(item["external_group_id"], build_publication_intake_preview(group, refresh_documents=False)["items"][0]["external_group_id"])
+
+        not_processed = dict(group, notificacoes_origem=[{**group["notificacoes_origem"][0], "rpa_status": "PENDENTE"}])
+        self.assertIn("notificacoes_nao_processadas", build_publication_intake_preview(not_processed, refresh_documents=False)["reasons"])
+
+    def test_v2_intake_blocks_mixed_or_ambiguous_group(self):
+        cnj = "1234567-89.2026.8.01.0001"
+        publication = dict(PUBLICATION, detalhes=f"Processo {cnj}. " + PUBLICATION["detalhes"])
+        group = reunir_linhas_notificacao([{
+            "id": 101, "npj": "NPJ-101", "data_notificacao": "25/09/2026",
+            "tipo_notificacao": "Andamento de publicação em processo de condução terceirizada",
+            "rpa_status": "PROCESSADO", "andamentos": json.dumps([publication]),
+            "documentos": "[]", "documentos_json": json.dumps(document("Outro documento sem equivalência.")),
+        }])
+        self.assertIn("dossie_em_revisao", build_publication_intake_preview(group, refresh_documents=False)["reasons"])
+        ambiguous = dict(group, andamentos=[dict(publication, detalhes=publication["detalhes"] + " Processo 1234567-89.2026.8.01.0002.")],
+                         documentos=[], documentos_json={"items": []})
+        self.assertIn("cnj_publicacao_ausente_ou_ambiguo", build_publication_intake_preview(ambiguous, refresh_documents=False)["reasons"])
+        compact_cnj = "12345678920268010002"
+        compact = dict(group, andamentos=[dict(publication, detalhes=publication["detalhes"] + f" Processo {compact_cnj}.")],
+                       documentos=[], documentos_json={"items": []})
+        self.assertIn("cnj_publicacao_ausente_ou_ambiguo", build_publication_intake_preview(compact, refresh_documents=False)["reasons"])
+
     def test_document_can_contain_judicial_act_without_publication_movement(self):
         text = "Processo 1234567-89.2026.8.01.0001\nSENTENÇA\nJulgo procedente o pedido."
         result = analisar_dossie([], document(text))
@@ -368,6 +414,36 @@ class PublicationTriageTest(unittest.TestCase):
             self.assertNotIn("tribunal.example", report)
             self.assertNotIn(PUBLICATION["detalhes"], report)
             self.assertEqual(cases.stat().st_mode & 0o777, 0o600)
+
+    def test_offline_v2_export_only_includes_processed_publication(self):
+        cnj = "1234567-89.2026.8.01.0001"
+        publication = dict(PUBLICATION, detalhes=f"Processo {cnj}. " + PUBLICATION["detalhes"])
+        rows = []
+        for row_id, status in ((201, "PROCESSADO"), (202, "PENDENTE")):
+            rows.append(reunir_linhas_notificacao([{
+                "id": row_id, "npj": f"NPJ-{row_id}", "data_notificacao": "25/09/2026",
+                "tipo_notificacao": "Andamento de publicação em processo de condução terceirizada",
+                "rpa_status": status, "andamentos": json.dumps([publication]),
+                "documentos": "[]", "documentos_json": json.dumps({"items": []}),
+            }]))
+        with tempfile.TemporaryDirectory() as temp_dir:
+            snapshot = Path(temp_dir) / "snapshot.jsonl"
+            output = Path(temp_dir) / "intake.jsonl"
+            snapshot.write_text("".join(json.dumps({
+                "snapshot_schema": "onenotify.triage-snapshot.v1", "group": group,
+            }) + "\n" for group in rows), encoding="utf-8")
+            script = Path(__file__).resolve().parents[1] / "scripts" / "preview_triagem_publicacoes.py"
+            completed = subprocess.run([
+                sys.executable, str(script), "--input-jsonl", str(snapshot),
+                "--publication-intake-out", str(output),
+            ], check=True, capture_output=True, text=True)
+            summary = json.loads(completed.stdout)
+            self.assertEqual(summary["intake_v2_itens"], 1)
+            self.assertEqual(summary["intake_v2_bloqueios"], {"notificacoes_nao_processadas": 1})
+            payload = json.loads(output.read_text(encoding="utf-8").strip())
+            self.assertEqual(payload["item_kind"], "PUBLICACAO")
+            self.assertEqual(payload["cnj_publicacao"], cnj)
+            self.assertEqual(output.stat().st_mode & 0o777, 0o600)
 
     def test_materialized_snapshot_replays_after_source_document_disappears(self):
         with tempfile.TemporaryDirectory() as temp_dir:

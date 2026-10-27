@@ -141,16 +141,23 @@ python scripts/preview_triagem_publicacoes.py --days 30 --limit 500 \
   --cases-out /caminho/privado/casos.jsonl
 python scripts/preview_triagem_publicacoes.py \
   --input-jsonl /caminho/privado/amostra.jsonl \
-  --cases-out /caminho/privado/casos-replay.jsonl
+  --cases-out /caminho/privado/casos-replay.jsonl \
+  --publication-intake-out /caminho/privado/publicacoes-v2.jsonl
 ```
 
-O snapshot contém dados completos do dossiê, **inclusive textos, identificadores,
-caminhos e URLs**. Guardá-lo em pasta privada e não anexá-lo ao repositório ou PR.
-Os dois tipos de saída são criados com permissão `0600` e nunca sobrescrevem um
+O snapshot e `publicacoes-v2.jsonl` contêm dados completos, **inclusive textos,
+identificadores, caminhos e URLs**. Guardá-los em pasta privada e não anexá-los
+ao repositório ou PR. O segundo arquivo é apenas uma prévia de payload v2,
+**sem POST ao Flow**. Ele aceita somente notificações `PROCESSADO` fora do
+legado de migração, com uma publicação de texto/data/CNJ único e nenhum
+andamento ou documento sem equivalência demonstrada. Cada item tem ID externo
+estável, um único texto de publicação para a conciliação, PDFs repetidos
+preservados e proveniência da janela. Dossiês mistos e CNJs ambíguos ficam fora.
+
+Os três tipos de saída são criados com permissão `0600` e nunca sobrescrevem um
 arquivo existente; o relatório por caso ainda contém o NPJ e a evidência
 técnica, inclusive o ID da peça PJe quando houver, mas não o texto ou URL.
-No replay, o texto
-congelado é usado sem reler o arquivo original. A extração do PDF requer a
+No replay, o texto congelado é usado sem reler o arquivo original. A extração do PDF requer a
 dependência `pypdf` do projeto no ambiente que faz a exportação.
 
 Uma leitura somente local do diretório `documentos/` em 27/10 encontrou 36 PDFs
@@ -214,3 +221,11 @@ dossiê continuam pendentes. Esta é **validação técnica local**, não decis�
 descarte nem medida de acurácia jurídica. Os PDFs e sua proveniência são
 preservados para revisão; a integração produtiva com o Flow não consome a
 nova relação.
+
+Aplicando a faixa v2 apenas em memória aos mesmos 1.000 dossiês, 409
+publicações produziram payloads distintos, com uma fonte de texto cada e 16
+PDFs relacionados. Sete casos adicionais foram bloqueados porque o texto
+continha outro CNJ em formato compacto, reconhecido pelo Flow e inicialmente
+não reconhecido pelo Notify. O restante não foi exportado. Esta contagem não
+autoriza envio: o contrato e a coexistência com grupos v1 foram validados
+localmente, mas o sincronizador v2 não está ativo em produção.

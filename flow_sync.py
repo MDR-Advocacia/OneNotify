@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -10,7 +11,7 @@ from urllib.request import Request, urlopen
 
 import db_adapter
 from document_payload import build_documents_json, safe_json_loads
-from triagem_publicacoes import analisar_dossie, reunir_linhas_notificacao
+from triagem_publicacoes import CNJ_PATTERN, analisar_dossie, reunir_linhas_notificacao
 
 
 DOCUMENTOS_PATH = os.getenv(
@@ -28,6 +29,7 @@ FLOW_SYNC_ENABLED = os.getenv("FLOW_SYNC_ENABLED", "false").strip().lower() in {
 FLOW_SYNC_BATCH_SIZE = int(os.getenv("FLOW_SYNC_BATCH_SIZE", "100"))
 FLOW_SYNC_TIMEOUT_SECONDS = int(os.getenv("FLOW_SYNC_TIMEOUT_SECONDS", "30"))
 NON_MIGRATION_WHERE = "LOWER(TRIM(COALESCE(origem, ''))) <> 'migracao'"
+FLOW_CNJ_PATTERN = re.compile(r"\b\d{7}-?\d{2}\.?\d{4}\.?\d\.?\d{2}\.?\d{4}\b")
 
 
 def _now_iso() -> str:
@@ -339,6 +341,67 @@ def build_triage_preview(row: Any, *, refresh_documents: bool = True) -> dict[st
     return result
 
 
+def build_publication_intake_preview(row: Any, *, refresh_documents: bool = True) -> dict[str, Any]:
+    """Prepara somente publicação isolada ou com PDFs repetidos; nunca envia."""
+    source = materialize_triage_group(row) if refresh_documents else _row_to_dict(row)
+    triage = build_triage_preview(source, refresh_documents=False)
+    reasons: list[str] = []
+    notifications = triage["notificacoes_origem"]
+    if not notifications or any(item.get("rpa_status") != "PROCESSADO" for item in notifications):
+        reasons.append("notificacoes_nao_processadas")
+    if any(str(item.get("origem") or "").strip().casefold() == "migracao" for item in notifications):
+        reasons.append("origem_migracao")
+    if not triage["apto_para_etapa_publicacao"] or len(triage["publicacoes"]) != 1:
+        reasons.append("dossie_em_revisao")
+    if reasons:
+        return {"ready": False, "reasons": reasons, "items": [], "triage_status": triage["status"]}
+
+    publication = triage["publicacoes"][0]
+    cnjs = set(CNJ_PATTERN.findall(publication["texto"]))
+    all_cnj_digits = {re.sub(r"\D", "", match) for match in FLOW_CNJ_PATTERN.findall(publication["texto"])}
+    if len(cnjs) != 1 or all_cnj_digits != {re.sub(r"\D", "", match) for match in cnjs}:
+        reasons.append("cnj_publicacao_ausente_ou_ambiguo")
+    if not _parse_date(publication["data"]):
+        reasons.append("data_publicacao_ausente")
+    if reasons:
+        return {"ready": False, "reasons": reasons, "items": [], "triage_status": triage["status"]}
+
+    movements = safe_json_loads(source.get("andamentos"), fallback=[])
+    originals = safe_json_loads(source.get("documentos"), fallback=[])
+    enriched = safe_json_loads(source.get("documentos_json"), fallback={})
+    indices = triage["itens_publicacao"][0]["documentos_repetidos"]
+    selected_originals = [originals[index] for index in indices]
+    selected_documents = [enriched["items"][index] for index in indices]
+    item_row = dict(source)
+    item_row["andamentos"] = [movements[publication["indices_andamentos"][0]]]
+    item_row["documentos"] = selected_originals
+    item_row["documentos_json"] = {"schema_version": "onenotify.documents.v1", "items": selected_documents}
+    item_row["tipos_notificacao"] = "; ".join(triage["tipos_notificacao_recebidos"])
+    item_row["rpa_status"] = "PROCESSADO"
+    payload = build_flow_payload(item_row)
+    payload["schema_version"] = "onenotify.flow-intake.v2"
+    payload["item_kind"] = "PUBLICACAO"
+    payload["source_group_id"] = triage["external_group_id"]
+    # A faixa segura contém exatamente uma publicação: reutilizar a chave v1
+    # atualiza o mesmo registro no Flow e evita duplicar grupos já importados.
+    payload["external_group_id"] = triage["external_group_id"]
+    payload["cnj_publicacao"] = next(iter(cnjs))
+    payload["data_publicacao"] = publication["data"]
+    payload["conteudo"]["fontes_texto"] = [
+        source_text for source_text in payload["conteudo"]["fontes_texto"]
+        if source_text["tipo"] == "andamento"
+    ]
+    payload["triagem"] = {
+        "schema_version": triage["schema_version"],
+        "status": triage["status"],
+        "id_publicacao": publication["id"],
+        "indices_documentos_repetidos": indices,
+        "referencias_documentos": [triage["referencias_documentos"][index] for index in indices],
+        "ids_notificacoes_janela": triage["ids_notificacoes"],
+    }
+    return {"ready": True, "reasons": [], "items": [payload], "triage_status": triage["status"]}
+
+
 def _group_select_sql() -> str:
     if db_adapter.is_postgres():
         agg_ids = "STRING_AGG(id::text, ';')"
@@ -466,6 +529,7 @@ def _triage_rows_for_keys(keys: list[tuple[str, str]]) -> list[dict[str, Any]]:
     conditions = " OR ".join("(NPJ = ? AND data_notificacao = ?)" for _ in keys)
     query = f"""
         SELECT id, NPJ AS npj, data_notificacao, tipo_notificacao, data_criacao,
+               numero_processo, polo, adverso_principal, status, rpa_status, origem,
                andamentos, documentos, documentos_json
         FROM notificacoes
         WHERE {NON_MIGRATION_WHERE} AND ({conditions})

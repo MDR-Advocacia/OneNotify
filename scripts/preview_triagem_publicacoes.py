@@ -13,7 +13,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from flow_sync import (  # noqa: E402
-    build_triage_preview, fetch_triage_group, list_triage_groups, materialize_triage_group,
+    build_publication_intake_preview, build_triage_preview, fetch_triage_group,
+    list_triage_groups, materialize_triage_group,
 )
 
 SNAPSHOT_SCHEMA = "onenotify.triage-snapshot.v1"
@@ -76,6 +77,7 @@ def main() -> None:
     parser.add_argument("--input-jsonl", type=Path, help="reexecuta snapshot local sem conexão ao banco")
     parser.add_argument("--snapshot-out", type=Path, help="exporta dossiês completos para arquivo privado")
     parser.add_argument("--cases-out", type=Path, help="resumo por dossiê sem texto nem links")
+    parser.add_argument("--publication-intake-out", type=Path, help="payload v2 privado, somente publicações elegíveis; não envia")
     args = parser.parse_args()
     if bool(args.npj) != bool(args.data):
         parser.error("--npj e --data devem ser informados juntos")
@@ -83,8 +85,9 @@ def main() -> None:
         parser.error("--days deve ser >= 0 e --limit deve ser >= 1")
     if args.input_jsonl and (args.npj or args.data or args.snapshot_out):
         parser.error("--input-jsonl não pode ser combinado com --npj, --data ou --snapshot-out")
-    if args.snapshot_out and args.cases_out and args.snapshot_out.resolve() == args.cases_out.resolve():
-        parser.error("--snapshot-out e --cases-out precisam de caminhos diferentes")
+    output_paths = [path.resolve() for path in (args.snapshot_out, args.cases_out, args.publication_intake_out) if path]
+    if len(output_paths) != len(set(output_paths)):
+        parser.error("arquivos de saída precisam de caminhos diferentes")
 
     if args.input_jsonl:
         groups = _load_snapshot(args.input_jsonl, args.limit)
@@ -106,6 +109,9 @@ def main() -> None:
     individual_publications = 0
     publication_items = 0
     pending_documents = 0
+    intake_ready = 0
+    intake_blocked: Counter[str] = Counter()
+    intake_items = []
     cases = []
     for group in groups:
         result = build_triage_preview(group, refresh_documents=not (args.input_jsonl or args.snapshot_out))
@@ -117,8 +123,17 @@ def main() -> None:
         individual_publications += bool(result["publicacoes_para_analise_individual"])
         publication_items += len(result["publicacoes_para_analise_individual"])
         pending_documents += len(result["documentos_pendentes"])
+        if args.publication_intake_out:
+            prepared = build_publication_intake_preview(group, refresh_documents=not (args.input_jsonl or args.snapshot_out))
+            if prepared["ready"]:
+                intake_ready += 1
+                intake_items.extend(prepared["items"])
+            else:
+                intake_blocked.update(prepared["reasons"])
     if args.cases_out:
         _write_private_jsonl(args.cases_out, cases)
+    if args.publication_intake_out:
+        _write_private_jsonl(args.publication_intake_out, intake_items)
 
     print(json.dumps({
         "grupos_analisados": len(groups),
@@ -128,6 +143,9 @@ def main() -> None:
         "grupos_com_publicacao_para_analise_individual": individual_publications,
         "publicacoes_para_analise_individual": publication_items,
         "documentos_pendentes_de_analise": pending_documents,
+        "intake_v2_publicacoes_elegiveis": intake_ready,
+        "intake_v2_itens": len(intake_items),
+        "intake_v2_bloqueios": intake_blocked,
         "escopo": "snapshot_local" if args.input_jsonl else "avisos_correntes_sem_origem_migracao",
         "efeito": "somente_leitura_sem_envio",
     }, ensure_ascii=False, indent=2))
