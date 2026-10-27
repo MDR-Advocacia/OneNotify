@@ -27,6 +27,7 @@ FLOW_INTAKE_API_KEY = (
 FLOW_SYNC_ENABLED = os.getenv("FLOW_SYNC_ENABLED", "false").strip().lower() in {"1", "true", "yes", "sim", "on"}
 FLOW_SYNC_BATCH_SIZE = int(os.getenv("FLOW_SYNC_BATCH_SIZE", "100"))
 FLOW_SYNC_TIMEOUT_SECONDS = int(os.getenv("FLOW_SYNC_TIMEOUT_SECONDS", "30"))
+NON_MIGRATION_WHERE = "LOWER(TRIM(COALESCE(origem, ''))) <> 'migracao'"
 
 
 def _now_iso() -> str:
@@ -322,6 +323,7 @@ def build_triage_preview(row: Any) -> dict[str, Any]:
     if result["erros_json"]:
         result["motivos_revisao"].append("json_invalido_em_linha_do_dossie")
         result["apto_para_etapa_publicacao"] = False
+        result["publicacoes_para_analise_individual"] = []
         result["status"] = "REVISAO_NECESSARIA"
     return result
 
@@ -382,12 +384,15 @@ def list_candidate_groups(
     limit: int | None = None,
     only_publicacao: bool = False,
     exclude_document_groups: bool = False,
+    exclude_migration: bool = False,
 ) -> list[dict[str, Any]]:
     where = [
         "data_notificacao IS NOT NULL",
         "(rpa_status = 'PROCESSADO' OR status IN ('Processado', 'Tratada', 'Migrado', 'Arquivado'))",
     ]
     params: list[Any] = []
+    if exclude_migration:
+        where.append(NON_MIGRATION_WHERE)
     if not force:
         condition, condition_params = _flow_pending_condition(retry_errors)
         where.append(condition)
@@ -447,12 +452,14 @@ def fetch_group(npj: str, data_notificacao: str) -> dict[str, Any] | None:
 def _triage_rows_for_keys(keys: list[tuple[str, str]]) -> list[dict[str, Any]]:
     if not keys:
         return []
-    query = """
+    conditions = " OR ".join("(NPJ = ? AND data_notificacao = ?)" for _ in keys)
+    query = f"""
         SELECT id, NPJ AS npj, data_notificacao, tipo_notificacao, data_criacao,
                andamentos, documentos, documentos_json
         FROM notificacoes
-        WHERE
-    """ + " OR ".join("(NPJ = ? AND data_notificacao = ?)" for _ in keys) + " ORDER BY id"
+        WHERE {NON_MIGRATION_WHERE} AND ({conditions})
+        ORDER BY id
+    """
     params = [part for key in keys for part in key]
     with db_adapter.connect_main() as conn:
         return [_row_to_dict(row) for row in conn.execute(query, params).fetchall()]
@@ -460,7 +467,7 @@ def _triage_rows_for_keys(keys: list[tuple[str, str]]) -> list[dict[str, Any]]:
 
 def list_triage_groups(days: int | None = None, limit: int = 500) -> list[dict[str, Any]]:
     """Seleciona chaves como a prévia antiga, mas reúne todas as linhas de cada dossiê."""
-    candidates = list_candidate_groups(days=days, force=True, limit=limit)
+    candidates = list_candidate_groups(days=days, force=True, limit=limit, exclude_migration=True)
     keys = [(str(row["npj"]), str(row["data_notificacao"])) for row in candidates]
     by_key: dict[tuple[str, str], list[dict[str, Any]]] = {key: [] for key in keys}
     for start in range(0, len(keys), 100):

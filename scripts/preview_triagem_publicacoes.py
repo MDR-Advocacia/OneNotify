@@ -35,17 +35,27 @@ def main() -> None:
     statuses: Counter[str] = Counter()
     reasons: Counter[str] = Counter()
     documents: Counter[str] = Counter()
+    individual_publications = 0
+    publication_items = 0
+    pending_documents = 0
     for group in groups:
         result = build_triage_preview(group)
         statuses[result["status"]] += 1
         reasons.update(result["motivos_revisao"])
         documents.update(item["relacao"] for item in result["documentos"])
+        individual_publications += bool(result["publicacoes_para_analise_individual"])
+        publication_items += len(result["publicacoes_para_analise_individual"])
+        pending_documents += len(result["documentos_pendentes"])
 
     print(json.dumps({
         "grupos_analisados": len(groups),
         "status": statuses,
         "motivos_revisao": reasons,
         "relacao_documentos": documents,
+        "grupos_com_publicacao_para_analise_individual": individual_publications,
+        "publicacoes_para_analise_individual": publication_items,
+        "documentos_pendentes_de_analise": pending_documents,
+        "escopo": "avisos_correntes_sem_origem_migracao",
         "efeito": "somente_leitura_sem_envio",
     }, ensure_ascii=False, indent=2))
 

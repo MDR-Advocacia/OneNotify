@@ -24,6 +24,10 @@ de cada arquivo nas linhas, sem inferir qual aviso causou sua inclusão.
 - TXT de erro ou link, PDF sem texto, OCR pendente, extração truncada, texto
   longo demais, outro andamento e vários atos distintos permanecem em revisão.
   Um hash igual entre dois arquivos não prova que sejam a publicação.
+- O TXT do BB com campo explícito `Link documento:` é identificado como
+  `LINK_DOCUMENTO_PENDENTE`. A prévia conserva o endereço e indica que o
+  original precisa ser obtido; não abre links nem supõe que seu conteúdo seja
+  igual à publicação.
 - Sem andamento DJ/DO, um PDF ainda pode trazer sentença, decisão ou intimação.
   Título de ato judicial junto de CNJ no texto produz
   `POSSIVEL_ATO_EM_DOCUMENTO`, sempre para investigação; não prova publicação
@@ -40,6 +44,30 @@ de cada arquivo nas linhas, sem inferir qual aviso causou sua inclusão.
 O nome `COM_REPETICOES_COMPROVADAS` indica que a regra textual passou. Ele não
 substitui a conferência jurídica do piloto nem prova que todos os documentos
 da janela pertençam à notificação que gerou o grupo.
+
+## Plano individual na prévia local — 27/10/2026
+
+O resultado também traz `publicacoes_para_analise_individual`,
+`documentos_pendentes` e `andamentos_pendentes`. Uma publicação com texto útil
+continua identificada para a próxima análise mesmo quando um PDF, TXT ou outro
+andamento do mesmo NPJ/data exige revisão. Isso **não** libera o dossiê inteiro:
+`apto_para_etapa_publicacao` continua falso enquanto houver pendência. JSON
+inválido em qualquer linha suspende até a indicação individual, pois pode
+ocultar outra publicação.
+
+Quando há várias publicações distintas no mesmo dia, a prévia compara cada
+documento com cada uma. Uma repetição textual ligada a uma única publicação
+guarda o ID dessa publicação; compatibilidade com mais de uma permanece para
+conferência. Cada documento indica a próxima análise sugerida, preservando os
+demais arquivos da janela. Isso prepara decisões **por item**, ainda sem
+conciliação ou providência automática no Flow.
+
+A listagem da prévia exclui linhas cuja `origem` é `migracao`, conforme a decisão
+de Rildon de deixar o legado Ajus fora do recorte atual. Isso não altera os
+registros produtivos nem a seleção existente do sincronizador Flow. O comando
+agregado passou a contar publicações identificadas individualmente e documentos
+pendentes, além dos estados por dossiê. As contagens de 02/10 abaixo são a
+fotografia anterior a este bloco e não foram recalculadas.
 
 ## Medição de 02/10/2026
 

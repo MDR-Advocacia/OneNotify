@@ -13,12 +13,14 @@ import unicodedata
 from collections import Counter
 from difflib import SequenceMatcher
 from typing import Any
+from urllib.parse import urlsplit
 
 
 SCHEMA_VERSION = "onenotify.publication-triage.v1"
 MIN_EQUIVALENT_TOKENS = 20
 MAX_COMPARE_TOKENS = 2500
 CNJ_PATTERN = re.compile(r"\b\d{7}-\d{2}\.\d{4}\.\d\.\d{2}\.\d{4}\b")
+DOCUMENT_LINK_PATTERN = re.compile(r"(?im)^\s*link\s+documento\s*:\s*(https?://[^\s<>]+)")
 EXTRA_DECISION_WORDS = {"defiro", "indefiro", "julgo", "condeno", "determino", "homologo"}
 CRITICAL_WORDS = {
     "defiro", "indefiro", "deferido", "indeferido", "procedente", "improcedente",
@@ -191,6 +193,23 @@ def _document_has_judicial_act(text: str) -> bool:
     return bool(heading and CNJ_PATTERN.search(text))
 
 
+def _missing_document_link(name: Any, text: str) -> str | None:
+    """Identifica o link explícito do TXT do BB; não abre endereço externo."""
+    if not str(name or "").casefold().endswith((".txt", ".text")):
+        return None
+    match = DOCUMENT_LINK_PATTERN.search(text)
+    if not match:
+        return None
+    url = match.group(1).rstrip(".,;)")
+    try:
+        parts = urlsplit(url)
+    except ValueError:
+        return None
+    if parts.scheme not in {"http", "https"} or not parts.hostname or parts.username or parts.password:
+        return None
+    return url
+
+
 def _deadline_signatures(value: str) -> set[str]:
     tokens = _tokens(value)
     return {
@@ -286,7 +305,10 @@ def analisar_dossie(
         publications[identity]["indices_andamentos"].append(index)
 
     publication_list = list(publications.values())
-    reference_tokens = _tokens(publication_list[0]["texto"]) if len(publication_list) == 1 else []
+    publication_tokens = {
+        publication["id"]: _tokens(publication["texto"])
+        for publication in publication_list if publication["texto_util"]
+    }
     documents = []
     total_documents = max(len(items), len(originais))
     for index in range(total_documents):
@@ -295,35 +317,78 @@ def analisar_dossie(
         extraction = item.get("extraction") or {}
         text = _document_text(item)
         tokens = _tokens(text)
+        name = item.get("nome") or original.get("nome")
+        missing_link = _missing_document_link(name, text)
         relation = "NAO_ANALISADO"
         reason = "sem_andamento_publicacao_unico"
         evidence = None
-        if reference_tokens:
+        publication_ids: list[str] = []
+        if missing_link:
+            relation, reason = "LINK_DOCUMENTO_PENDENTE", "txt_indica_original_nao_obtido"
+        elif publication_tokens:
             if not item or extraction.get("status") != "ok" or extraction.get("truncated") or extraction.get("ocr_required"):
                 relation, reason = "INCONCLUSIVO", "texto_ausente_incompleto_ou_imagem"
             elif len(tokens) < MIN_EQUIVALENT_TOKENS:
                 relation, reason = "INCONCLUSIVO", "texto_curto_ou_insuficiente"
-            elif tokens == reference_tokens:
-                relation, reason = "REPETE_PUBLICACAO", "texto_integral_normalizado_igual"
-            elif len(reference_tokens) > MAX_COMPARE_TOKENS or len(tokens) > MAX_COMPARE_TOKENS:
-                relation, reason = "INCONCLUSIVO", "texto_longo_sem_comparacao_segura"
+            elif len(tokens) > MAX_COMPARE_TOKENS:
+                publication_ids = [
+                    pub_id for pub_id, reference in publication_tokens.items()
+                    if tokens == reference
+                ]
+                if len(publication_ids) == 1:
+                    relation, reason = "REPETE_PUBLICACAO", "texto_integral_normalizado_igual"
+                elif len(publication_ids) > 1:
+                    relation, reason = "CANDIDATO_MESMO_ATO", "mais_de_uma_publicacao_compativel"
+                else:
+                    relation, reason = "INCONCLUSIVO", "texto_longo_sem_comparacao_segura"
             else:
-                evidence = _candidate_overlap(reference_tokens, tokens)
-                if _same_core(publication_list[0]["texto"], text, evidence):
-                    relation, reason = "REPETE_PUBLICACAO", "nucleo_final_identico_com_cnj_compartilhado"
-                elif evidence["longest_common_tokens"] >= 40:
+                strong: list[tuple[str, str, Any]] = []
+                possible: list[tuple[str, Any]] = []
+                for publication in publication_list:
+                    reference = publication_tokens.get(publication["id"])
+                    if not reference:
+                        continue
+                    if tokens == reference:
+                        strong.append((publication["id"], "texto_integral_normalizado_igual", None))
+                        continue
+                    if len(reference) > MAX_COMPARE_TOKENS:
+                        continue
+                    overlap = _candidate_overlap(reference, tokens)
+                    if _same_core(publication["texto"], text, overlap):
+                        strong.append((publication["id"], "nucleo_final_identico_com_cnj_compartilhado", overlap))
+                    elif overlap["longest_common_tokens"] >= 40:
+                        possible.append((publication["id"], overlap))
+                publication_ids = [entry[0] for entry in strong] + [entry[0] for entry in possible]
+                if len(strong) == 1 and not possible:
+                    _, reason, evidence = strong[0]
+                    relation = "REPETE_PUBLICACAO"
+                elif len(publication_ids) > 1:
+                    relation, reason = "CANDIDATO_MESMO_ATO", "mais_de_uma_publicacao_compativel"
+                elif possible:
                     relation, reason = "CANDIDATO_MESMO_ATO", "trecho_longo_em_comum_sem_equivalencia_integral"
+                    evidence = possible[0][1]
+                elif any(len(reference) > MAX_COMPARE_TOKENS for reference in publication_tokens.values()):
+                    relation, reason = "INCONCLUSIVO", "texto_longo_sem_comparacao_segura"
                 else:
                     relation, reason = "INCONCLUSIVO", "conteudo_nao_equivalente"
         elif _document_has_judicial_act(text):
             relation, reason = "ATO_JUDICIAL_CANDIDATO", "peca_judicial_no_documento_sem_andamento_dj_do"
+        next_steps = {
+            "REPETE_PUBLICACAO": "RELACIONAR_A_PUBLICACAO",
+            "LINK_DOCUMENTO_PENDENTE": "OBTER_ORIGINAL_DO_LINK",
+            "ATO_JUDICIAL_CANDIDATO": "CONFERIR_COBERTURA_DO_ATO",
+            "CANDIDATO_MESMO_ATO": "CONFERIR_EQUIVALENCIA",
+        }
         documents.append({
             "indice": index,
-            "nome": item.get("nome") or original.get("nome"),
+            "nome": name,
             "sha256": item.get("sha256"),
             "relacao": relation,
             "motivo": reason,
             "evidencia": evidence,
+            "publicacao_ids_candidatas": publication_ids,
+            "link_original": missing_link,
+            "proxima_analise": next_steps.get(relation, "ANALISAR_CONTEUDO"),
         })
 
     reasons = []
@@ -339,6 +404,13 @@ def analisar_dossie(
         reasons.append("documentos_sem_equivalencia_comprovada")
 
     automatic = not reasons
+    # Uma peça incerta na janela não apaga uma publicação identificável. Esta
+    # indicação é só para a próxima análise por item; não libera o grupo nem
+    # autoriza envio, descarte ou conclusão de qualquer documento.
+    publication_candidates = [publication["id"] for publication in publication_list if publication["texto_util"]]
+    pending_documents = [
+        doc["indice"] for doc in documents if doc["relacao"] != "REPETE_PUBLICACAO"
+    ]
     if not publication_list and any(doc["relacao"] == "ATO_JUDICIAL_CANDIDATO" for doc in documents):
         status = "POSSIVEL_ATO_EM_DOCUMENTO"
     elif not publication_list:
@@ -354,6 +426,9 @@ def analisar_dossie(
         "schema_version": SCHEMA_VERSION,
         "status": status,
         "apto_para_etapa_publicacao": automatic,
+        "publicacoes_para_analise_individual": publication_candidates,
+        "documentos_pendentes": pending_documents,
+        "andamentos_pendentes": other_movements,
         "publicacoes": publication_list,
         "documentos": documents,
         "outros_andamentos": other_movements,

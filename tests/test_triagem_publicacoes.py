@@ -1,7 +1,12 @@
 import unittest
 import json
+import os
+import sqlite3
+import tempfile
+from pathlib import Path
+from unittest.mock import patch
 
-from flow_sync import build_triage_preview
+from flow_sync import build_triage_preview, fetch_triage_group, list_candidate_groups, list_triage_groups
 from triagem_publicacoes import analisar_dossie, reunir_linhas_notificacao
 
 
@@ -55,6 +60,9 @@ class PublicationTriageTest(unittest.TestCase):
         self.assertIn("outros_andamentos_na_janela", result["motivos_revisao"])
         self.assertIn("documentos_sem_equivalencia_comprovada", result["motivos_revisao"])
         self.assertEqual(result["documentos"][0]["relacao"], "INCONCLUSIVO")
+        self.assertEqual(len(result["publicacoes_para_analise_individual"]), 1)
+        self.assertEqual(result["documentos_pendentes"], [0])
+        self.assertEqual(result["andamentos_pendentes"], [1])
 
     def test_scanned_document_does_not_become_repeat(self):
         result = analisar_dossie(
@@ -63,11 +71,44 @@ class PublicationTriageTest(unittest.TestCase):
         )
         self.assertEqual(result["status"], "REVISAO_NECESSARIA")
 
+    def test_bb_txt_link_stays_pending_without_blocking_publication_item(self):
+        txt = document(
+            "Arquivos adicionais não foram acessados pelo robô.\n"
+            "Link documento: https://tribunal.example/processo/123/arquivo.pdf"
+        )
+        txt["items"][0]["nome"] = "nao-obtido.txt"
+        result = analisar_dossie([PUBLICATION], txt)
+        self.assertEqual(result["status"], "REVISAO_NECESSARIA")
+        self.assertEqual(len(result["publicacoes_para_analise_individual"]), 1)
+        self.assertEqual(result["documentos_pendentes"], [0])
+        self.assertEqual(result["documentos"][0]["relacao"], "LINK_DOCUMENTO_PENDENTE")
+        self.assertEqual(result["documentos"][0]["proxima_analise"], "OBTER_ORIGINAL_DO_LINK")
+        self.assertEqual(result["documentos"][0]["link_original"], "https://tribunal.example/processo/123/arquivo.pdf")
+
+    def test_unrelated_pdf_url_does_not_become_missing_document(self):
+        pdf = document("Consulte https://tribunal.example para informações gerais.")
+        result = analisar_dossie([PUBLICATION], pdf)
+        self.assertNotEqual(result["documentos"][0]["relacao"], "LINK_DOCUMENTO_PENDENTE")
+
     def test_distinct_publications_same_day_are_not_collapsed(self):
         another = dict(PUBLICATION, detalhes=PUBLICATION["detalhes"] + " Nova decisao.")
         result = analisar_dossie([PUBLICATION, another], {"items": []})
         self.assertEqual(len(result["publicacoes"]), 2)
         self.assertFalse(result["apto_para_etapa_publicacao"])
+
+    def test_two_publications_keep_individual_pdf_match_and_residual_document(self):
+        first = dict(PUBLICATION, detalhes="Processo 1234567-89.2026.8.01.0001. " + PUBLICATION["detalhes"])
+        second = dict(PUBLICATION, detalhes="Processo 1234567-89.2026.8.01.0001. " + PUBLICATION["detalhes"].replace("prosseguimento", "extinção"))
+        matched = document(first["detalhes"])["items"][0]
+        unmatched = document("Comunicação do banco sobre comprovante de pagamento de custa judicial.")["items"][0]
+        unmatched["nome"] = "comprovante.pdf"
+        unmatched["sha256"] = "different"
+        result = analisar_dossie([first, second], {"items": [matched, unmatched]})
+        self.assertEqual(result["status"], "REVISAO_NECESSARIA")
+        self.assertEqual(len(result["publicacoes_para_analise_individual"]), 2)
+        self.assertEqual(result["documentos"][0]["relacao"], "REPETE_PUBLICACAO")
+        self.assertEqual(result["documentos"][0]["publicacao_ids_candidatas"], [result["publicacoes"][0]["id"]])
+        self.assertEqual(result["documentos_pendentes"], [1])
 
     def test_same_final_act_with_pdf_header_can_be_consolidated(self):
         cnj = "1234567-89.2026.8.01.0001"
@@ -192,6 +233,41 @@ class PublicationTriageTest(unittest.TestCase):
         self.assertEqual(result["status"], "REVISAO_NECESSARIA")
         self.assertFalse(result["apto_para_etapa_publicacao"])
         self.assertEqual(result["erros_json"], [{"id_notificacao": 41, "campo": "andamentos"}])
+        self.assertEqual(result["publicacoes_para_analise_individual"], [])
+
+    def test_preview_excludes_migration_even_in_mixed_npj_date(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            db_path = str(Path(temp_dir) / "notify.sqlite")
+            with sqlite3.connect(db_path) as conn:
+                conn.execute("""
+                    CREATE TABLE notificacoes (
+                        id INTEGER PRIMARY KEY, NPJ TEXT, data_notificacao TEXT,
+                        origem TEXT, status TEXT, rpa_status TEXT, flow_status TEXT,
+                        tipo_notificacao TEXT, data_criacao TEXT,
+                        adverso_principal TEXT, numero_processo TEXT, polo TEXT,
+                        bb_ciencia_status TEXT, human_status TEXT, responsavel TEXT,
+                        data_processamento TEXT, detalhes_erro TEXT,
+                        andamentos TEXT, documentos TEXT, documentos_json TEXT
+                    )
+                """)
+                rows = [
+                    (1, "N1", "24/09/2026", "migracao", json.dumps([{"descricao": "OUTRO"}])),
+                    (2, "N1", "24/09/2026", "onenotify", json.dumps([PUBLICATION])),
+                    (3, "N2", "23/09/2026", "migracao", json.dumps([PUBLICATION])),
+                ]
+                conn.executemany("""
+                    INSERT INTO notificacoes (
+                        id, NPJ, data_notificacao, origem, andamentos,
+                        status, tipo_notificacao, documentos, documentos_json
+                    ) VALUES (?, ?, ?, ?, ?, 'Processado', 'Andamento', '[]', '{"items": []}')
+                """, rows)
+            with patch.dict(os.environ, {"SQLITE_DATABASE_PATH": db_path, "DATABASE_URL": ""}):
+                self.assertEqual(len(list_candidate_groups(force=True, limit=10)), 2)
+                groups = list_triage_groups(days=None, limit=10)
+                self.assertEqual(len(groups), 1)
+                self.assertEqual(groups[0]["ids"], "2")
+                self.assertEqual(build_triage_preview(groups[0])["status"], "PUBLICACAO_ISOLADA")
+                self.assertIsNone(fetch_triage_group("N2", "23/09/2026"))
 
 
 if __name__ == "__main__":
