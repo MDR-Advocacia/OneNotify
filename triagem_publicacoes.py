@@ -21,6 +21,9 @@ MIN_EQUIVALENT_TOKENS = 20
 MAX_COMPARE_TOKENS = 2500
 CNJ_PATTERN = re.compile(r"\b\d{7}-\d{2}\.\d{4}\.\d\.\d{2}\.\d{4}\b")
 DOCUMENT_LINK_PATTERN = re.compile(r"(?im)^\s*link\s+documento\s*:\s*(https?://[^\s<>]+)")
+PJE_DOCUMENT_ID_PATTERN = re.compile(
+    r"(?i)(?:consultadocumento/listview\.seam\?x=|n[uú]mero\s+do\s+documento\s*:?\s*)(\d{20,})"
+)
 EXTRA_DECISION_WORDS = {"defiro", "indefiro", "julgo", "condeno", "determino", "homologo"}
 CRITICAL_WORDS = {
     "defiro", "indefiro", "deferido", "indeferido", "procedente", "improcedente",
@@ -265,6 +268,27 @@ def _same_core(publication_text: str, document_text: str, evidence: dict[str, An
     return not EXTRA_DECISION_WORDS.intersection(unmatched_document)
 
 
+def _same_pje_document(publication_text: str, document_text: str, evidence: dict[str, Any]) -> str | None:
+    """Confirma a mesma peça de origem com texto compatível, sem usar só o link."""
+    publication_ids = set(PJE_DOCUMENT_ID_PATTERN.findall(publication_text))
+    document_ids = set(PJE_DOCUMENT_ID_PATTERN.findall(document_text))
+    if len(publication_ids) != 1 or publication_ids != document_ids:
+        return None
+    publication_cnjs = set(CNJ_PATTERN.findall(publication_text))
+    document_cnjs = set(CNJ_PATTERN.findall(document_text))
+    if len(publication_cnjs) != 1 or publication_cnjs != document_cnjs:
+        return None
+    if evidence["longest_common_tokens"] < 40:
+        return None
+    publication_critical = Counter(token for token in _tokens(publication_text) if token in CRITICAL_WORDS)
+    document_critical = Counter(token for token in _tokens(document_text) if token in CRITICAL_WORDS)
+    if publication_critical != document_critical:
+        return None
+    if _deadline_signatures(publication_text) != _deadline_signatures(document_text):
+        return None
+    return next(iter(publication_ids))
+
+
 def analisar_dossie(
     andamentos: Any,
     documentos_json: Any,
@@ -356,6 +380,10 @@ def analisar_dossie(
                     overlap = _candidate_overlap(reference, tokens)
                     if _same_core(publication["texto"], text, overlap):
                         strong.append((publication["id"], "nucleo_final_identico_com_cnj_compartilhado", overlap))
+                    elif source_id := _same_pje_document(publication["texto"], text, overlap):
+                        strong.append((publication["id"], "mesmo_documento_pje_com_texto_compativel", {
+                            **overlap, "documento_pje_id": source_id,
+                        }))
                     elif overlap["longest_common_tokens"] >= 40:
                         possible.append((publication["id"], overlap))
                 publication_ids = [entry[0] for entry in strong] + [entry[0] for entry in possible]
@@ -411,6 +439,25 @@ def analisar_dossie(
     pending_documents = [
         doc["indice"] for doc in documents if doc["relacao"] != "REPETE_PUBLICACAO"
     ]
+    publication_items = [
+        {
+            "id_publicacao": publication["id"],
+            "data_publicacao": publication["data"],
+            "indices_andamentos": publication["indices_andamentos"],
+            "texto_util": publication["texto_util"],
+            "documentos_repetidos": [
+                doc["indice"] for doc in documents
+                if doc["relacao"] == "REPETE_PUBLICACAO"
+                and doc["publicacao_ids_candidatas"] == [publication["id"]]
+            ],
+            "documentos_candidatos_em_revisao": [
+                doc["indice"] for doc in documents
+                if doc["relacao"] == "CANDIDATO_MESMO_ATO"
+                and publication["id"] in doc["publicacao_ids_candidatas"]
+            ],
+        }
+        for publication in publication_list
+    ]
     if not publication_list and any(doc["relacao"] == "ATO_JUDICIAL_CANDIDATO" for doc in documents):
         status = "POSSIVEL_ATO_EM_DOCUMENTO"
     elif not publication_list:
@@ -427,6 +474,7 @@ def analisar_dossie(
         "status": status,
         "apto_para_etapa_publicacao": automatic,
         "publicacoes_para_analise_individual": publication_candidates,
+        "itens_publicacao": publication_items,
         "documentos_pendentes": pending_documents,
         "andamentos_pendentes": other_movements,
         "publicacoes": publication_list,

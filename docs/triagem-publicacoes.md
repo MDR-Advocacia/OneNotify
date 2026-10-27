@@ -21,6 +21,11 @@ de cada arquivo nas linhas, sem inferir qual aviso causou sua inclusão.
   diferente pode entrar em `PUBLICACAO_COM_REPETICOES_COMPROVADAS` quando há um
   núcleo final idêntico longo, CNJ único igual e termos decisórios/prazos
   preservados. A evidência e a razão ficam no resultado.
+- Quando a publicação e o PDF apontam para um único **mesmo ID de documento do
+  PJe**, a prévia também pode ligar os dois se houver pelo menos 40 tokens
+  consecutivos em comum, CNJ único igual e os mesmos termos decisórios/prazos.
+  O ID isolado não basta; PDFs com outros processos ou IDs permanecem em
+  revisão. A ligação conserva o PDF e registra o ID da peça como evidência.
 - TXT de erro ou link, PDF sem texto, OCR pendente, extração truncada, texto
   longo demais, outro andamento e vários atos distintos permanecem em revisão.
   Um hash igual entre dois arquivos não prova que sejam a publicação.
@@ -48,7 +53,10 @@ da janela pertençam à notificação que gerou o grupo.
 ## Plano individual na prévia local — 27/10/2026
 
 O resultado também traz `publicacoes_para_analise_individual`,
-`documentos_pendentes` e `andamentos_pendentes`. Uma publicação com texto útil
+`itens_publicacao`, `documentos_pendentes` e `andamentos_pendentes`. Cada item
+de publicação aponta para seus índices de andamento, PDFs repetidos ligados
+unicamente a ele e PDFs ainda candidatos em revisão. O relatório privado por
+caso inclui esse mapa sem duplicar o texto das peças. Uma publicação com texto útil
 continua identificada para a próxima análise mesmo quando um PDF, TXT ou outro
 andamento do mesmo NPJ/data exige revisão. Isso **não** libera o dossiê inteiro:
 `apto_para_etapa_publicacao` continua falso enquanto houver pendência. JSON
@@ -139,7 +147,9 @@ python scripts/preview_triagem_publicacoes.py \
 O snapshot contém dados completos do dossiê, **inclusive textos, identificadores,
 caminhos e URLs**. Guardá-lo em pasta privada e não anexá-lo ao repositório ou PR.
 Os dois tipos de saída são criados com permissão `0600` e nunca sobrescrevem um
-arquivo existente; o relatório por caso ainda contém o NPJ. No replay, o texto
+arquivo existente; o relatório por caso ainda contém o NPJ e a evidência
+técnica, inclusive o ID da peça PJe quando houver, mas não o texto ou URL.
+No replay, o texto
 congelado é usado sem reler o arquivo original. A extração do PDF requer a
 dependência `pypdf` do projeto no ambiente que faz a exportação.
 
@@ -177,3 +187,30 @@ o conteúdo e verificar cobertura em outros fluxos antes de propor trabalho.
 No mesmo retorno da RPA, os novos registros ainda estavam `PENDENTE`, sem
 andamentos ou documentos extraídos. Eles ficaram fora deste replay. Esta
 amostra dirigida não mede a acurácia da regra nem a proporção do backlog.
+
+## Validação ampliada da referência PJe — 27/10/2026
+
+Em 1.000 dossiês `PROCESSADO` capturados de 01 a 13/10 (1.254 notificações),
+o replay local anterior à nova referência PJe produziu 452 publicações
+isoladas, 4 dossiês com repetição comprovada, 379 em revisão, 67 possíveis
+atos em documento e 98 sem andamento DJ/DO capturado. Havia 1.210 publicações
+individuais, 429 documentos pendentes e nenhum JSON inválido.
+
+Cinco PDFs já tinham passado no critério de núcleo textual; os trechos
+desiguais eram cabeçalhos, metadados ou rodapés da peça. Um desses dossiês
+continuava em revisão por conter outro documento. A inspeção dos candidatos
+mostrou PDFs cujo texto diferia pela extração e formatação, mas apontava para
+o **mesmo identificador da peça no PJe** presente na publicação. A regra nova
+exige esse ID único em ambos os textos, CNJ único igual, trecho comum mínimo
+de 40 tokens e termos decisórios/prazos iguais. Não usa coincidência de
+processo, data ou link isoladamente.
+
+No replay com a regra nova, 30 PDFs adicionais foram relacionados à
+publicação. Os dossiês com repetição comprovada passaram de 4 para 17 e os
+em revisão de 379 para 366; 37 documentos continuaram apenas candidatos.
+Os demais totais não mudaram. A diferença entre 30 documentos relacionados
+e 13 dossiês liberados ocorre porque outros arquivos/andamentos no mesmo
+dossiê continuam pendentes. Esta é **validação técnica local**, não decisão de
+descarte nem medida de acurácia jurídica. Os PDFs e sua proveniência são
+preservados para revisão; a integração produtiva com o Flow não consome a
+nova relação.

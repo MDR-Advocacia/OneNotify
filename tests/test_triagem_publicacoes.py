@@ -114,6 +114,10 @@ class PublicationTriageTest(unittest.TestCase):
         self.assertEqual(result["documentos"][0]["relacao"], "REPETE_PUBLICACAO")
         self.assertEqual(result["documentos"][0]["publicacao_ids_candidatas"], [result["publicacoes"][0]["id"]])
         self.assertEqual(result["documentos_pendentes"], [1])
+        self.assertEqual(len(result["itens_publicacao"]), 2)
+        self.assertEqual(result["itens_publicacao"][0]["documentos_repetidos"], [0])
+        self.assertEqual(result["itens_publicacao"][1]["documentos_repetidos"], [])
+        self.assertTrue(all(item["texto_util"] for item in result["itens_publicacao"]))
 
     def test_same_final_act_with_pdf_header_can_be_consolidated(self):
         cnj = "1234567-89.2026.8.01.0001"
@@ -123,6 +127,54 @@ class PublicationTriageTest(unittest.TestCase):
         result = analisar_dossie([publication], document(pdf))
         self.assertEqual(result["status"], "PUBLICACAO_COM_REPETICOES_COMPROVADAS")
         self.assertEqual(result["documentos"][0]["motivo"], "nucleo_final_identico_com_cnj_compartilhado")
+
+    def test_same_pje_document_with_formatting_changes_is_one_source(self):
+        cnj = "1234567-89.2026.8.01.0001"
+        source_id = "26100810254396000000188354867"
+        body = " ".join(f"trecho{i}" for i in range(55))
+        publication = dict(PUBLICATION, detalhes=(
+            f"Processo {cnj}. https://pje.example/consultadocumento/listView.seam?x={source_id} "
+            f"Intimacao. {body}"
+        ))
+        footer = " ".join(f"rodape{i}" for i in range(55))
+        pdf = (f"Processo {cnj}. Intimacao. {body} {footer} "
+               f"Número do documento: {source_id}")
+        result = analisar_dossie([publication], document(pdf))
+        self.assertEqual(result["status"], "PUBLICACAO_COM_REPETICOES_COMPROVADAS")
+        self.assertEqual(result["documentos"][0]["motivo"], "mesmo_documento_pje_com_texto_compativel")
+        self.assertEqual(result["documentos"][0]["evidencia"]["documento_pje_id"], source_id)
+
+        other_id = "26100810254396000000188354868"
+        different_source = analisar_dossie([publication], document(pdf.replace(source_id, other_id)))
+        self.assertNotEqual(different_source["documentos"][0]["relacao"], "REPETE_PUBLICACAO")
+
+    def test_pje_id_alone_does_not_hide_distinct_content(self):
+        cnj = "1234567-89.2026.8.01.0001"
+        source_id = "26100810254396000000188354867"
+        body = " ".join(f"trecho{i}" for i in range(55))
+        publication = dict(PUBLICATION, detalhes=(
+            f"Processo {cnj}. https://pje.example/consultadocumento/listView.seam?x={source_id} "
+            f"Prazo de 15 dias. {body}"
+        ))
+        pdf = (f"Processo {cnj}. Prazo de 5 dias. {body} "
+               f"Número do documento: {source_id} "
+               + " ".join(f"rodape{i}" for i in range(55)))
+        result = analisar_dossie([publication], document(pdf))
+        self.assertNotEqual(result["documentos"][0]["relacao"], "REPETE_PUBLICACAO")
+        self.assertFalse(result["apto_para_etapa_publicacao"])
+
+    def test_pje_id_in_process_bundle_is_not_enough(self):
+        cnj = "1234567-89.2026.8.01.0001"
+        source_id = "26100810254396000000188354867"
+        body = " ".join(f"trecho{i}" for i in range(55))
+        publication = dict(PUBLICATION, detalhes=(
+            f"Processo {cnj}. https://pje.example/consultadocumento/listView.seam?x={source_id} {body}"
+        ))
+        pdf = (f"Processo {cnj} e processo 1234567-89.2026.8.01.0002. {body} "
+               f"Número do documento: {source_id} "
+               + " ".join(f"rodape{i}" for i in range(55)))
+        result = analisar_dossie([publication], document(pdf))
+        self.assertNotEqual(result["documentos"][0]["relacao"], "REPETE_PUBLICACAO")
 
     def test_opposite_decision_before_common_tail_is_not_consolidated(self):
         cnj = "1234567-89.2026.8.01.0001"
@@ -312,6 +364,7 @@ class PublicationTriageTest(unittest.TestCase):
             self.assertEqual(summary["documentos_pendentes_de_analise"], 1)
             report = cases.read_text(encoding="utf-8")
             self.assertIn("LINK_DOCUMENTO_PENDENTE", report)
+            self.assertIn("itens_publicacao", report)
             self.assertNotIn("tribunal.example", report)
             self.assertNotIn(PUBLICATION["detalhes"], report)
             self.assertEqual(cases.stat().st_mode & 0o777, 0o600)

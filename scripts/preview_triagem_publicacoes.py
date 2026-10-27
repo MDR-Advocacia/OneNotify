@@ -49,6 +49,7 @@ def _case_summary(result: dict) -> dict:
         "external_group_id": result["external_group_id"],
         "status": result["status"],
         "publicacoes_para_analise_individual": result["publicacoes_para_analise_individual"],
+        "itens_publicacao": result["itens_publicacao"],
         "documentos_pendentes": result["documentos_pendentes"],
         "andamentos_pendentes": result["andamentos_pendentes"],
         "motivos_revisao": result["motivos_revisao"],
@@ -57,6 +58,7 @@ def _case_summary(result: dict) -> dict:
                 "indice": doc["indice"],
                 "relacao": doc["relacao"],
                 "motivo": doc["motivo"],
+                "evidencia": doc["evidencia"],
                 "publicacao_ids_candidatas": doc["publicacao_ids_candidatas"],
                 "proxima_analise": doc["proxima_analise"],
             }
