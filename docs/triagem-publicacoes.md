@@ -148,5 +148,32 @@ e 13 TXTs: 35 PDFs com texto extraível, um PDF com texto e imagem e oito TXTs
 com `Link documento:`. É uma amostra pequena e histórica, sem base para estimar
 frequências no banco. No mesmo dia, o acesso SSH ao PC funcionou, mas o serviço
 Docker Desktop estava parado e a API/banco do Notify não estavam disponíveis.
-Por isso, **não houve replay novo em dossiês produtivos** nem validação de OCR;
-as contagens acima de 02/10 continuam sendo a última medição da base.
+Naquela checagem, **não houve replay novo em dossiês produtivos** nem validação
+de OCR. O Docker foi restaurado mais tarde em 27/10, conforme a medição abaixo.
+
+## Replay após restaurar o Docker — 27/10/2026
+
+O código local foi executado somente em leitura sobre 100 dossiês já
+`PROCESSADO` capturados de 01 a 13/10 (132 notificações). Nenhum status,
+arquivo ou envio ao Flow foi alterado.
+
+| Resultado | Grupos |
+| --- | ---: |
+| Publicação isolada | 50 |
+| Revisão necessária | 24 |
+| Sem andamento DJ/DO capturado | 24 |
+| Possível ato em documento | 2 |
+
+Foram identificadas 83 publicações individuais e 56 documentos ainda pendentes
+de análise. Os dois casos `POSSIVEL_ATO_EM_DOCUMENTO` mostram por que o rótulo
+é apenas uma indicação para investigar: um contém um PDF curto de intimação,
+copiado em dois avisos documentais; o outro tem andamentos de regularização de
+representação e juntada de procuração, mais PDFs extensos do processo (56 e
+101 páginas), sem andamento DJ/DO capturado. O detector encontrou títulos de
+peças judiciais no texto; isso não demonstra que exista uma publicação oficial
+nova nem que o pacote inteiro seja um só ato. A análise por item deve confirmar
+o conteúdo e verificar cobertura em outros fluxos antes de propor trabalho.
+
+No mesmo retorno da RPA, os novos registros ainda estavam `PENDENTE`, sem
+andamentos ou documentos extraídos. Eles ficaram fora deste replay. Esta
+amostra dirigida não mede a acurácia da regra nem a proporção do backlog.
