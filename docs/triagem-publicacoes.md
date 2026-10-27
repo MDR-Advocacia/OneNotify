@@ -236,7 +236,8 @@ elegíveis ou bloqueados. `--send` é explícito: transmite somente os elegívei
 confere o recibo completo do Flow antes de marcar `ENVIADO` no Notify e deixa
 os demais sem mudança de status. Falha de envio marca somente o lote tentado
 como `ERRO_ENVIO`, para reenvio idempotente. Este caminho **não** foi ligado ao
-ciclo automático da RPA e não foi executado contra o Flow produtivo.
+ciclo automático da RPA e bloqueia `--send` enquanto `FLOW_SYNC_ENABLED=true`
+mantiver o envio automático v1 ativo. Não foi executado contra o Flow produtivo.
 
 ```bash
 python scripts/sync_triaged_publications.py --limit 100

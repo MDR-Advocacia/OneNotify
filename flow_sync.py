@@ -714,6 +714,9 @@ def sync_triaged_publications(groups: list[dict[str, Any]], *, dry_run: bool = T
     }
     if dry_run or not eligible:
         return summary
+    if FLOW_SYNC_ENABLED:
+        summary["error"] = "Envio v2 bloqueado enquanto o sincronizador automatico v1 estiver ativo."
+        return summary
     try:
         expected = {item["external_group_id"] for item in payloads}
         if len(expected) != len(payloads):

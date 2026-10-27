@@ -276,6 +276,12 @@ class PublicationTriageTest(unittest.TestCase):
             post.assert_not_called()
             mark.assert_not_called()
 
+            with patch("flow_sync.FLOW_SYNC_ENABLED", True):
+                blocked_by_v1 = sync_triaged_publications(groups, dry_run=False)
+            self.assertIn("v1 estiver ativo", blocked_by_v1["error"])
+            post.assert_not_called()
+            mark.assert_not_called()
+
             post.return_value = {"records": []}
             failed = sync_triaged_publications(groups, dry_run=False)
             self.assertEqual(failed["sent"], 0)
