@@ -2,11 +2,16 @@ import unittest
 import json
 import os
 import sqlite3
+import subprocess
+import sys
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from flow_sync import build_triage_preview, fetch_triage_group, list_candidate_groups, list_triage_groups
+from flow_sync import (
+    build_triage_preview, fetch_triage_group, list_candidate_groups,
+    list_triage_groups, materialize_triage_group,
+)
 from triagem_publicacoes import analisar_dossie, reunir_linhas_notificacao
 
 
@@ -268,6 +273,74 @@ class PublicationTriageTest(unittest.TestCase):
                 self.assertEqual(groups[0]["ids"], "2")
                 self.assertEqual(build_triage_preview(groups[0])["status"], "PUBLICACAO_ISOLADA")
                 self.assertIsNone(fetch_triage_group("N2", "23/09/2026"))
+                snapshot = Path(temp_dir) / "export.jsonl"
+                script = Path(__file__).resolve().parents[1] / "scripts" / "preview_triagem_publicacoes.py"
+                exported = subprocess.run(
+                    [sys.executable, str(script), "--npj", "N1", "--data", "24/09/2026",
+                     "--snapshot-out", str(snapshot)],
+                    check=True, capture_output=True, text=True,
+                )
+                replayed = subprocess.run(
+                    [sys.executable, str(script), "--input-jsonl", str(snapshot)],
+                    check=True, capture_output=True, text=True,
+                )
+                self.assertEqual(json.loads(exported.stdout)["status"], json.loads(replayed.stdout)["status"])
+                self.assertEqual(snapshot.stat().st_mode & 0o777, 0o600)
+
+    def test_offline_replay_writes_private_case_report_without_text_or_url(self):
+        txt = document("Link documento: https://tribunal.example/arquivo/123.pdf")
+        txt["items"][0]["nome"] = "arquivo-nao-obtido.txt"
+        group = reunir_linhas_notificacao([{
+            "id": 90, "npj": "NPJ-TESTE", "data_notificacao": "24/09/2026",
+            "tipo_notificacao": "Andamento de publicação em processo de condução terceirizada",
+            "andamentos": json.dumps([PUBLICATION]),
+            "documentos": "[]", "documentos_json": json.dumps(txt),
+        }])
+        with tempfile.TemporaryDirectory() as temp_dir:
+            snapshot = Path(temp_dir) / "snapshot.jsonl"
+            cases = Path(temp_dir) / "cases.jsonl"
+            snapshot.write_text(json.dumps({
+                "snapshot_schema": "onenotify.triage-snapshot.v1", "group": group,
+            }) + "\n", encoding="utf-8")
+            script = Path(__file__).resolve().parents[1] / "scripts" / "preview_triagem_publicacoes.py"
+            completed = subprocess.run(
+                [sys.executable, str(script), "--input-jsonl", str(snapshot), "--cases-out", str(cases)],
+                check=True, capture_output=True, text=True,
+            )
+            summary = json.loads(completed.stdout)
+            self.assertEqual(summary["status"], {"REVISAO_NECESSARIA": 1})
+            self.assertEqual(summary["documentos_pendentes_de_analise"], 1)
+            report = cases.read_text(encoding="utf-8")
+            self.assertIn("LINK_DOCUMENTO_PENDENTE", report)
+            self.assertNotIn("tribunal.example", report)
+            self.assertNotIn(PUBLICATION["detalhes"], report)
+            self.assertEqual(cases.stat().st_mode & 0o777, 0o600)
+
+    def test_materialized_snapshot_replays_after_source_document_disappears(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            original = Path(temp_dir) / "nao-obtido.txt"
+            original.write_text(
+                "Arquivos adicionais não foram acessados pelo robô.\n"
+                "Link documento: https://tribunal.example/peca.pdf",
+                encoding="utf-8",
+            )
+            group = reunir_linhas_notificacao([{
+                "id": 91, "npj": "NPJ-TESTE", "data_notificacao": "24/09/2026",
+                "tipo_notificacao": "Andamento de publicação em processo de condução terceirizada",
+                "andamentos": json.dumps([PUBLICATION]),
+                "documentos": json.dumps([{"caminho": str(original), "nome": original.name}]),
+                "documentos_json": json.dumps({"items": []}),
+            }])
+            frozen = materialize_triage_group(group)
+            original.unlink()
+            result = build_triage_preview(frozen, refresh_documents=False)
+            self.assertEqual(result["status"], "REVISAO_NECESSARIA")
+            self.assertEqual(result["documentos"][0]["relacao"], "LINK_DOCUMENTO_PENDENTE")
+            self.assertEqual(
+                frozen["documentos_json"]["items"][0]["extraction"]["pages"][0]["text"],
+                "Arquivos adicionais não foram acessados pelo robô.\n"
+                "Link documento: https://tribunal.example/peca.pdf",
+            )
 
 
 if __name__ == "__main__":

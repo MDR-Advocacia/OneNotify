@@ -119,3 +119,34 @@ decisão em outro fluxo. Esse vínculo pode tornar o aviso **sem trabalho novo n
 Notify**, sem afirmar que a notificação foi tratada ali. O Notify ainda precisa
 resolver TXT com link quando possível e decidir a rota de atos documentais sem
 cobertura externa. A sincronização atual por grupo não consome esta triagem.
+
+## Exportação e replay local — 27/10/2026
+
+É possível congelar uma amostra do banco, com os textos extraídos disponíveis,
+para repetir a triagem fora do PC. O exportador não altera banco, status nem
+envio. O resumo por caso identifica decisões e pendências sem copiar textos das
+peças ou endereços de links:
+
+```bash
+python scripts/preview_triagem_publicacoes.py --days 30 --limit 500 \
+  --snapshot-out /caminho/privado/amostra.jsonl \
+  --cases-out /caminho/privado/casos.jsonl
+python scripts/preview_triagem_publicacoes.py \
+  --input-jsonl /caminho/privado/amostra.jsonl \
+  --cases-out /caminho/privado/casos-replay.jsonl
+```
+
+O snapshot contém dados completos do dossiê, **inclusive textos, identificadores,
+caminhos e URLs**. Guardá-lo em pasta privada e não anexá-lo ao repositório ou PR.
+Os dois tipos de saída são criados com permissão `0600` e nunca sobrescrevem um
+arquivo existente; o relatório por caso ainda contém o NPJ. No replay, o texto
+congelado é usado sem reler o arquivo original. A extração do PDF requer a
+dependência `pypdf` do projeto no ambiente que faz a exportação.
+
+Uma leitura somente local do diretório `documentos/` em 27/10 encontrou 36 PDFs
+e 13 TXTs: 35 PDFs com texto extraível, um PDF com texto e imagem e oito TXTs
+com `Link documento:`. É uma amostra pequena e histórica, sem base para estimar
+frequências no banco. No mesmo dia, o acesso SSH ao PC funcionou, mas o serviço
+Docker Desktop estava parado e a API/banco do Notify não estavam disponíveis.
+Por isso, **não houve replay novo em dossiês produtivos** nem validação de OCR;
+as contagens acima de 02/10 continuam sendo a última medição da base.

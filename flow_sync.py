@@ -233,10 +233,12 @@ def _documents_payload_needs_refresh(documentos_json: Any, documentos_originais:
         return True
 
     items = [item for item in documentos_json.get("items", []) if isinstance(item, dict)]
-    if not items:
+    if len(items) != len(documentos_originais):
         return True
 
     for item in items:
+        if not isinstance(item.get("extraction"), dict):
+            return True
         extraction = item.get("extraction", {}) if isinstance(item.get("extraction"), dict) else {}
         if item.get("exists") is False or extraction.get("status") == "missing_file":
             return True
@@ -302,14 +304,23 @@ def build_flow_payload(row: Any, include_documents: bool = True) -> dict[str, An
     }
 
 
-def build_triage_preview(row: Any) -> dict[str, Any]:
-    """Avalia um grupo sem enviá-lo nem alterar seu status no Notify."""
+def materialize_triage_group(row: Any) -> dict[str, Any]:
+    """Congela a extração disponível para replays locais sem arquivos originais."""
     source = _row_to_dict(row)
-    andamentos = safe_json_loads(source.get("andamentos"), fallback=[])
     originais = safe_json_loads(source.get("documentos"), fallback=[])
     enriched = safe_json_loads(source.get("documentos_json"), fallback=None)
     if _documents_payload_needs_refresh(enriched, originais):
         enriched = build_documents_json(originais, base_dir=DOCUMENTOS_PATH)
+    source["documentos_json"] = enriched
+    return source
+
+
+def build_triage_preview(row: Any, *, refresh_documents: bool = True) -> dict[str, Any]:
+    """Avalia um grupo sem enviá-lo nem alterar seu status no Notify."""
+    source = materialize_triage_group(row) if refresh_documents else _row_to_dict(row)
+    andamentos = safe_json_loads(source.get("andamentos"), fallback=[])
+    originais = safe_json_loads(source.get("documentos"), fallback=[])
+    enriched = safe_json_loads(source.get("documentos_json"), fallback=None)
     result = analisar_dossie(andamentos, enriched, originais)
     result["external_group_id"] = f"{source.get('npj') or source.get('NPJ')}|{source.get('data_notificacao')}"
     result["ids_notificacoes"] = [
