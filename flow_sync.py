@@ -691,6 +691,49 @@ def sync_groups(
         }
 
 
+def sync_triaged_publications(groups: list[dict[str, Any]], *, dry_run: bool = True) -> dict[str, Any]:
+    """Envia explicitamente somente publicações v2 elegíveis; não altera o ciclo da RPA."""
+    eligible: list[dict[str, Any]] = []
+    payloads: list[dict[str, Any]] = []
+    blocked: dict[str, int] = {}
+    for group in groups:
+        prepared = build_publication_intake_preview(group)
+        if not prepared["ready"]:
+            for reason in prepared["reasons"]:
+                blocked[reason] = blocked.get(reason, 0) + 1
+            continue
+        eligible.append(group)
+        payloads.extend(prepared["items"])
+    summary: dict[str, Any] = {
+        "selected": len(groups),
+        "eligible": len(eligible),
+        "blocked": blocked,
+        "sent": 0,
+        "updated": 0,
+        "dry_run": dry_run,
+    }
+    if dry_run or not eligible:
+        return summary
+    try:
+        expected = {item["external_group_id"] for item in payloads}
+        if len(expected) != len(payloads):
+            raise RuntimeError("Chaves v2 repetidas no lote; envio cancelado.")
+        _mark_groups(eligible, "ENVIANDO")
+        response = _post_to_flow(payloads)
+        records = response.get("records") if isinstance(response, dict) else None
+        acknowledged = [record.get("external_group_id") for record in records] if isinstance(records, list) else []
+        if (len(acknowledged) != len(payloads) or set(acknowledged) != expected
+                or any(not isinstance(record, dict) or record.get("id") is None for record in records)):
+            raise RuntimeError("Recibo do Flow incompleto ou divergente; nenhuma publicação foi marcada como enviada.")
+        summary["updated"] = _mark_group_results(eligible, response)
+        summary["sent"] = len(payloads)
+        return summary
+    except Exception as exc:
+        _mark_groups(eligible, "ERRO_ENVIO", error=str(exc))
+        summary["error"] = str(exc)
+        return summary
+
+
 def sync_pending(
     limit: int | None = None,
     days: int | None = None,

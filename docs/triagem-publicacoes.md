@@ -229,3 +229,17 @@ continha outro CNJ em formato compacto, reconhecido pelo Flow e inicialmente
 não reconhecido pelo Notify. O restante não foi exportado. Esta contagem não
 autoriza envio: o contrato e a coexistência com grupos v1 foram validados
 localmente, mas o sincronizador v2 não está ativo em produção.
+
+O comando `scripts/sync_triaged_publications.py` seleciona dossiês pendentes,
+reúne todas as linhas e, por padrão, apenas informa quantos itens v2 seriam
+elegíveis ou bloqueados. `--send` é explícito: transmite somente os elegíveis,
+confere o recibo completo do Flow antes de marcar `ENVIADO` no Notify e deixa
+os demais sem mudança de status. Falha de envio marca somente o lote tentado
+como `ERRO_ENVIO`, para reenvio idempotente. Este caminho **não** foi ligado ao
+ciclo automático da RPA e não foi executado contra o Flow produtivo.
+
+```bash
+python scripts/sync_triaged_publications.py --limit 100
+# Somente depois de implantar/configurar o receptor e fazer o corte do v1:
+python scripts/sync_triaged_publications.py --limit 100 --send
+```

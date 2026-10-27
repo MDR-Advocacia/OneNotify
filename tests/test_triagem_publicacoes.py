@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 from flow_sync import (
     build_publication_intake_preview, build_triage_preview, fetch_triage_group, list_candidate_groups,
-    list_triage_groups, materialize_triage_group,
+    list_triage_groups, materialize_triage_group, sync_triaged_publications,
 )
 from triagem_publicacoes import analisar_dossie, reunir_linhas_notificacao
 
@@ -257,6 +257,37 @@ class PublicationTriageTest(unittest.TestCase):
         compact = dict(group, andamentos=[dict(publication, detalhes=publication["detalhes"] + f" Processo {compact_cnj}.")],
                        documentos=[], documentos_json={"items": []})
         self.assertIn("cnj_publicacao_ausente_ou_ambiguo", build_publication_intake_preview(compact, refresh_documents=False)["reasons"])
+
+    def test_v2_sender_requires_complete_receipt_and_never_marks_blocked_group(self):
+        groups = [{"npj": "NPJ-1", "data_notificacao": "25/09/2026"},
+                  {"npj": "NPJ-2", "data_notificacao": "25/09/2026"}]
+        def preview(group):
+            if group["npj"] == "NPJ-2":
+                return {"ready": False, "reasons": ["dossie_em_revisao"], "items": []}
+            return {"ready": True, "reasons": [], "items": [{"external_group_id": "NPJ-1|25/09/2026"}]}
+
+        with patch("flow_sync.build_publication_intake_preview", side_effect=preview), \
+             patch("flow_sync._post_to_flow") as post, \
+             patch("flow_sync._mark_groups") as mark, \
+             patch("flow_sync._mark_group_results") as mark_results:
+            dry = sync_triaged_publications(groups)
+            self.assertEqual(dry["eligible"], 1)
+            self.assertEqual(dry["blocked"], {"dossie_em_revisao": 1})
+            post.assert_not_called()
+            mark.assert_not_called()
+
+            post.return_value = {"records": []}
+            failed = sync_triaged_publications(groups, dry_run=False)
+            self.assertEqual(failed["sent"], 0)
+            self.assertIn("Recibo do Flow incompleto", failed["error"])
+            self.assertEqual(mark.call_args_list[-1].args[0], groups[:1])
+            mark_results.assert_not_called()
+
+            post.return_value = {"records": [{"id": 42, "external_group_id": "NPJ-1|25/09/2026"}]}
+            mark_results.return_value = 1
+            sent = sync_triaged_publications(groups, dry_run=False)
+            self.assertEqual((sent["sent"], sent["updated"]), (1, 1))
+            self.assertEqual(mark_results.call_args.args[0], groups[:1])
 
     def test_document_can_contain_judicial_act_without_publication_movement(self):
         text = "Processo 1234567-89.2026.8.01.0001\nSENTENÇA\nJulgo procedente o pedido."
