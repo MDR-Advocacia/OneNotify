@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 from flow_sync import (
     build_publication_intake_preview, build_triage_preview, fetch_triage_group, list_candidate_groups,
-    list_triage_groups, materialize_triage_group, sync_triaged_publications,
+    list_triage_groups, materialize_triage_group, sync_after_rpa_batch, sync_triaged_publications,
 )
 from triagem_publicacoes import analisar_dossie, reunir_linhas_notificacao
 
@@ -294,6 +294,44 @@ class PublicationTriageTest(unittest.TestCase):
             sent = sync_triaged_publications(groups, dry_run=False)
             self.assertEqual((sent["sent"], sent["updated"]), (1, 1))
             self.assertEqual(mark_results.call_args.args[0], groups[:1])
+
+    def test_rpa_v2_sender_limits_eligible_items_without_running_v1(self):
+        candidates = [
+            {"npj": str(index), "data_notificacao": "28/10/2026"}
+            for index in range(60)
+        ]
+        with patch("flow_sync.FLOW_V2_SYNC_ENABLED", True), \
+             patch("flow_sync.FLOW_SYNC_ENABLED", False), \
+             patch("flow_sync.FLOW_INTAKE_URL", "https://flow.example/intake"), \
+             patch("flow_sync.FLOW_INTAKE_API_KEY", "test-key"), \
+             patch("flow_sync.list_candidate_groups", return_value=candidates) as list_groups, \
+             patch("flow_sync.fetch_triage_group", side_effect=lambda npj, date: {"npj": npj, "data_notificacao": date}), \
+             patch("flow_sync.build_publication_intake_preview", side_effect=lambda group: {"ready": int(group["npj"]) % 2 == 0}), \
+             patch("flow_sync.sync_triaged_publications", return_value={"sent": 25, "updated": 25}) as send:
+            result = sync_after_rpa_batch()
+        self.assertEqual(result["scanned"], 49)
+        self.assertEqual(result["sent"], 25)
+        self.assertEqual(len(send.call_args.args[0]), 25)
+        self.assertFalse(send.call_args.kwargs["dry_run"])
+        self.assertEqual(list_groups.call_args.kwargs, {
+            "days": 3, "retry_errors": True, "limit": 1000, "exclude_migration": True,
+        })
+
+    def test_rpa_v2_sender_never_runs_together_with_v1_or_breaks_capture(self):
+        with patch("flow_sync.FLOW_V2_SYNC_ENABLED", True), \
+             patch("flow_sync.FLOW_SYNC_ENABLED", True), \
+             patch("flow_sync.list_candidate_groups") as list_groups:
+            result = sync_after_rpa_batch()
+        self.assertIn("não podem operar juntos", result["error"])
+        list_groups.assert_not_called()
+
+        with patch("flow_sync.FLOW_V2_SYNC_ENABLED", True), \
+             patch("flow_sync.FLOW_SYNC_ENABLED", False), \
+             patch("flow_sync.FLOW_INTAKE_URL", "https://flow.example/intake"), \
+             patch("flow_sync.FLOW_INTAKE_API_KEY", "test-key"), \
+             patch("flow_sync.list_candidate_groups", side_effect=RuntimeError("database unavailable")):
+            result = sync_after_rpa_batch()
+        self.assertEqual(result["error"], "database unavailable")
 
     def test_document_can_contain_judicial_act_without_publication_movement(self):
         text = "Processo 1234567-89.2026.8.01.0001\nSENTENÇA\nJulgo procedente o pedido."
