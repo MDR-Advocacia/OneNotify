@@ -1,5 +1,11 @@
 .git
-.env
+.env*
+backup/
+**/backup/
+*.bak-*
+**/*.bak-*
+*.codex-backup*
+**/*.codex-backup*
 .venv
 .venv-migration
 venv
