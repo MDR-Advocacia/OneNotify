@@ -26,6 +26,7 @@ FLOW_INTAKE_API_KEY = (
     or ""
 )
 FLOW_SYNC_ENABLED = os.getenv("FLOW_SYNC_ENABLED", "false").strip().lower() in {"1", "true", "yes", "sim", "on"}
+FLOW_V2_SYNC_ENABLED = os.getenv("FLOW_V2_SYNC_ENABLED", "false").strip().lower() in {"1", "true", "yes", "sim", "on"}
 FLOW_SYNC_BATCH_SIZE = int(os.getenv("FLOW_SYNC_BATCH_SIZE", "100"))
 FLOW_SYNC_TIMEOUT_SECONDS = int(os.getenv("FLOW_SYNC_TIMEOUT_SECONDS", "30"))
 NON_MIGRATION_WHERE = "LOWER(TRIM(COALESCE(origem, ''))) <> 'migracao'"
@@ -760,6 +761,45 @@ def sync_pending(
 
 
 def sync_after_rpa_batch() -> dict[str, Any] | None:
+    if FLOW_V2_SYNC_ENABLED:
+        if FLOW_SYNC_ENABLED:
+            logging.error("Sincronizacao v2 bloqueada: sincronizador v1 tambem esta ativo.")
+            return {"error": "Sincronizadores v1 e v2 não podem operar juntos."}
+        if not FLOW_INTAKE_URL or not FLOW_INTAKE_API_KEY:
+            logging.warning("Sincronizacao v2 ignorada: URL ou API key nao configurada.")
+            return None
+        try:
+            # A RPA chama este ponto ao fim de cada lote. Limitar o POST a 25
+            # publicações e examinar até 1000 dossiês pendentes evita que
+            # documentos/revisões recentes impeçam o envio dos elegíveis.
+            candidates = list_candidate_groups(
+                days=3, retry_errors=True, limit=1000, exclude_migration=True,
+            )
+            eligible: list[dict[str, Any]] = []
+            scanned = 0
+            for candidate in candidates:
+                scanned += 1
+                group = fetch_triage_group(
+                    str(candidate["npj"]), str(candidate["data_notificacao"]),
+                )
+                if group and build_publication_intake_preview(group)["ready"]:
+                    eligible.append(group)
+                    if len(eligible) >= 25:
+                        break
+            result = sync_triaged_publications(eligible, dry_run=False)
+            result["scanned"] = scanned
+            logging.info(
+                "Sincronizacao v2 OneNotify -> Flow: examinados=%s elegiveis=%s enviados=%s "
+                "atualizados=%s erro=%s",
+                scanned, len(eligible), result.get("sent"), result.get("updated"),
+                result.get("error"),
+            )
+            return result
+        except Exception as exc:
+            # Falha de envio não pode transformar um lote de captura bem
+            # sucedido em falha da RPA; o próximo lote pode tentar de novo.
+            logging.exception("Falha na sincronizacao v2; captura preservada.")
+            return {"error": str(exc)}
     if not FLOW_SYNC_ENABLED:
         logging.info("Sincronizacao OneNotify -> Flow desativada por FLOW_SYNC_ENABLED=false.")
         return None
