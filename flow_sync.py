@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -10,6 +11,7 @@ from urllib.request import Request, urlopen
 
 import db_adapter
 from document_payload import build_documents_json, safe_json_loads
+from triagem_publicacoes import CNJ_PATTERN, analisar_dossie, reunir_linhas_notificacao
 
 
 DOCUMENTOS_PATH = os.getenv(
@@ -26,6 +28,8 @@ FLOW_INTAKE_API_KEY = (
 FLOW_SYNC_ENABLED = os.getenv("FLOW_SYNC_ENABLED", "false").strip().lower() in {"1", "true", "yes", "sim", "on"}
 FLOW_SYNC_BATCH_SIZE = int(os.getenv("FLOW_SYNC_BATCH_SIZE", "100"))
 FLOW_SYNC_TIMEOUT_SECONDS = int(os.getenv("FLOW_SYNC_TIMEOUT_SECONDS", "30"))
+NON_MIGRATION_WHERE = "LOWER(TRIM(COALESCE(origem, ''))) <> 'migracao'"
+FLOW_CNJ_PATTERN = re.compile(r"\b\d{7}-?\d{2}\.?\d{4}\.?\d\.?\d{2}\.?\d{4}\b")
 
 
 def _now_iso() -> str:
@@ -231,10 +235,12 @@ def _documents_payload_needs_refresh(documentos_json: Any, documentos_originais:
         return True
 
     items = [item for item in documentos_json.get("items", []) if isinstance(item, dict)]
-    if not items:
+    if len(items) != len(documentos_originais):
         return True
 
     for item in items:
+        if not isinstance(item.get("extraction"), dict):
+            return True
         extraction = item.get("extraction", {}) if isinstance(item.get("extraction"), dict) else {}
         if item.get("exists") is False or extraction.get("status") == "missing_file":
             return True
@@ -300,6 +306,102 @@ def build_flow_payload(row: Any, include_documents: bool = True) -> dict[str, An
     }
 
 
+def materialize_triage_group(row: Any) -> dict[str, Any]:
+    """Congela a extração disponível para replays locais sem arquivos originais."""
+    source = _row_to_dict(row)
+    originais = safe_json_loads(source.get("documentos"), fallback=[])
+    enriched = safe_json_loads(source.get("documentos_json"), fallback=None)
+    if _documents_payload_needs_refresh(enriched, originais):
+        enriched = build_documents_json(originais, base_dir=DOCUMENTOS_PATH)
+    source["documentos_json"] = enriched
+    return source
+
+
+def build_triage_preview(row: Any, *, refresh_documents: bool = True) -> dict[str, Any]:
+    """Avalia um grupo sem enviá-lo nem alterar seu status no Notify."""
+    source = materialize_triage_group(row) if refresh_documents else _row_to_dict(row)
+    andamentos = safe_json_loads(source.get("andamentos"), fallback=[])
+    originais = safe_json_loads(source.get("documentos"), fallback=[])
+    enriched = safe_json_loads(source.get("documentos_json"), fallback=None)
+    result = analisar_dossie(andamentos, enriched, originais)
+    result["external_group_id"] = f"{source.get('npj') or source.get('NPJ')}|{source.get('data_notificacao')}"
+    result["ids_notificacoes"] = [
+        int(item) for item in _split_agg(source.get("ids")) if str(item).isdigit()
+    ]
+    result["tipos_notificacao_recebidos"] = source.get("tipos_notificacao_recebidos") or _split_agg(source.get("tipos_notificacao"))
+    result["notificacoes_origem"] = source.get("notificacoes_origem") or []
+    result["vistos_nas_notificacoes"] = source.get("vistos_nas_notificacoes") or {}
+    result["referencias_documentos"] = source.get("referencias_documentos") or []
+    result["erros_json"] = source.get("erros_json") or []
+    if result["erros_json"]:
+        result["motivos_revisao"].append("json_invalido_em_linha_do_dossie")
+        result["apto_para_etapa_publicacao"] = False
+        result["publicacoes_para_analise_individual"] = []
+        result["status"] = "REVISAO_NECESSARIA"
+    return result
+
+
+def build_publication_intake_preview(row: Any, *, refresh_documents: bool = True) -> dict[str, Any]:
+    """Prepara somente publicação isolada ou com PDFs repetidos; nunca envia."""
+    source = materialize_triage_group(row) if refresh_documents else _row_to_dict(row)
+    triage = build_triage_preview(source, refresh_documents=False)
+    reasons: list[str] = []
+    notifications = triage["notificacoes_origem"]
+    if not notifications or any(item.get("rpa_status") != "PROCESSADO" for item in notifications):
+        reasons.append("notificacoes_nao_processadas")
+    if any(str(item.get("origem") or "").strip().casefold() == "migracao" for item in notifications):
+        reasons.append("origem_migracao")
+    if not triage["apto_para_etapa_publicacao"] or len(triage["publicacoes"]) != 1:
+        reasons.append("dossie_em_revisao")
+    if reasons:
+        return {"ready": False, "reasons": reasons, "items": [], "triage_status": triage["status"]}
+
+    publication = triage["publicacoes"][0]
+    cnjs = set(CNJ_PATTERN.findall(publication["texto"]))
+    all_cnj_digits = {re.sub(r"\D", "", match) for match in FLOW_CNJ_PATTERN.findall(publication["texto"])}
+    if len(cnjs) != 1 or all_cnj_digits != {re.sub(r"\D", "", match) for match in cnjs}:
+        reasons.append("cnj_publicacao_ausente_ou_ambiguo")
+    if not _parse_date(publication["data"]):
+        reasons.append("data_publicacao_ausente")
+    if reasons:
+        return {"ready": False, "reasons": reasons, "items": [], "triage_status": triage["status"]}
+
+    movements = safe_json_loads(source.get("andamentos"), fallback=[])
+    originals = safe_json_loads(source.get("documentos"), fallback=[])
+    enriched = safe_json_loads(source.get("documentos_json"), fallback={})
+    indices = triage["itens_publicacao"][0]["documentos_repetidos"]
+    selected_originals = [originals[index] for index in indices]
+    selected_documents = [enriched["items"][index] for index in indices]
+    item_row = dict(source)
+    item_row["andamentos"] = [movements[publication["indices_andamentos"][0]]]
+    item_row["documentos"] = selected_originals
+    item_row["documentos_json"] = {"schema_version": "onenotify.documents.v1", "items": selected_documents}
+    item_row["tipos_notificacao"] = "; ".join(triage["tipos_notificacao_recebidos"])
+    item_row["rpa_status"] = "PROCESSADO"
+    payload = build_flow_payload(item_row)
+    payload["schema_version"] = "onenotify.flow-intake.v2"
+    payload["item_kind"] = "PUBLICACAO"
+    payload["source_group_id"] = triage["external_group_id"]
+    # A faixa segura contém exatamente uma publicação: reutilizar a chave v1
+    # atualiza o mesmo registro no Flow e evita duplicar grupos já importados.
+    payload["external_group_id"] = triage["external_group_id"]
+    payload["cnj_publicacao"] = next(iter(cnjs))
+    payload["data_publicacao"] = publication["data"]
+    payload["conteudo"]["fontes_texto"] = [
+        source_text for source_text in payload["conteudo"]["fontes_texto"]
+        if source_text["tipo"] == "andamento"
+    ]
+    payload["triagem"] = {
+        "schema_version": triage["schema_version"],
+        "status": triage["status"],
+        "id_publicacao": publication["id"],
+        "indices_documentos_repetidos": indices,
+        "referencias_documentos": [triage["referencias_documentos"][index] for index in indices],
+        "ids_notificacoes_janela": triage["ids_notificacoes"],
+    }
+    return {"ready": True, "reasons": [], "items": [payload], "triage_status": triage["status"]}
+
+
 def _group_select_sql() -> str:
     if db_adapter.is_postgres():
         agg_ids = "STRING_AGG(id::text, ';')"
@@ -356,12 +458,15 @@ def list_candidate_groups(
     limit: int | None = None,
     only_publicacao: bool = False,
     exclude_document_groups: bool = False,
+    exclude_migration: bool = False,
 ) -> list[dict[str, Any]]:
     where = [
         "data_notificacao IS NOT NULL",
         "(rpa_status = 'PROCESSADO' OR status IN ('Processado', 'Tratada', 'Migrado', 'Arquivado'))",
     ]
     params: list[Any] = []
+    if exclude_migration:
+        where.append(NON_MIGRATION_WHERE)
     if not force:
         condition, condition_params = _flow_pending_condition(retry_errors)
         where.append(condition)
@@ -416,6 +521,39 @@ def fetch_group(npj: str, data_notificacao: str) -> dict[str, Any] | None:
     with db_adapter.connect_main() as conn:
         row = conn.execute(query, (npj, data_notificacao)).fetchone()
         return _row_to_dict(row) if row else None
+
+
+def _triage_rows_for_keys(keys: list[tuple[str, str]]) -> list[dict[str, Any]]:
+    if not keys:
+        return []
+    conditions = " OR ".join("(NPJ = ? AND data_notificacao = ?)" for _ in keys)
+    query = f"""
+        SELECT id, NPJ AS npj, data_notificacao, tipo_notificacao, data_criacao,
+               numero_processo, polo, adverso_principal, status, rpa_status, origem,
+               andamentos, documentos, documentos_json
+        FROM notificacoes
+        WHERE {NON_MIGRATION_WHERE} AND ({conditions})
+        ORDER BY id
+    """
+    params = [part for key in keys for part in key]
+    with db_adapter.connect_main() as conn:
+        return [_row_to_dict(row) for row in conn.execute(query, params).fetchall()]
+
+
+def list_triage_groups(days: int | None = None, limit: int = 500) -> list[dict[str, Any]]:
+    """Seleciona chaves como a prévia antiga, mas reúne todas as linhas de cada dossiê."""
+    candidates = list_candidate_groups(days=days, force=True, limit=limit, exclude_migration=True)
+    keys = [(str(row["npj"]), str(row["data_notificacao"])) for row in candidates]
+    by_key: dict[tuple[str, str], list[dict[str, Any]]] = {key: [] for key in keys}
+    for start in range(0, len(keys), 100):
+        for row in _triage_rows_for_keys(keys[start:start + 100]):
+            by_key[(str(row["npj"]), str(row["data_notificacao"]))].append(row)
+    return [reunir_linhas_notificacao(by_key[key]) for key in keys if by_key[key]]
+
+
+def fetch_triage_group(npj: str, data_notificacao: str) -> dict[str, Any] | None:
+    rows = _triage_rows_for_keys([(npj, data_notificacao)])
+    return reunir_linhas_notificacao(rows) if rows else None
 
 
 def _mark_groups(groups: list[dict[str, Any]], status: str, external_id: str | None = None, error: str | None = None) -> int:
@@ -551,6 +689,52 @@ def sync_groups(
             "dry_run": False,
             "error": error,
         }
+
+
+def sync_triaged_publications(groups: list[dict[str, Any]], *, dry_run: bool = True) -> dict[str, Any]:
+    """Envia explicitamente somente publicações v2 elegíveis; não altera o ciclo da RPA."""
+    eligible: list[dict[str, Any]] = []
+    payloads: list[dict[str, Any]] = []
+    blocked: dict[str, int] = {}
+    for group in groups:
+        prepared = build_publication_intake_preview(group)
+        if not prepared["ready"]:
+            for reason in prepared["reasons"]:
+                blocked[reason] = blocked.get(reason, 0) + 1
+            continue
+        eligible.append(group)
+        payloads.extend(prepared["items"])
+    summary: dict[str, Any] = {
+        "selected": len(groups),
+        "eligible": len(eligible),
+        "blocked": blocked,
+        "sent": 0,
+        "updated": 0,
+        "dry_run": dry_run,
+    }
+    if dry_run or not eligible:
+        return summary
+    if FLOW_SYNC_ENABLED:
+        summary["error"] = "Envio v2 bloqueado enquanto o sincronizador automatico v1 estiver ativo."
+        return summary
+    try:
+        expected = {item["external_group_id"] for item in payloads}
+        if len(expected) != len(payloads):
+            raise RuntimeError("Chaves v2 repetidas no lote; envio cancelado.")
+        _mark_groups(eligible, "ENVIANDO")
+        response = _post_to_flow(payloads)
+        records = response.get("records") if isinstance(response, dict) else None
+        acknowledged = [record.get("external_group_id") for record in records] if isinstance(records, list) else []
+        if (len(acknowledged) != len(payloads) or set(acknowledged) != expected
+                or any(not isinstance(record, dict) or record.get("id") is None for record in records)):
+            raise RuntimeError("Recibo do Flow incompleto ou divergente; nenhuma publicação foi marcada como enviada.")
+        summary["updated"] = _mark_group_results(eligible, response)
+        summary["sent"] = len(payloads)
+        return summary
+    except Exception as exc:
+        _mark_groups(eligible, "ERRO_ENVIO", error=str(exc))
+        summary["error"] = str(exc)
+        return summary
 
 
 def sync_pending(
